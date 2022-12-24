@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/mad-ang/mad-ang-servers/issues"
   },
-  "homepage": "https://github.com/mad-ang/mad-ang-servers#readme"
+  "homepage": "https://github.com/mad-ang/mad-ang-servers#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
