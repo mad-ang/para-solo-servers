@@ -1,8 +1,8 @@
 {
-  "name": "servers",
+  "name": "mad-ang-servers",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.ts",
   "scripts": {
     "build": "yarn tsc",
     "start": "nodemon server.ts",
@@ -14,7 +14,7 @@
     "url": "git+https://github.com/mad-ang/mad-ang-servers.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "mad-ang",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/mad-ang/mad-ang-servers/issues"
