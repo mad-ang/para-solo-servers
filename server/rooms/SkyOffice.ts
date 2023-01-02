@@ -42,16 +42,16 @@ export class SkyOffice extends Room<OfficeState> {
     }
 
     // when a player stop sharing screen
-    this.onMessage(Message.STOP_SCREEN_SHARE, (client, message: { computerId: string }) => {
-      const computer = this.state.computers.get(message.computerId)
-      // computer.connectedUser.forEach((id) => {
-      //   this.clients.forEach((cli) => {
-      //     if (cli.sessionId === id && cli.sessionId !== client.sessionId) {
-      //       cli.send(Message.STOP_SCREEN_SHARE, client.sessionId)
-      //     }
-      //   })
-      // })
-    })
+    // this.onMessage(Message.STOP_SCREEN_SHARE, (client, message: { computerId: string }) => {
+    // const computer = this.state.computers.get(message.computerId)
+    // computer.connectedUser.forEach((id) => {
+    //   this.clients.forEach((cli) => {
+    //     if (cli.sessionId === id && cli.sessionId !== client.sessionId) {
+    //       cli.send(Message.STOP_SCREEN_SHARE, client.sessionId)
+    //     }
+    //   })
+    // })
+    // })
 
     // when receiving updatePlayer message, call the PlayerUpdateCommand
     this.onMessage(
@@ -149,7 +149,8 @@ export class SkyOffice extends Room<OfficeState> {
 
   onDispose() {
     this.state.whiteboards.forEach((whiteboard) => {
-      if (whiteboard && whiteboardRoomIds.has(whiteboard?.roomId!)) whiteboardRoomIds.delete(whiteboard?.roomId!)
+      if (whiteboard && whiteboardRoomIds.has(whiteboard?.roomId!))
+        whiteboardRoomIds.delete(whiteboard?.roomId!)
     })
 
     console.log('room', this.roomId, 'disposing...')
