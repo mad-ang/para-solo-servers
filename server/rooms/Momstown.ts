@@ -1,13 +1,17 @@
 import bcrypt from 'bcrypt'
 import { Room, Client, ServerError } from 'colyseus'
 import { Dispatcher } from '@colyseus/command'
-import { Player, TownState } from './schema/TownState'
+import { Player, TownState, Table } from './schema/TownState'
 import { Message } from '../../types/Messages'
 import { IRoomData } from '../../types/Rooms'
 import { whiteboardRoomIds } from './schema/TownState'
 import PlayerUpdateCommand from './commands/PlayerUpdateCommand'
 import PlayerUpdateNameCommand from './commands/PlayerUpdateNameCommand'
 import ChatMessageUpdateCommand from './commands/ChatMessageUpdateCommand'
+import {
+  TableAddUserCommand,
+  TableRemoveUserCommand,
+} from './commands/TableUpdateArrayCommand'
 import fs from 'fs'
 
 const userDB = JSON.parse(fs.readFileSync(`${__dirname}/../../DB/rooms.json`, 'utf-8'))
@@ -33,6 +37,10 @@ export class SkyOffice extends Room<TownState> {
     this.setMetadata({ name, description, hasPassword })
 
     this.setState(new TownState())
+    for (let i = 0; i < 5; i++) {
+      this.state.tables.set(String(i), new Table())
+    }
+
 
     // when a player stop sharing screen
     // this.onMessage(Message.STOP_SCREEN_SHARE, (client, message: { computerId: string }) => {
