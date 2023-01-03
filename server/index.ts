@@ -4,7 +4,7 @@ import cors from 'cors'
 import { Server, LobbyRoom } from 'colyseus'
 import { monitor } from '@colyseus/monitor'
 import { RoomType } from '../types/Rooms'
-import userRouter from './routes/user'
+import roomRouter from './routes/room'
 
 // import socialRoutes from "@colyseus/social/express"
 
@@ -42,6 +42,6 @@ gameServer.define(RoomType.PUBLIC, SkyOffice, {
 
 // register colyseus monitor AFTER registering your room handlers
 app.use('/colyseus', monitor())
-app.use('/users', userRouter)
+app.use('/room', roomRouter)
 gameServer.listen(port)
 console.log(`Listening on ws://localhost:${port}`)
