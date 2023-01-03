@@ -1,5 +1,6 @@
 import http from 'http'
 import express from 'express'
+import { ExpressPeerServer, PeerServer } from 'peer'
 import cors from 'cors'
 import { Server, LobbyRoom } from 'colyseus'
 import { monitor } from '@colyseus/monitor'
@@ -43,6 +44,9 @@ app.get('/api/get/get_user_cnt', (req, res) => {
 })
 
 const server = http.createServer(app)
+// const peerServer = ExpressPeerServer(server, {
+//   path : '/peerServer'
+// })
 const gameServer = new Server({
   server,
 })
@@ -67,6 +71,7 @@ gameServer.define(RoomType.PUBLIC, SkyOffice, {
 
 // register colyseus monitor AFTER registering your room handlers
 app.use('/colyseus', monitor())
-
+// app.use('peerjs', peerServer);
+// peerServer.listen(9000)
 gameServer.listen(port)
 console.log(`Listening on ws://localhost:${port}`)

@@ -1,12 +1,16 @@
 import bcrypt from 'bcrypt'
 import { Room, Client, ServerError } from 'colyseus'
 import { Dispatcher } from '@colyseus/command'
-import { Player, OfficeState, Computer, Whiteboard } from './schema/OfficeState'
+import { Player, OfficeState, Table } from './schema/OfficeState'
 import { Message } from '../../types/Messages'
 import { IRoomData } from '../../types/Rooms'
 import { whiteboardRoomIds } from './schema/OfficeState'
 import PlayerUpdateCommand from './commands/PlayerUpdateCommand'
 import PlayerUpdateNameCommand from './commands/PlayerUpdateNameCommand'
+import {
+  TableAddUserCommand,
+  TableRemoveUserCommand,
+} from './commands/TableUpdateArrayCommand'
 import ChatMessageUpdateCommand from './commands/ChatMessageUpdateCommand'
 
 export class SkyOffice extends Room<OfficeState> {
@@ -33,13 +37,13 @@ export class SkyOffice extends Room<OfficeState> {
 
     // HARD-CODED: Add 5 computers in a room
     for (let i = 0; i < 5; i++) {
-      this.state.computers.set(String(i), new Computer())
+      this.state.tables.set(String(i), new Table())
     }
 
     // HARD-CODED: Add 3 whiteboards in a room
-    for (let i = 0; i < 3; i++) {
-      this.state.whiteboards.set(String(i), new Whiteboard())
-    }
+    // for (let i = 0; i < 3; i++) {
+    //   this.state.whiteboards.set(String(i), new Whiteboard())
+    // }
 
     // when a player stop sharing screen
     // this.onMessage(Message.STOP_SCREEN_SHARE, (client, message: { computerId: string }) => {
