@@ -1,5 +1,6 @@
 import http from 'http'
 import express from 'express'
+import { ExpressPeerServer, PeerServer } from 'peer'
 import cors from 'cors'
 import { Server, LobbyRoom } from 'colyseus'
 import { monitor } from '@colyseus/monitor'
@@ -18,6 +19,9 @@ app.use(express.json())
 // app.use(express.static('dist'))
 
 const server = http.createServer(app)
+// const peerServer = ExpressPeerServer(server, {
+//   path : '/peerServer'
+// })
 const gameServer = new Server({
   server,
 })
