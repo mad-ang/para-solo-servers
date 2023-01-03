@@ -8,10 +8,7 @@ import { whiteboardRoomIds } from './schema/TownState'
 import PlayerUpdateCommand from './commands/PlayerUpdateCommand'
 import PlayerUpdateNameCommand from './commands/PlayerUpdateNameCommand'
 import ChatMessageUpdateCommand from './commands/ChatMessageUpdateCommand'
-import {
-  TableAddUserCommand,
-  TableRemoveUserCommand,
-} from './commands/TableUpdateArrayCommand'
+import { TableAddUserCommand, TableRemoveUserCommand } from './commands/TableUpdateArrayCommand'
 import fs from 'fs'
 
 const userDB = JSON.parse(fs.readFileSync(`${__dirname}/../../DB/rooms.json`, 'utf-8'))
@@ -37,11 +34,35 @@ export class SkyOffice extends Room<TownState> {
     this.setMetadata({ name, description, hasPassword })
 
     this.setState(new TownState())
-    for (let i = 0; i < 5; i++) {
+
+    for (let i = 0; i < 9; i++) {
       this.state.tables.set(String(i), new Table())
     }
 
+    this.onMessage(Message.CONNECT_TO_TABLE, (client, message: { tableId: string }) => {
+      this.dispatcher.dispatch(new TableAddUserCommand(), {
+        client,
+        tableId: message.tableId,
+      })
+    })
 
+    this.onMessage(Message.DISCONNECT_FROM_TABLE, (client, message: { tableId: string }) => {
+      this.dispatcher.dispatch(new TableRemoveUserCommand(), {
+        client,
+        tableId: message.tableId,
+      })
+    })
+
+    this.onMessage(Message.STOP_TABLE_TALK, (client, message: { tableId: string }) => {
+      const table = this.state.tables.get(message.tableId)
+      table?.connectedUser.forEach((id) => [
+        this.clients.forEach((cli) => {
+          if (cli.sessionId === id && cli.sessionId !== client.sessionId) {
+            cli.send(Message.STOP_TABLE_TALK, client.sessionId)
+          }
+        }),
+      ])
+    })
     // when a player stop sharing screen
     // this.onMessage(Message.STOP_SCREEN_SHARE, (client, message: { computerId: string }) => {
     // const computer = this.state.computers.get(message.computerId)
@@ -55,6 +76,7 @@ export class SkyOffice extends Room<TownState> {
     // })
 
     // when receiving updatePlayer message, call the PlayerUpdateCommand
+
     this.onMessage(
       Message.UPDATE_PLAYER,
       (client, message: { x: number; y: number; anim: string }) => {
@@ -154,6 +176,12 @@ export class SkyOffice extends Room<TownState> {
     if (this.state.players.has(client.sessionId)) {
       this.state.players.delete(client.sessionId)
     }
+    this.state.tables.forEach((table) => {
+      if (table.connectedUser.has(client.sessionId)) {
+        table.connectedUser.delete(client.sessionId)
+      }
+    })
+
     const currentRoom = userDB.rooms[this.roomId]
     userDB.rooms[this.roomId] = {
       ...currentRoom,

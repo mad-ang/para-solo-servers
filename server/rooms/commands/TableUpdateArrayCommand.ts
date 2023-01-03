@@ -21,7 +21,7 @@ export class TableAddUserCommand extends Command<ITownState, Payload> {
 export class TableRemoveUserCommand extends Command<ITownState, Payload> {
   execute(data: Payload) {
     const { client, tableId } = data
-    const tableId = this.state.tables.get(tableId)
+    const table = this.state.tables.get(tableId)
 
     if (tableId.connectedUser.has(client.sessionId)) {
       tableId.connectedUser.delete(client.sessionId)
