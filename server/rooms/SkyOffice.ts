@@ -9,6 +9,8 @@ import PlayerUpdateCommand from './commands/PlayerUpdateCommand'
 import PlayerUpdateNameCommand from './commands/PlayerUpdateNameCommand'
 import ChatMessageUpdateCommand from './commands/ChatMessageUpdateCommand'
 
+let userCnt = 0
+
 export class SkyOffice extends Room<OfficeState> {
   private dispatcher = new Dispatcher(this)
   private name: string
@@ -114,10 +116,12 @@ export class SkyOffice extends Room<OfficeState> {
 
   onJoin(client: Client, options: any) {
     this.state.players.set(client.sessionId, new Player())
+    userCnt++
     client.send(Message.SEND_ROOM_DATA, {
       id: this.roomId,
       name: this.name,
       description: this.description,
+      userCnt: userCnt,
     })
   }
 
