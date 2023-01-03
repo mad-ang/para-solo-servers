@@ -34,8 +34,8 @@ export class OfficeState extends Schema implements IOfficeState {
   @type({ map: Player })
   players = new MapSchema<Player>()
 
-  // @type({ map: Computer })
-  // computers = new MapSchema<Computer>()
+  @type({ map: Table })
+  tables = new MapSchema<Table>()
 
   // @type({ map: Whiteboard })
   // whiteboards = new MapSchema<Whiteboard>()
