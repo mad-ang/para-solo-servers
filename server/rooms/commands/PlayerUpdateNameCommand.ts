@@ -1,13 +1,13 @@
 import { Command } from '@colyseus/command'
 import { Client } from 'colyseus'
-import { IOfficeState } from '../../../types/IOfficeState'
+import { ITownState } from '../../../types/ITownState'
 
 type Payload = {
   client: Client
   name: string
 }
 
-export default class PlayerUpdateNameCommand extends Command<IOfficeState, Payload> {
+export default class PlayerUpdateNameCommand extends Command<ITownState, Payload> {
   execute(data: Payload) {
     const { client, name } = data
 

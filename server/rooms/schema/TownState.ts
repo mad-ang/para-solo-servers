@@ -1,10 +1,5 @@
 import { Schema, ArraySchema, SetSchema, MapSchema, type } from '@colyseus/schema'
-import {
-  IPlayer,
-  IOfficeState,
-  ITable,
-  IChatMessage,
-} from '../../../types/IOfficeState'
+import { IPlayer, ITownState, IChatMessage } from '../../../types/ITownState'
 
 export class Player extends Schema implements IPlayer {
   @type('string') name = ''
@@ -15,30 +10,15 @@ export class Player extends Schema implements IPlayer {
   @type('boolean') videoConnected = false
 }
 
-export class Table extends Schema implements ITable {
-  @type({ set: 'string' }) connectedUser = new SetSchema<string>()
-}
-
-// export class Whiteboard extends Schema implements IWhiteboard {
-//   @type('string') roomId = getRoomId()
-//   @type({ set: 'string' }) connectedUser = new SetSchema<string>()
-// }
-
 export class ChatMessage extends Schema implements IChatMessage {
   @type('string') author = ''
   @type('number') createdAt = new Date().getTime()
   @type('string') content = ''
 }
 
-export class OfficeState extends Schema implements IOfficeState {
+export class TownState extends Schema implements ITownState {
   @type({ map: Player })
   players = new MapSchema<Player>()
-
-  @type({ map: Table })
-  tables = new MapSchema<Table>()
-
-  // @type({ map: Whiteboard })
-  // whiteboards = new MapSchema<Whiteboard>()
 
   @type([ChatMessage])
   chatMessages = new ArraySchema<ChatMessage>()

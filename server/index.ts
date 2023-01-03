@@ -5,10 +5,11 @@ import cors from 'cors'
 import { Server, LobbyRoom } from 'colyseus'
 import { monitor } from '@colyseus/monitor'
 import { RoomType } from '../types/Rooms'
+import roomRouter from './routes/room'
 
 // import socialRoutes from "@colyseus/social/express"
 
-import { SkyOffice } from './rooms/SkyOffice'
+import { SkyOffice } from './rooms/Momstown'
 
 const port = Number(process.env.PORT || 2567)
 const app = express()
@@ -16,32 +17,6 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 // app.use(express.static('dist'))
-
-let userCnt = 0
-
-app.post('/api/post/increase_user_cnt', (req, res) => {
-  userCnt += 1
-
-  console.log('set user_cnt', userCnt)
-  res.status(200).json({
-    userCnt: userCnt,
-  })
-})
-
-app.post('/api/post/decrease_user_cnt', (req, res) => {
-  userCnt -= 1
-
-  console.log('set user_cnt', userCnt)
-  res.status(200).json({
-    userCnt: userCnt,
-  })
-})
-
-app.get('/api/get/get_user_cnt', (req, res) => {
-  res.status(200).json({
-    userCnt: userCnt,
-  })
-})
 
 const server = http.createServer(app)
 // const peerServer = ExpressPeerServer(server, {
@@ -71,7 +46,6 @@ gameServer.define(RoomType.PUBLIC, SkyOffice, {
 
 // register colyseus monitor AFTER registering your room handlers
 app.use('/colyseus', monitor())
-// app.use('peerjs', peerServer);
-// peerServer.listen(9000)
+app.use('/room', roomRouter)
 gameServer.listen(port)
 console.log(`Listening on ws://localhost:${port}`)

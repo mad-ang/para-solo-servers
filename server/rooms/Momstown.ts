@@ -1,19 +1,18 @@
 import bcrypt from 'bcrypt'
 import { Room, Client, ServerError } from 'colyseus'
 import { Dispatcher } from '@colyseus/command'
-import { Player, OfficeState, Table } from './schema/OfficeState'
+import { Player, TownState } from './schema/TownState'
 import { Message } from '../../types/Messages'
 import { IRoomData } from '../../types/Rooms'
-import { whiteboardRoomIds } from './schema/OfficeState'
+import { whiteboardRoomIds } from './schema/TownState'
 import PlayerUpdateCommand from './commands/PlayerUpdateCommand'
 import PlayerUpdateNameCommand from './commands/PlayerUpdateNameCommand'
-import {
-  TableAddUserCommand,
-  TableRemoveUserCommand,
-} from './commands/TableUpdateArrayCommand'
 import ChatMessageUpdateCommand from './commands/ChatMessageUpdateCommand'
+import fs from 'fs'
 
-export class SkyOffice extends Room<OfficeState> {
+const userDB = JSON.parse(fs.readFileSync(`${__dirname}/../../DB/rooms.json`, 'utf-8'))
+
+export class SkyOffice extends Room<TownState> {
   private dispatcher = new Dispatcher(this)
   private name: string
   private description: string
@@ -33,17 +32,7 @@ export class SkyOffice extends Room<OfficeState> {
     }
     this.setMetadata({ name, description, hasPassword })
 
-    this.setState(new OfficeState())
-
-    // HARD-CODED: Add 5 computers in a room
-    for (let i = 0; i < 5; i++) {
-      this.state.tables.set(String(i), new Table())
-    }
-
-    // HARD-CODED: Add 3 whiteboards in a room
-    // for (let i = 0; i < 3; i++) {
-    //   this.state.whiteboards.set(String(i), new Whiteboard())
-    // }
+    this.setState(new TownState())
 
     // when a player stop sharing screen
     // this.onMessage(Message.STOP_SCREEN_SHARE, (client, message: { computerId: string }) => {
@@ -128,17 +117,42 @@ export class SkyOffice extends Room<OfficeState> {
 
   onJoin(client: Client, options: any) {
     this.state.players.set(client.sessionId, new Player())
+    console.log('this.roomId', this.roomId)
+    const rooms = userDB.rooms
+    let currentRoomUserCnt = 1
+    if (!Object.hasOwnProperty.call(rooms, this.roomId)) {
+      userDB.rooms[this.roomId] = {
+        roomId: this.roomId,
+        userCnt: 1,
+      }
+    } else {
+      const currentRoom = userDB.rooms[this.roomId]
+      ;(currentRoomUserCnt = currentRoom.userCnt + 1),
+        (userDB.rooms[this.roomId] = {
+          ...currentRoom,
+          userCnt: currentRoomUserCnt,
+        })
+    }
+
     client.send(Message.SEND_ROOM_DATA, {
       id: this.roomId,
       name: this.name,
       description: this.description,
-      userCnt: 0,
+      userCnt: currentRoomUserCnt,
     })
   }
 
   onLeave(client: Client, consented: boolean) {
     if (this.state.players.has(client.sessionId)) {
       this.state.players.delete(client.sessionId)
+    }
+    const currentRoom = userDB.rooms[this.roomId]
+    userDB.rooms[this.roomId] = {
+      ...currentRoom,
+      userCnt: currentRoom.userCnt - 1,
+    }
+    if (currentRoom.userCnt === 0) {
+      delete userDB.rooms[this.roomId]
     }
   }
 
