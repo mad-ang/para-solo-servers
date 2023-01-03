@@ -53,6 +53,7 @@ export class SkyOffice extends Room<TownState> {
       })
     })
 
+    
     this.onMessage(Message.STOP_TABLE_TALK, (client, message: { tableId: string }) => {
       const table = this.state.tables.get(message.tableId)
       table?.connectedUser.forEach((id) => [
