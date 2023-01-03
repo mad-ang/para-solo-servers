@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
 import { Room, Client, ServerError } from 'colyseus'
 import { Dispatcher } from '@colyseus/command'
-import { Player, OfficeState, Computer, Whiteboard } from './schema/OfficeState'
+import { Player, OfficeState } from './schema/OfficeState'
 import { Message } from '../../types/Messages'
 import { IRoomData } from '../../types/Rooms'
 import { whiteboardRoomIds } from './schema/OfficeState'
@@ -30,16 +30,6 @@ export class SkyOffice extends Room<OfficeState> {
     this.setMetadata({ name, description, hasPassword })
 
     this.setState(new OfficeState())
-
-    // HARD-CODED: Add 5 computers in a room
-    for (let i = 0; i < 5; i++) {
-      this.state.computers.set(String(i), new Computer())
-    }
-
-    // HARD-CODED: Add 3 whiteboards in a room
-    for (let i = 0; i < 3; i++) {
-      this.state.whiteboards.set(String(i), new Whiteboard())
-    }
 
     // when a player stop sharing screen
     // this.onMessage(Message.STOP_SCREEN_SHARE, (client, message: { computerId: string }) => {
@@ -135,24 +125,9 @@ export class SkyOffice extends Room<OfficeState> {
     if (this.state.players.has(client.sessionId)) {
       this.state.players.delete(client.sessionId)
     }
-    this.state.computers.forEach((computer) => {
-      if (computer.connectedUser.has(client.sessionId)) {
-        computer.connectedUser.delete(client.sessionId)
-      }
-    })
-    this.state.whiteboards.forEach((whiteboard) => {
-      if (whiteboard.connectedUser.has(client.sessionId)) {
-        whiteboard.connectedUser.delete(client.sessionId)
-      }
-    })
   }
 
   onDispose() {
-    this.state.whiteboards.forEach((whiteboard) => {
-      if (whiteboard && whiteboardRoomIds.has(whiteboard?.roomId!))
-        whiteboardRoomIds.delete(whiteboard?.roomId!)
-    })
-
     console.log('room', this.roomId, 'disposing...')
     this.dispatcher.stop()
   }
