@@ -8,8 +8,9 @@ import { whiteboardRoomIds } from './schema/TownState'
 import PlayerUpdateCommand from './commands/PlayerUpdateCommand'
 import PlayerUpdateNameCommand from './commands/PlayerUpdateNameCommand'
 import ChatMessageUpdateCommand from './commands/ChatMessageUpdateCommand'
+import fs from 'fs'
 
-let userCnt = 0
+const userDB = JSON.parse(fs.readFileSync(`${__dirname}/../../DB/rooms.json`, 'utf-8'))
 
 export class SkyOffice extends Room<TownState> {
   private dispatcher = new Dispatcher(this)
@@ -116,19 +117,42 @@ export class SkyOffice extends Room<TownState> {
 
   onJoin(client: Client, options: any) {
     this.state.players.set(client.sessionId, new Player())
-    userCnt += 1
+    console.log('this.roomId', this.roomId)
+    const rooms = userDB.rooms
+    let currentRoomUserCnt = 1
+    if (!Object.hasOwnProperty.call(rooms, this.roomId)) {
+      userDB.rooms[this.roomId] = {
+        roomId: this.roomId,
+        userCnt: 1,
+      }
+    } else {
+      const currentRoom = userDB.rooms[this.roomId]
+      ;(currentRoomUserCnt = currentRoom.userCnt + 1),
+        (userDB.rooms[this.roomId] = {
+          ...currentRoom,
+          userCnt: currentRoomUserCnt,
+        })
+    }
+
     client.send(Message.SEND_ROOM_DATA, {
       id: this.roomId,
       name: this.name,
       description: this.description,
-      userCnt: userCnt,
+      userCnt: currentRoomUserCnt,
     })
   }
 
   onLeave(client: Client, consented: boolean) {
-    userCnt -= 1
     if (this.state.players.has(client.sessionId)) {
       this.state.players.delete(client.sessionId)
+    }
+    const currentRoom = userDB.rooms[this.roomId]
+    userDB.rooms[this.roomId] = {
+      ...currentRoom,
+      userCnt: currentRoom.userCnt - 1,
+    }
+    if (currentRoom.userCnt === 0) {
+      delete userDB.rooms[this.roomId]
     }
   }
 
