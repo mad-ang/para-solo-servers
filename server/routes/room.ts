@@ -7,7 +7,7 @@ const router = express.Router()
 let userCnt = 0
 router.post('/increase_users_cnt', (req, res) => {
   const { roomId } = req.body
-  console.log('요청받은', roomId)
+
   console.log('before userDB', userDB)
   if (!roomId) {
     res.status(404).json({ error: 'roomid not found' })
@@ -35,18 +35,21 @@ router.post('/decrease_users_cnt', (req, res) => {
     res.status(404).json({ error: 'roomid not found' })
     return
   }
-
+  console.log('before userDB', userDB)
   const newUserCnt = userDB.rooms[roomId].userCnt - 1
-  userDB.rooms[roomId].userCnt = newUserCnt
 
-  console.log('decrease user_cnt', userCnt)
+  userDB.rooms[roomId].userCnt = newUserCnt
+  if (userDB.rooms[roomId].userCnt === 0) {
+    delete userDB.rooms[roomId]
+  }
+  console.log('after userDB', userDB)
   res.status(200).json({
     userCnt: newUserCnt,
   })
 })
 
-router.get('/get_users_cnt', (req, res) => {
-  const { roomId } = req.body
+router.get('/get_users_cnt/:id', (req, res) => {
+  const roomId = req.params.id
   if (!roomId || !userDB.rooms[roomId]) {
     res.status(404).json({ error: 'roomid not found' })
     return
