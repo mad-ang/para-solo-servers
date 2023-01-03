@@ -4,7 +4,7 @@ import fs from 'fs'
 const userDB = JSON.parse(fs.readFileSync(`${__dirname}/../../DB/rooms.json`, 'utf-8'))
 
 const router = express.Router()
-let userCnt = 0
+
 router.post('/increase_users_cnt', (req, res) => {
   const { roomId } = req.body
 
@@ -55,7 +55,6 @@ router.get('/get_users_cnt/:id', (req, res) => {
     return
   }
 
-  console.log('get user_cnt', userCnt)
   res.status(200).json({
     userCnt: userDB.rooms[roomId].userCnt,
   })
