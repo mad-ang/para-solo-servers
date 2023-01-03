@@ -116,7 +116,7 @@ export class SkyOffice extends Room<OfficeState> {
 
   onJoin(client: Client, options: any) {
     this.state.players.set(client.sessionId, new Player())
-    userCnt++
+    userCnt += 1
     client.send(Message.SEND_ROOM_DATA, {
       id: this.roomId,
       name: this.name,
@@ -126,6 +126,7 @@ export class SkyOffice extends Room<OfficeState> {
   }
 
   onLeave(client: Client, consented: boolean) {
+    userCnt -= 1
     if (this.state.players.has(client.sessionId)) {
       this.state.players.delete(client.sessionId)
     }
