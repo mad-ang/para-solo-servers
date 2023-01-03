@@ -7,7 +7,7 @@ import { RoomType } from '../types/Rooms'
 
 // import socialRoutes from "@colyseus/social/express"
 
-import { SkyOffice } from './rooms/SkyOffice'
+import { SkyOffice } from './rooms/Momstown'
 
 const port = Number(process.env.PORT || 2567)
 const app = express()

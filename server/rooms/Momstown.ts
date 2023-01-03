@@ -1,17 +1,17 @@
 import bcrypt from 'bcrypt'
 import { Room, Client, ServerError } from 'colyseus'
 import { Dispatcher } from '@colyseus/command'
-import { Player, OfficeState } from './schema/OfficeState'
+import { Player, TownState } from './schema/TownState'
 import { Message } from '../../types/Messages'
 import { IRoomData } from '../../types/Rooms'
-import { whiteboardRoomIds } from './schema/OfficeState'
+import { whiteboardRoomIds } from './schema/TownState'
 import PlayerUpdateCommand from './commands/PlayerUpdateCommand'
 import PlayerUpdateNameCommand from './commands/PlayerUpdateNameCommand'
 import ChatMessageUpdateCommand from './commands/ChatMessageUpdateCommand'
 
 let userCnt = 0
 
-export class SkyOffice extends Room<OfficeState> {
+export class SkyOffice extends Room<TownState> {
   private dispatcher = new Dispatcher(this)
   private name: string
   private description: string
@@ -31,7 +31,7 @@ export class SkyOffice extends Room<OfficeState> {
     }
     this.setMetadata({ name, description, hasPassword })
 
-    this.setState(new OfficeState())
+    this.setState(new TownState())
 
     // when a player stop sharing screen
     // this.onMessage(Message.STOP_SCREEN_SHARE, (client, message: { computerId: string }) => {
