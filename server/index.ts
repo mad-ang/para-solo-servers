@@ -4,6 +4,7 @@ import cors from 'cors'
 import { Server, LobbyRoom } from 'colyseus'
 import { monitor } from '@colyseus/monitor'
 import { RoomType } from '../types/Rooms'
+import userRouter from './routes/user'
 
 // import socialRoutes from "@colyseus/social/express"
 
@@ -15,32 +16,6 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 // app.use(express.static('dist'))
-
-let userCnt = 0
-
-app.post('/api/post/increase_user_cnt', (req, res) => {
-  userCnt += 1
-
-  console.log('set user_cnt', userCnt)
-  res.status(200).json({
-    userCnt: userCnt,
-  })
-})
-
-app.post('/api/post/decrease_user_cnt', (req, res) => {
-  userCnt -= 1
-
-  console.log('set user_cnt', userCnt)
-  res.status(200).json({
-    userCnt: userCnt,
-  })
-})
-
-app.get('/api/get/get_user_cnt', (req, res) => {
-  res.status(200).json({
-    userCnt: userCnt,
-  })
-})
 
 const server = http.createServer(app)
 const gameServer = new Server({
@@ -67,6 +42,6 @@ gameServer.define(RoomType.PUBLIC, SkyOffice, {
 
 // register colyseus monitor AFTER registering your room handlers
 app.use('/colyseus', monitor())
-
+app.use('/users', userRouter)
 gameServer.listen(port)
 console.log(`Listening on ws://localhost:${port}`)
