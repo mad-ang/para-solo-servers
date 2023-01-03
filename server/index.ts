@@ -55,7 +55,7 @@ gameServer.define(RoomType.PUBLIC, SkyOffice, {
   password: null,
   autoDispose: false,
 })
-gameServer.define(RoomType.CUSTOM, SkyOffice).enableRealtimeListing()
+// gameServer.define(RoomType.CUSTOM, SkyOffice).enableRealtimeListing()
 
 /**
  * Register @colyseus/social routes

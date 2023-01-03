@@ -1,20 +1,12 @@
 import bcrypt from 'bcrypt'
 import { Room, Client, ServerError } from 'colyseus'
 import { Dispatcher } from '@colyseus/command'
-import { Player, OfficeState, Computer, Whiteboard } from './schema/OfficeState'
+import { Player, OfficeState } from './schema/OfficeState'
 import { Message } from '../../types/Messages'
 import { IRoomData } from '../../types/Rooms'
 import { whiteboardRoomIds } from './schema/OfficeState'
 import PlayerUpdateCommand from './commands/PlayerUpdateCommand'
 import PlayerUpdateNameCommand from './commands/PlayerUpdateNameCommand'
-import {
-  ComputerAddUserCommand,
-  ComputerRemoveUserCommand,
-} from './commands/ComputerUpdateArrayCommand'
-import {
-  WhiteboardAddUserCommand,
-  WhiteboardRemoveUserCommand,
-} from './commands/WhiteboardUpdateArrayCommand'
 import ChatMessageUpdateCommand from './commands/ChatMessageUpdateCommand'
 
 export class SkyOffice extends Room<OfficeState> {
@@ -39,62 +31,17 @@ export class SkyOffice extends Room<OfficeState> {
 
     this.setState(new OfficeState())
 
-    // HARD-CODED: Add 5 computers in a room
-    for (let i = 0; i < 5; i++) {
-      this.state.computers.set(String(i), new Computer())
-    }
-
-    // HARD-CODED: Add 3 whiteboards in a room
-    for (let i = 0; i < 3; i++) {
-      this.state.whiteboards.set(String(i), new Whiteboard())
-    }
-
-    // when a player connect to a computer, add to the computer connectedUser array
-    this.onMessage(Message.CONNECT_TO_COMPUTER, (client, message: { computerId: string }) => {
-      this.dispatcher.dispatch(new ComputerAddUserCommand(), {
-        client,
-        computerId: message.computerId,
-      })
-    })
-
-    // when a player disconnect from a computer, remove from the computer connectedUser array
-    this.onMessage(Message.DISCONNECT_FROM_COMPUTER, (client, message: { computerId: string }) => {
-      this.dispatcher.dispatch(new ComputerRemoveUserCommand(), {
-        client,
-        computerId: message.computerId,
-      })
-    })
-
     // when a player stop sharing screen
-    this.onMessage(Message.STOP_SCREEN_SHARE, (client, message: { computerId: string }) => {
-      const computer = this.state.computers.get(message.computerId)
-      computer.connectedUser.forEach((id) => {
-        this.clients.forEach((cli) => {
-          if (cli.sessionId === id && cli.sessionId !== client.sessionId) {
-            cli.send(Message.STOP_SCREEN_SHARE, client.sessionId)
-          }
-        })
-      })
-    })
-
-    // when a player connect to a whiteboard, add to the whiteboard connectedUser array
-    this.onMessage(Message.CONNECT_TO_WHITEBOARD, (client, message: { whiteboardId: string }) => {
-      this.dispatcher.dispatch(new WhiteboardAddUserCommand(), {
-        client,
-        whiteboardId: message.whiteboardId,
-      })
-    })
-
-    // when a player disconnect from a whiteboard, remove from the whiteboard connectedUser array
-    this.onMessage(
-      Message.DISCONNECT_FROM_WHITEBOARD,
-      (client, message: { whiteboardId: string }) => {
-        this.dispatcher.dispatch(new WhiteboardRemoveUserCommand(), {
-          client,
-          whiteboardId: message.whiteboardId,
-        })
-      }
-    )
+    // this.onMessage(Message.STOP_SCREEN_SHARE, (client, message: { computerId: string }) => {
+    // const computer = this.state.computers.get(message.computerId)
+    // computer.connectedUser.forEach((id) => {
+    //   this.clients.forEach((cli) => {
+    //     if (cli.sessionId === id && cli.sessionId !== client.sessionId) {
+    //       cli.send(Message.STOP_SCREEN_SHARE, client.sessionId)
+    //     }
+    //   })
+    // })
+    // })
 
     // when receiving updatePlayer message, call the PlayerUpdateCommand
     this.onMessage(
@@ -157,7 +104,7 @@ export class SkyOffice extends Room<OfficeState> {
 
   async onAuth(client: Client, options: { password: string | null }) {
     if (this.password) {
-      const validPassword = await bcrypt.compare(options.password, this.password)
+      const validPassword = await bcrypt.compare(options.password!, this.password)
       if (!validPassword) {
         throw new ServerError(403, 'Password is incorrect!')
       }
@@ -178,23 +125,9 @@ export class SkyOffice extends Room<OfficeState> {
     if (this.state.players.has(client.sessionId)) {
       this.state.players.delete(client.sessionId)
     }
-    this.state.computers.forEach((computer) => {
-      if (computer.connectedUser.has(client.sessionId)) {
-        computer.connectedUser.delete(client.sessionId)
-      }
-    })
-    this.state.whiteboards.forEach((whiteboard) => {
-      if (whiteboard.connectedUser.has(client.sessionId)) {
-        whiteboard.connectedUser.delete(client.sessionId)
-      }
-    })
   }
 
   onDispose() {
-    this.state.whiteboards.forEach((whiteboard) => {
-      if (whiteboardRoomIds.has(whiteboard.roomId)) whiteboardRoomIds.delete(whiteboard.roomId)
-    })
-
     console.log('room', this.roomId, 'disposing...')
     this.dispatcher.stop()
   }
