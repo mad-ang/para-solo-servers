@@ -11,7 +11,7 @@ import ChatMessageUpdateCommand from './commands/ChatMessageUpdateCommand'
 import { TableAddUserCommand, TableRemoveUserCommand } from './commands/TableUpdateArrayCommand'
 import fs from 'fs'
 
-const userDB = JSON.parse(fs.readFileSync(`${__dirname}/../../DB/rooms.json`, 'utf-8'))
+// const userDB = JSON.parse(fs.readFileSync(`${__dirname}/../../DB/rooms.json`, 'utf-8'))
 
 export class SkyOffice extends Room<TownState> {
   private dispatcher = new Dispatcher(this)
@@ -53,7 +53,6 @@ export class SkyOffice extends Room<TownState> {
       })
     })
 
-    
     this.onMessage(Message.STOP_TABLE_TALK, (client, message: { tableId: string }) => {
       const table = this.state.tables.get(message.tableId)
       table?.connectedUser.forEach((id) => [
@@ -149,28 +148,28 @@ export class SkyOffice extends Room<TownState> {
   onJoin(client: Client, options: any) {
     this.state.players.set(client.sessionId, new Player())
     console.log('this.roomId', this.roomId)
-    const rooms = userDB.rooms
-    let currentRoomUserCnt = 1
-    if (!Object.hasOwnProperty.call(rooms, this.roomId)) {
-      userDB.rooms[this.roomId] = {
-        roomId: this.roomId,
-        userCnt: 1,
-      }
-    } else {
-      const currentRoom = userDB.rooms[this.roomId]
-      ;(currentRoomUserCnt = currentRoom.userCnt + 1),
-        (userDB.rooms[this.roomId] = {
-          ...currentRoom,
-          userCnt: currentRoomUserCnt,
-        })
-    }
+    // const rooms = userDB.rooms
+    // let currentRoomUserCnt = 1
+    // if (!Object.hasOwnProperty.call(rooms, this.roomId)) {
+    //   userDB.rooms[this.roomId] = {
+    //     roomId: this.roomId,
+    //     userCnt: 1,
+    //   }
+    // } else {
+    //   const currentRoom = userDB.rooms[this.roomId]
+    //   ;(currentRoomUserCnt = currentRoom.userCnt + 1),
+    //     (userDB.rooms[this.roomId] = {
+    //       ...currentRoom,
+    //       userCnt: currentRoomUserCnt,
+    //     })
+    // }
 
-    client.send(Message.SEND_ROOM_DATA, {
-      id: this.roomId,
-      name: this.name,
-      description: this.description,
-      userCnt: currentRoomUserCnt,
-    })
+    // client.send(Message.SEND_ROOM_DATA, {
+    //   id: this.roomId,
+    //   name: this.name,
+    //   description: this.description,
+    //   userCnt: currentRoomUserCnt,
+    // })
   }
 
   onLeave(client: Client, consented: boolean) {
@@ -184,13 +183,13 @@ export class SkyOffice extends Room<TownState> {
     })
 
     const currentRoom = userDB.rooms[this.roomId]
-    userDB.rooms[this.roomId] = {
-      ...currentRoom,
-      userCnt: currentRoom.userCnt - 1,
-    }
-    if (currentRoom.userCnt === 0) {
-      delete userDB.rooms[this.roomId]
-    }
+    // userDB.rooms[this.roomId] = {
+    //   ...currentRoom,
+    //   userCnt: currentRoom.userCnt - 1,
+    // }
+    // if (currentRoom.userCnt === 0) {
+    //   delete userDB.rooms[this.roomId]
+    // }
   }
 
   onDispose() {
