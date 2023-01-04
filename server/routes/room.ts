@@ -8,7 +8,7 @@ const router = express.Router()
 router.post('/increase_users_cnt', (req, res) => {
   const { roomId } = req.body
 
-  console.log('before userDB', userDB)
+  // console.log('before userDB', userDB)
   if (!roomId) {
     res.status(404).json({ error: 'roomid not found' })
     return
@@ -50,14 +50,14 @@ router.post('/decrease_users_cnt', (req, res) => {
 
 router.get('/get_users_cnt/:id', (req, res) => {
   const roomId = req.params.id
-  if (!roomId || !userDB.rooms[roomId]) {
-    res.status(404).json({ error: 'roomid not found' })
-    return
-  }
+  // if (!roomId || !userDB.rooms[roomId]) {
+  //   res.status(404).json({ error: 'roomid not found' })
+  //   return
+  // }
 
-  res.status(200).json({
-    userCnt: userDB.rooms[roomId].userCnt,
-  })
+  // res.status(200).json({
+  //   userCnt: userDB.rooms[roomId].userCnt,
+  // })
 })
 
 export default router

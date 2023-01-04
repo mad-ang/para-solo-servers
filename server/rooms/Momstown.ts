@@ -182,7 +182,7 @@ export class SkyOffice extends Room<TownState> {
       }
     })
 
-    const currentRoom = userDB.rooms[this.roomId]
+    // const currentRoom = userDB.rooms[this.roomId]
     // userDB.rooms[this.roomId] = {
     //   ...currentRoom,
     //   userCnt: currentRoom.userCnt - 1,
