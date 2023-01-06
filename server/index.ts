@@ -6,6 +6,7 @@ import { Server, LobbyRoom } from 'colyseus'
 import { monitor } from '@colyseus/monitor'
 import { RoomType } from '../types/Rooms'
 import roomRouter from './routes/room'
+import authRouter from './routes/auth'
 
 // import socialRoutes from "@colyseus/social/express"
 
@@ -47,5 +48,6 @@ gameServer.define(RoomType.CUSTOM, SkyOffice).enableRealtimeListing()
 // register colyseus monitor AFTER registering your room handlers
 app.use('/colyseus', monitor())
 app.use('/room', roomRouter)
+app.use('/auth', authRouter)
 gameServer.listen(port)
 console.log(`Listening on ws://localhost:${port}`)
