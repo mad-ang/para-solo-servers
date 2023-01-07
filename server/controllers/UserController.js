@@ -1,6 +1,21 @@
+const bcrypt = require('bcrypt')
 const db = require('../models')
 
 const User = db.users
+
+async function hashPassword(user) {
+  const password = user.password
+  const saltRounds = 8
+
+  const hashedPassword = await new Promise((resolve, reject) => {
+    bcrypt.hash(password, saltRounds, function (err, hash) {
+      if (err) reject(err)
+      resolve(hash)
+    })
+  })
+
+  return hashedPassword
+}
 
 // TODO: bcrypt
 export const addUser = async (req, res) => {
@@ -9,6 +24,9 @@ export const addUser = async (req, res) => {
     email: req.body.email,
     password: req.body.password,
   }
+
+  userInfo.password = await hashPassword(userInfo)
+
   const user = await User.create(userInfo).catch((err) => console.log(err))
   return res.status(200).json({ success: true, payload: user })
 }
