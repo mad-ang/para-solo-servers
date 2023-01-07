@@ -1,10 +1,11 @@
 import express from 'express'
-import { createUser } from '../controller/auth'
+import { addUser } from '../controllers/UserController'
+
 const router = express.Router()
 
-router.use('/signup', createUser)
+router.post('/signup', addUser)
 
-router.post('/login', (req, res) => {
+router.get('/login', (req, res) => {
   console.log('login!')
 })
 
