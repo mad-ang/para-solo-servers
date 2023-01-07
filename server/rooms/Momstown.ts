@@ -63,6 +63,7 @@ export class SkyOffice extends Room<TownState> {
       console.log("message", message);
       this.dispatcher.dispatch(new ChairStatusUpdateCommand(), {
         client,
+        tableId: message.tableId,
         chairId: message.chairId,
         status: message.status
       })

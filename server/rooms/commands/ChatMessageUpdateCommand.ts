@@ -15,7 +15,6 @@ export default class ChatMessageUpdateCommand extends Command<ITownState, Payloa
     const chatMessages = this.room.state.chatMessages
 
     if (!chatMessages) return
-
     /**
      * Only allow server to store a maximum of 100 chat messages:
      * remove the first element before pushing a new one when array length is >= 100
