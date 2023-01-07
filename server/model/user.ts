@@ -1,4 +1,4 @@
-import { config } from '../config'
+import { config } from '../envconfig'
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 const bcrypt = require('bcrypt')
