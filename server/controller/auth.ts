@@ -1,7 +1,7 @@
 import User from '../model/user'
 import { config } from '../config'
 
-export const createUser = (req, res) => {
+export const signUp = (req, res) => {
   const user = new User(req.body)
 
   user.save((err, userInfo) => {
