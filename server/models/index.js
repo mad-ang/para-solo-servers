@@ -20,7 +20,7 @@ fs.readdirSync(__dirname)
     return file.indexOf('.') !== 0 && file !== basename && file.slice(-3) === '.js'
   })
   .forEach((file) => {
-    const model = sequelize['import'](path.join(__dirname, file))
+    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes)
     db[model.name] = model
   })
 
@@ -32,5 +32,14 @@ Object.keys(db).forEach((modelName) => {
 
 db.sequelize = sequelize
 db.Sequelize = Sequelize
+
+sequelize
+  .sync({ force: false })
+  .then(() => {
+    console.log('데이터베이스 연결됨.')
+  })
+  .catch((err) => {
+    console.error(err)
+  })
 
 module.exports = db

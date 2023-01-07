@@ -16,15 +16,6 @@ import { SkyOffice } from './rooms/Momstown'
 const port = Number(process.env.PORT || 2567)
 const app = express()
 
-sequelize
-  .sync({ force: false })
-  .then(() => {
-    console.log('데이터베이스 연결됨.')
-  })
-  .catch((err) => {
-    console.error(err)
-  })
-
 app.use(cors())
 app.use(express.json())
 // app.use(express.static('dist'))
