@@ -11,6 +11,7 @@ import authRouter from './routes/auth'
 // import socialRoutes from "@colyseus/social/express"
 
 import { SkyOffice } from './rooms/Momstown'
+import { connectDB } from './DB/db'
 
 const port = Number(process.env.PORT || 2567)
 const app = express()
@@ -49,5 +50,15 @@ gameServer.define(RoomType.CUSTOM, SkyOffice).enableRealtimeListing()
 app.use('/colyseus', monitor())
 app.use('/room', roomRouter)
 app.use('/auth', authRouter)
-gameServer.listen(port)
-console.log(`Listening on ws://localhost:${port}`)
+
+connectDB()
+  .then((db) => {
+    console.log('init!', db)
+    gameServer.listen(port)
+    // db.collection('users').insertOne({ 이름: 'John', _id: 100 }, function (에러, 결과) {
+    //   console.log('저장완료')
+    // })
+
+    console.log(`Listening on ws://localhost:${port}`)
+  })
+  .catch(console.error)
