@@ -16,9 +16,20 @@ import { SkyOffice } from './rooms/Momstown'
 const port = Number(process.env.PORT || 2567)
 const app = express()
 
+sequelize
+  .sync({ force: false })
+  .then(() => {
+    console.log('데이터베이스 연결됨.')
+  })
+  .catch((err) => {
+    console.error(err)
+  })
+
 app.use(cors())
 app.use(express.json())
 // app.use(express.static('dist'))
+
+require('./models/index')
 
 const server = http.createServer(app)
 // const peerServer = ExpressPeerServer(server, {
@@ -51,11 +62,4 @@ app.use('/colyseus', monitor())
 app.use('/room', roomRouter)
 app.use('/auth', authRouter)
 
-sequelize
-  .sync({ force: false })
-  .then(() => {
-    console.log('DB Connected Success')
-  })
-  .catch((err) => {
-    console.error(err)
-  })
+gameServer.listen(port)
