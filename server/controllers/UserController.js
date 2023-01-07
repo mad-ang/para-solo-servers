@@ -1,14 +1,13 @@
 const db = require('../models')
 
-const User = db.users
+const User = db.User
 
 // TODO: bcrypt
 export const addUser = async (req, res) => {
-    const userInfo = {
-        username: req.body.username,
-        password: req.body.password,
-    }
-    console.log(333333, userInfo)
+  const userInfo = {
+    username: req.body.username,
+    password: req.body.password,
+  }
   const user = await User.create(userInfo).catch((err) => console.log(err))
   return res.status(200).json({ success: true, payload: user })
 }
