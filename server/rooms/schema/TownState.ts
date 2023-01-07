@@ -18,6 +18,7 @@ export class ChatMessage extends Schema implements IChatMessage {
 
 export class Chair extends Schema implements IChair {
   @type('boolean') occupied = false
+  @type('string') clientId = ''
 }
 export class Table extends Schema implements ITable {
   @type({ set: 'string' }) connectedUser = new SetSchema<string>()
