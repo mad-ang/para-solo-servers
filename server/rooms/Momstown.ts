@@ -33,10 +33,12 @@ export class SkyOffice extends Room<TownState> {
     this.setMetadata({ name, description, hasPassword })
 
     this.setState(new TownState())
-
+    // hard coding for talbe.
     for (let i = 0; i < 4; i++) {
       this.state.tables.set(String(i), new Table())
     }
+
+    // hard coding for chair.
     let j = 0;
     this.state.tables.forEach((table) => {
       j++;
@@ -60,7 +62,6 @@ export class SkyOffice extends Room<TownState> {
     })
     // dispatcher 로 관리해야함.
     this.onMessage(Message.UPDATE_CHAIR_STATUS, (client, message: { tableId: string, chairId: string, status : boolean}) =>{
-      console.log("message", message);
       this.dispatcher.dispatch(new ChairStatusUpdateCommand(), {
         client,
         tableId: message.tableId,
