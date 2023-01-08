@@ -1,5 +1,5 @@
 import { Schema, ArraySchema, SetSchema, MapSchema, type } from '@colyseus/schema'
-import { IPlayer, ITownState, ITable, IChatMessage } from '../../../types/ITownState'
+import { IPlayer, ITownState, ITable, IChatMessage, IChair } from '../../../types/ITownState'
 
 export class Player extends Schema implements IPlayer {
   @type('string') name = ''
@@ -16,10 +16,14 @@ export class ChatMessage extends Schema implements IChatMessage {
   @type('string') content = ''
 }
 
+export class Chair extends Schema implements IChair {
+  @type('boolean') occupied = false
+  @type('string') clientId = ''
+}
 export class Table extends Schema implements ITable {
   @type({ set: 'string' }) connectedUser = new SetSchema<string>()
+  @type({ map: Chair }) containedChairs = new MapSchema<Chair>()
 }
-
 
 export class TownState extends Schema implements ITownState {
   @type({ map: Player })
@@ -30,6 +34,9 @@ export class TownState extends Schema implements ITownState {
 
   @type([ChatMessage])
   chatMessages = new ArraySchema<ChatMessage>()
+
+  @type({map : Chair})
+  chairs = new MapSchema<Chair>()
 }
 
 

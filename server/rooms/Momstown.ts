@@ -1,12 +1,13 @@
 import bcrypt from 'bcrypt'
 import { Room, Client, ServerError } from 'colyseus'
 import { Dispatcher } from '@colyseus/command'
-import { Player, TownState, Table } from './schema/TownState'
+import { Player, TownState, Table, Chair } from './schema/TownState'
 import { Message } from '../../types/Messages'
 import { IRoomData } from '../../types/Rooms'
 import { whiteboardRoomIds } from './schema/TownState'
 import PlayerUpdateCommand from './commands/PlayerUpdateCommand'
 import PlayerUpdateNameCommand from './commands/PlayerUpdateNameCommand'
+import {ChairStatusUpdateCommand} from './commands/ChairStatusUpdateCommand'
 import ChatMessageUpdateCommand from './commands/ChatMessageUpdateCommand'
 import { TableAddUserCommand, TableRemoveUserCommand } from './commands/TableUpdateArrayCommand'
 import { userDB } from '../DB/db'
@@ -32,11 +33,20 @@ export class SkyOffice extends Room<TownState> {
     this.setMetadata({ name, description, hasPassword })
 
     this.setState(new TownState())
-
-    for (let i = 0; i < 9; i++) {
+    // hard coding for talbe.
+    for (let i = 0; i < 4; i++) {
       this.state.tables.set(String(i), new Table())
     }
 
+    // hard coding for chair.
+    let j = 0;
+    this.state.tables.forEach((table) => {
+      j++;
+      for (let i = 0; i < 4; i++) {
+        const chair = this.state.chairs.set(String(i * j), new Chair())
+      }
+    })
+    
     this.onMessage(Message.CONNECT_TO_TABLE, (client, message: { tableId: string }) => {
       this.dispatcher.dispatch(new TableAddUserCommand(), {
         client,
@@ -48,6 +58,15 @@ export class SkyOffice extends Room<TownState> {
       this.dispatcher.dispatch(new TableRemoveUserCommand(), {
         client,
         tableId: message.tableId,
+      })
+    })
+    // dispatcher 로 관리해야함.
+    this.onMessage(Message.UPDATE_CHAIR_STATUS, (client, message: { tableId: string, chairId: string, status : boolean}) =>{
+      this.dispatcher.dispatch(new ChairStatusUpdateCommand(), {
+        client,
+        tableId: message.tableId,
+        chairId: message.chairId,
+        status: message.status
       })
     })
 
