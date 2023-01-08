@@ -33,10 +33,21 @@ export const signUp = async (req, res) => {
         message: '사용하실 비밀번호를 입력해주세요.',
       })
     }
+
     const userInfo = {
       username: req.body.username,
       userId: req.body.userId,
       password: req.body.password,
+    }
+
+    let foundUser = await User.findOne({ where: { userId: userInfo.userId } }).catch((err) =>
+      console.log(err)
+    )
+    if (foundUser) {
+      return res.status(409).json({
+        status: 409,
+        message: '이미 존재하는 아이디입니다.',
+      })
     }
 
     userInfo.password = await hashPassword(userInfo)
