@@ -6,7 +6,9 @@ import { Server, LobbyRoom } from 'colyseus'
 import { monitor } from '@colyseus/monitor'
 import { RoomType } from '../types/Rooms'
 import roomRouter from './routes/room'
-
+import authRouter from './routes/auth'
+import { sequelize } from './DB/db'
+import { config } from './envconfig'
 // import socialRoutes from "@colyseus/social/express"
 
 import { SkyOffice } from './rooms/Momstown'
@@ -17,6 +19,8 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 // app.use(express.static('dist'))
+
+require('./models/index')
 
 const server = http.createServer(app)
 // const peerServer = ExpressPeerServer(server, {
@@ -47,5 +51,6 @@ gameServer.define(RoomType.CUSTOM, SkyOffice).enableRealtimeListing()
 // register colyseus monitor AFTER registering your room handlers
 app.use('/colyseus', monitor())
 app.use('/room', roomRouter)
+app.use('/auth', authRouter)
+
 gameServer.listen(port)
-console.log(`Listening on ws://localhost:${port}`)
