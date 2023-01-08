@@ -77,16 +77,13 @@ export const login = async (req, res) => {
 
       const refreshToken = 'refreshToken'
 
-      const cookieHeader = {
-        'Set-Cookie': [`refreshToken=${refreshToken}; Secure; HttpOnly;`],
-      }
       await User.update(
         {
           refreshToken: refreshToken,
         },
         { where: { email: email } }
-      ).catch((err) => console.log(err))
-
+      )
+      res.append('Set-Cookie', `refreshToken=${refreshToken}; Secure; HttpOnly;`)
       return res.status(200).json({
         status: 200,
         payload: {
