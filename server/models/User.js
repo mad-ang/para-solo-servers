@@ -11,7 +11,8 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true,
       },
       username: DataTypes.STRING(35),
-      email: DataTypes.STRING(35),
+      userId: DataTypes.STRING(35),
+      profileImgUrl: DataTypes.STRING(100),
       refreshToken: DataTypes.STRING(35),
       password: {
         type: DataTypes.STRING(80),
