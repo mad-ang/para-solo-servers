@@ -20,22 +20,27 @@ mysql.server start
 ```
 
 ```jsx
-// 유저생성 및 DB 권한 부여
-mysql -u root -p
+// 유저생성 및 DB 권한 부여, DB생성
+mysql -u root -p 
 
-create user 'rootroot'@'%' identified by 'root123';
+엔터
 
-grant all privileges on momstown.* to 'rootroot'@'%' with grant option; flush privileges;
+mysql> create user 'rootroot'@'%' identified by 'root123';
 
-flush privileges;
+mysql> grant all privileges on momstown.* to 'rootroot'@'%' with grant option; flush privileges;
+
+mysql> flush privileges;
+
+mysql> CREATE DATABASE momstown;
+
+exit
 ```
 
 ```bash
-// DB 생성
 cd server
- 
-mysql > CREATE DATABASE momstown
+
 sequelize db:migrate
+// 또는 npx sequelize db:migrate
 ```
 
 이렇게 나오면 성공!
