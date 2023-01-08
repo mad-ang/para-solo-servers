@@ -160,6 +160,9 @@ const isAuth = async (req, res, next) => {
 
 export const updateUser = async (req, res) => {
   const next = async (userData) => {
+    if (userData.password) {
+      userData.password = await hashPassword(userData)
+    }
     const user = await User.update(userData, { where: { userId: userData.userId } }).catch((err) =>
       console.log(err)
     )
