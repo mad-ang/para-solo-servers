@@ -12,6 +12,7 @@ module.exports = {
       },
       username: Sequelize.STRING(35),
       email: Sequelize.STRING(35),
+      refreshToken: Sequelize.STRING(35),
       password: {
         type: Sequelize.STRING(80),
         allowNull: false,
