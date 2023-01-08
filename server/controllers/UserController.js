@@ -177,7 +177,13 @@ export const updateUser = async (req, res) => {
     const user = await User.update(userData, { where: { userId: userData.userId } }).catch((err) =>
       console.log(err)
     )
-    res.status(200).send(user)
+    if (userData.password) {
+      delete userData.password
+    }
+    return res.status(200).json({
+      status: 200,
+      payload: userData,
+    })
   }
   isAuth(req, res, next.bind(null, req.body))
 }
