@@ -7,10 +7,9 @@ import { IRoomData } from '../../types/Rooms'
 import { whiteboardRoomIds } from './schema/TownState'
 import PlayerUpdateCommand from './commands/PlayerUpdateCommand'
 import PlayerUpdateNameCommand from './commands/PlayerUpdateNameCommand'
-import {ChairStatusUpdateCommand} from './commands/ChairStatusUpdateCommand'
+import { ChairStatusUpdateCommand } from './commands/ChairStatusUpdateCommand'
 import ChatMessageUpdateCommand from './commands/ChatMessageUpdateCommand'
 import { TableAddUserCommand, TableRemoveUserCommand } from './commands/TableUpdateArrayCommand'
-import { userDB } from '../DB/db'
 
 export class SkyOffice extends Room<TownState> {
   private dispatcher = new Dispatcher(this)
@@ -42,7 +41,7 @@ export class SkyOffice extends Room<TownState> {
     for (let i = 0; i < 16; i++) {
       this.state.chairs.set(String(i), new Chair())
     }
-    
+
     this.onMessage(Message.CONNECT_TO_TABLE, (client, message: { tableId: string }) => {
       this.dispatcher.dispatch(new TableAddUserCommand(), {
         client,
@@ -57,14 +56,17 @@ export class SkyOffice extends Room<TownState> {
       })
     })
     // dispatcher 로 관리해야함.
-    this.onMessage(Message.UPDATE_CHAIR_STATUS, (client, message: { tableId: string, chairId: string, status : boolean}) =>{
-      this.dispatcher.dispatch(new ChairStatusUpdateCommand(), {
-        client,
-        tableId: message.tableId,
-        chairId: message.chairId,
-        status: message.status
-      })
-    })
+    this.onMessage(
+      Message.UPDATE_CHAIR_STATUS,
+      (client, message: { tableId: string; chairId: string; status: boolean }) => {
+        this.dispatcher.dispatch(new ChairStatusUpdateCommand(), {
+          client,
+          tableId: message.tableId,
+          chairId: message.chairId,
+          status: message.status,
+        })
+      }
+    )
 
     this.onMessage(Message.STOP_TABLE_TALK, (client, message: { tableId: string }) => {
       const table = this.state.tables.get(message.tableId)
@@ -161,26 +163,11 @@ export class SkyOffice extends Room<TownState> {
   onJoin(client: Client, options: any) {
     this.state.players.set(client.sessionId, new Player())
     console.log('this.roomId', this.roomId)
-    const rooms = userDB.rooms
-    let currentRoomUserCnt = 1
-    if (!Object.hasOwnProperty.call(rooms, this.roomId)) {
-      userDB.rooms[this.roomId] = {
-        userCnt: 1,
-      }
-    } else {
-      const currentRoom = userDB.rooms[this.roomId]
-      ;(currentRoomUserCnt = currentRoom.userCnt + 1),
-        (userDB.rooms[this.roomId] = {
-          ...currentRoom,
-          userCnt: currentRoomUserCnt,
-        })
-    }
 
     client.send(Message.SEND_ROOM_DATA, {
       id: this.roomId,
       name: this.name,
       description: this.description,
-      userCnt: currentRoomUserCnt,
     })
   }
 
@@ -193,15 +180,6 @@ export class SkyOffice extends Room<TownState> {
         table.connectedUser.delete(client.sessionId)
       }
     })
-
-    const currentRoom = userDB.rooms[this.roomId]
-    userDB.rooms[this.roomId] = {
-      ...currentRoom,
-      userCnt: currentRoom.userCnt - 1,
-    }
-    if (currentRoom.userCnt === 0) {
-      delete userDB.rooms[this.roomId]
-    }
   }
 
   onDispose() {
