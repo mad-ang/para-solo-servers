@@ -51,7 +51,6 @@ gameServer.define(RoomType.CUSTOM, SkyOffice).enableRealtimeListing()
 
 // register colyseus monitor AFTER registering your room handlers
 app.use('/colyseus', monitor())
-app.use('/room', roomRouter)
 app.use('/auth', authRouter)
 
 connectDB()
