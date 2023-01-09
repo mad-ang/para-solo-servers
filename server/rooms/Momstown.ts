@@ -33,8 +33,8 @@ export class SkyOffice extends Room<TownState> {
 
     this.setState(new TownState())
     // hard coding for talbe.
-    for (let i = 0; i < 4; i++) {
-      this.state.tables.set(String(i), new Table())
+    for (let i = 0; i < 16; i++) {
+      this.state.chairs.set(String(i), new Chair())
     }
 
     // hard coding for chair.
