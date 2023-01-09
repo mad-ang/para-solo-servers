@@ -1,33 +1,5 @@
-// const bcrypt = require('bcrypt')
-
-// module.exports = (sequelize, DataTypes) => {
-//   const User = sequelize.define(
-//     'users',
-//     {
-//       id: {
-//         type: DataTypes.INTEGER(11),
-//         allowNull: false,
-//         autoIncrement: true,
-//         primaryKey: true,
-//       },
-//       username: DataTypes.STRING(35),
-//       userId: DataTypes.STRING(35),
-//       profileImgUrl: DataTypes.STRING(100),
-//       refreshToken: DataTypes.STRING(35),
-//       password: {
-//         type: DataTypes.STRING(80),
-//         allowNull: false,
-//       },
-//     },
-//     {
-//       timestamps: false,
-//     }
-//   )
-//   return User
-// }
-
 import { config } from '../envconfig'
-import { Schema, model } from 'mongoose'
+import { Schema, model, Document, Model } from 'mongoose'
 const bcrypt = require('bcrypt')
 const saltRounds = config.bcrypt.saltRounds
 
@@ -72,6 +44,9 @@ user.pre('save', function (next) {
   }
 })
 
-const User = model('User', user)
+const User = model<IUserDocument>('user', user)
 // create new User document
+
+export interface IUserDocument extends IUser, Document {}
+export interface IUserModel extends Model<IUserDocument> {}
 export default User
