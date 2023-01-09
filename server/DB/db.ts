@@ -21,7 +21,5 @@ export const createCollection = (modelName) => {
   switch (modelName) {
     case 'user':
       new User()
-    case 'chat':
-      new Chat()
   }
 }

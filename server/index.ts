@@ -12,7 +12,8 @@ import { config } from './envconfig'
 // import socialRoutes from "@colyseus/social/express"
 
 import { SkyOffice } from './rooms/Momstown'
-import { connectDB } from './DB/db'
+import { connectDB, createCollection } from './DB/db'
+const mongoose = require('mongoose')
 
 const port = Number(process.env.PORT || 2567)
 const app = express()
@@ -53,17 +54,20 @@ app.use('/colyseus', monitor())
 app.use('/auth', authRouter)
 app.use('/chat', chatRouter)
 
-const io = require('socket.io')(http)
-
+// const io = require('socket.io')(http)
+// io.on('connection', (socket) => {
+//   console.log('===socket', socket)
+//   socket.on('join', async (gameId) => {
+//     console.log('===gameId', gameId)
+//   })
+//   socket.on('message', (message) => {
+//     console.log('===message', message)
+//   })
+// })
 connectDB()
   .then((db) => {
     // console.log('init!', db)
     gameServer.listen(port)
-
-    io.on('connection', (socket) => {
-      socket.on('join', async (gameId) => {})
-      socket.on('message', (message) => {})
-    })
 
     console.log(`Listening on ws://localhost:${port}`)
   })
