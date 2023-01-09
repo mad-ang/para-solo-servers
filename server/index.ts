@@ -50,20 +50,10 @@ gameServer.define(RoomType.CUSTOM, SkyOffice).enableRealtimeListing()
 // app.use("/", socialRoutes);
 
 // register colyseus monitor AFTER registering your room handlers
-app.use('/colyseus', monitor())
+// app.use('/colyseus', monitor())
 app.use('/auth', authRouter)
 app.use('/chat', chatRouter)
 
-// const io = require('socket.io')(http)
-// io.on('connection', (socket) => {
-//   console.log('===socket', socket)
-//   socket.on('join', async (gameId) => {
-//     console.log('===gameId', gameId)
-//   })
-//   socket.on('message', (message) => {
-//     console.log('===message', message)
-//   })
-// })
 connectDB()
   .then((db) => {
     // console.log('init!', db)
@@ -72,3 +62,22 @@ connectDB()
     console.log(`Listening on ws://localhost:${port}`)
   })
   .catch(console.error)
+
+const socketServer = http.createServer(app)
+const io = require('socket.io')(socketServer, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+  },
+})
+io.on('connection', (socket) => {
+  console.log(111111)
+  socket.on('join', async (gameId) => {
+    console.log(222222)
+  })
+  socket.on('message', (message) => {
+    console.log(333333)
+  })
+})
+
+socketServer.listen(5002, () => console.log(`server is running on ${5002}`))
