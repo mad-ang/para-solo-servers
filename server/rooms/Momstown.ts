@@ -39,13 +39,9 @@ export class SkyOffice extends Room<TownState> {
     }
 
     // hard coding for chair.
-    let j = 0;
-    this.state.tables.forEach((table) => {
-      j++;
-      for (let i = 0; i < 4; i++) {
-        const chair = this.state.chairs.set(String(i * j), new Chair())
-      }
-    })
+    for (let i = 0; i < 16; i++) {
+      this.state.chairs.set(String(i), new Chair())
+    }
     
     this.onMessage(Message.CONNECT_TO_TABLE, (client, message: { tableId: string }) => {
       this.dispatcher.dispatch(new TableAddUserCommand(), {
