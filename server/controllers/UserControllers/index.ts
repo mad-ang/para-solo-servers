@@ -24,7 +24,7 @@ async function hashPassword(user: IUser) {
 
 export const signUp = async (req: Request, res: Response) => {
   try {
-    const user = new User(req.body)
+    const user = req.body
 
     if (!user.userId) {
       return res.status(400).json({
@@ -48,16 +48,19 @@ export const signUp = async (req: Request, res: Response) => {
     }
 
     user.createdAt = new Date()
-    user.refreshToken = null
-    // TODO: 삭제:
-    user.save((err, user) => {
-      if (err) return res.json({ success: false, message: err.message })
-      return res.status(200).json({
-        status: 200,
-        payload: {
-          userId: user.userId,
-        },
-      })
+    user.password = await hashPassword(user)
+    const result = await User.collection.insertOne({
+      userId: user.userId,
+      password: user.password,
+    })
+    if (!result) {
+      return res.json({ success: false, message: err.message })
+    }
+    return res.status(200).json({
+      status: 200,
+      payload: {
+        userId: user.userId,
+      },
     })
   } catch (error) {
     return res.status(500).json({

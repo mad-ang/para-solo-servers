@@ -6,6 +6,7 @@ import { Server, LobbyRoom } from 'colyseus'
 import { monitor } from '@colyseus/monitor'
 import { RoomType } from '../types/Rooms'
 import authRouter from './routes/auth'
+import chatRouter from './routes/chat'
 // import { sequelize } from './DB/db'
 import { config } from './envconfig'
 // import socialRoutes from "@colyseus/social/express"
@@ -21,7 +22,6 @@ app.use(express.json())
 // app.use(express.static('dist'))
 
 // require('./models/index')
-
 const server = http.createServer(app)
 // const peerServer = ExpressPeerServer(server, {
 //   path : '/peerServer'
@@ -51,14 +51,20 @@ gameServer.define(RoomType.CUSTOM, SkyOffice).enableRealtimeListing()
 // register colyseus monitor AFTER registering your room handlers
 app.use('/colyseus', monitor())
 app.use('/auth', authRouter)
+app.use('/chat', chatRouter)
+
+const io = require('socket.io')(http)
 
 connectDB()
   .then((db) => {
     // console.log('init!', db)
     gameServer.listen(port)
-    // db.collection('users').insertOne({ 이름: 'John', _id: 100 }, function (에러, 결과) {
-    //   console.log('저장완료')
-    // })
+
+    io.on('connection', (socket) => {
+      socket.on('join', async (gameId) => {})
+      socket.on('message', (message) => {})
+    })
+
     console.log(`Listening on ws://localhost:${port}`)
   })
   .catch(console.error)
