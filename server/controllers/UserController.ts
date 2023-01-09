@@ -1,9 +1,8 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const db = require('../models')
 import { config } from '../envconfig'
 const AUTH_ERROR = { message: '사용자 인증 오류' }
-const User = db.users
+import User from '../models/user'
 
 async function hashPassword(user) {
   const password = user.password
@@ -21,28 +20,22 @@ async function hashPassword(user) {
 
 export const signUp = async (req, res) => {
   try {
-    if (!req.body.userId) {
+    const user = new User(req.body)
+
+    if (!user.userId) {
       return res.status(400).json({
         status: 400,
         message: '사용하실 아이디를 입력해주세요.',
       })
     }
-    if (!req.body.password) {
+    if (!user.password) {
       return res.status(400).json({
         status: 400,
         message: '사용하실 비밀번호를 입력해주세요.',
       })
     }
 
-    const userInfo = {
-      username: req.body.username,
-      userId: req.body.userId,
-      password: req.body.password,
-    }
-
-    let foundUser = await User.findOne({ where: { userId: userInfo.userId } }).catch((err) =>
-      console.log(err)
-    )
+    const foundUser = await User.findOne({ userId: user.userId })
     if (foundUser) {
       return res.status(409).json({
         status: 409,
@@ -50,15 +43,17 @@ export const signUp = async (req, res) => {
       })
     }
 
-    userInfo.password = await hashPassword(userInfo)
-
-    const user = await User.create(userInfo).catch((err) => console.log(err))
-    return res.status(200).json({
-      status: 200,
-      payload: {
-        username: user.username,
-        userId: user.userId,
-      },
+    user.createdAt = new Date().toISOString()
+    user.refreshToken = null
+    // TODO: 삭제:
+    user.save((err, user) => {
+      if (err) return res.json({ success: false, message: err.message })
+      return res.status(200).json({
+        status: 200,
+        payload: {
+          userId: user.userId,
+        },
+      })
     })
   } catch (error) {
     return res.status(500).json({
@@ -85,9 +80,7 @@ export const login = async (req, res) => {
     }
     const { userId, password } = req.body
 
-    let foundUser = await User.findOne({ where: { userId: userId } }).catch((err) =>
-      console.log(err)
-    )
+    const foundUser = await User.findOne({ userId: userId })
     if (!foundUser) {
       return res.status(400).json({
         status: 400,
@@ -99,8 +92,8 @@ export const login = async (req, res) => {
     if (isPasswordCorrect) {
       const accessToken = jwt.sign(
         {
-          username: foundUser.username,
           userId: foundUser.userId,
+          username: foundUser.username,
         },
         config.jwt.secretKey
         // {
@@ -109,13 +102,16 @@ export const login = async (req, res) => {
       )
 
       const refreshToken = 'refreshToken'
-
-      await User.update(
+      await User.updateOne(
+        { userId: foundUser.userId },
         {
-          refreshToken: refreshToken,
-        },
-        { where: { userId: userId } }
+          $set: {
+            refreshToken: 'refreshToken',
+            lastUpdated: new Date().toISOString(),
+          },
+        }
       )
+
       res.append('Set-Cookie', `refreshToken=${refreshToken}; Secure; HttpOnly;`)
       return res.status(200).json({
         status: 200,
@@ -138,8 +134,8 @@ export const login = async (req, res) => {
   }
 }
 export const getAllUsers = async (req, res) => {
-  let users = await User.findAll({}).catch((err) => console.log(err))
-  res.status(200).send(users)
+  // let users = await User.findAll({}).catch((err) => console.log(err))
+  // res.status(200).send(users)
 }
 
 export const getUser = async (req, res) => {
@@ -148,48 +144,53 @@ export const getUser = async (req, res) => {
   res.status(200).send(user)
 }
 
-const isAuth = async (req, res, next) => {
+const isAuth = async (req, res) => {
   const authHeader = req.get('Authorization')
   if (!(authHeader && authHeader?.startsWith('Bearer '))) {
-    return res.status(401).json(AUTH_ERROR)
+    return false
   }
 
   const token = authHeader.split(' ')[1]
   // 사용자가 주장하는 본인의 토큰 -> id, isAdmin값이 진실인지 아직 모름(위조되었을 수도?)
 
-  jwt.verify(token, config.jwt.secretKey, async (error, decoded) => {
+  return jwt.verify(token, config.jwt.secretKey, async (error, decoded) => {
     // secretKey로 디코딩 및 검증
-    if (error) {
-      return res.status(401).json(AUTH_ERROR)
-    }
-
-    // (권한 관련 기능 사용하려고 할 때 )이 사용자의 isAdmin이 우리 DB의 정보와 매칭되는지도 추가로 매칭 확인)
-
-    next()
+    if (error) return false
+    return decoded
   })
 }
 
 export const updateUser = async (req, res) => {
-  const next = async (userData) => {
-    if (userData.password) {
-      userData.password = await hashPassword(userData)
-    }
-    const user = await User.update(userData, { where: { userId: userData.userId } }).catch((err) =>
-      console.log(err)
-    )
-    if (userData.password) {
-      delete userData.password
-    }
-    return res.status(200).json({
-      status: 200,
-      payload: userData,
-    })
+  const decoded = await isAuth(req, res)
+  if (!decoded) return res.status(401).json(AUTH_ERROR)
+
+  const previousUserId = decoded.userId
+
+  const newUserData = req.body
+  console.log(11111, newUserData)
+  if (newUserData.password) {
+    newUserData.password = await hashPassword(newUserData)
   }
-  isAuth(req, res, next.bind(null, req.body))
+  newUserData.lastUpdated = new Date().toISOString()
+  console.log(22222, newUserData)
+  await User.updateOne(
+    { userId: previousUserId },
+    {
+      $set: newUserData,
+    }
+  )
+
+  if (newUserData.password) {
+    delete newUserData.password
+  }
+  return res.status(200).json({
+    status: 200,
+    payload: newUserData,
+  })
 }
 
 export const deleteUser = async (req, res) => {
-  let id = req.params.id
-  await User.destroy({ where: { id: id } }).catch((err) => console.log(err))
-  res.status(200).send('User is deleted')
+  // let id = req.params.id
+  // await User.destroy({ where: { id: id } }).catch((err) => console.log(err))
+  // res.status(200).send('User is deleted')
 }
