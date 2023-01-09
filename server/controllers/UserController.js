@@ -1,9 +1,21 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const db = require('../models')
+// const db = require('../models')
 import { config } from '../envconfig'
 const AUTH_ERROR = { message: '사용자 인증 오류' }
-const User = db.users
+// const User = db.users
+
+import User from '../models/user'
+import { config } from '../envconfig'
+
+export const createUser = (req, res) => {
+  const user = new User(req.body)
+
+  user.save((err, userInfo) => {
+    if (err) return res.json({ success: false, err })
+    return res.status(200).json({ success: true })
+  })
+}
 
 async function hashPassword(user) {
   const password = user.password

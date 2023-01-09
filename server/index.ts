@@ -7,11 +7,12 @@ import { monitor } from '@colyseus/monitor'
 import { RoomType } from '../types/Rooms'
 import roomRouter from './routes/room'
 import authRouter from './routes/auth'
-import { sequelize } from './DB/db'
+// import { sequelize } from './DB/db'
 import { config } from './envconfig'
 // import socialRoutes from "@colyseus/social/express"
 
 import { SkyOffice } from './rooms/Momstown'
+import { connectDB } from './DB/db'
 
 const port = Number(process.env.PORT || 2567)
 const app = express()
@@ -20,7 +21,7 @@ app.use(cors())
 app.use(express.json())
 // app.use(express.static('dist'))
 
-require('./models/index')
+// require('./models/index')
 
 const server = http.createServer(app)
 // const peerServer = ExpressPeerServer(server, {
@@ -53,4 +54,14 @@ app.use('/colyseus', monitor())
 app.use('/room', roomRouter)
 app.use('/auth', authRouter)
 
-gameServer.listen(port)
+connectDB()
+  .then((db) => {
+    console.log('init!', db)
+    gameServer.listen(port)
+    // db.collection('users').insertOne({ 이름: 'John', _id: 100 }, function (에러, 결과) {
+    //   console.log('저장완료')
+    // })
+
+    console.log(`Listening on ws://localhost:${port}`)
+  })
+  .catch(console.error)
