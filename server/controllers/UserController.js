@@ -59,7 +59,7 @@ export const signUp = async (req, res) => {
       })
     }
 
-    user.password = await hashPassword(user)
+    user.createdAt = new Date().toISOString()
 
     user.save((err, user) => {
       if (err) return res.json({ success: false, err })
@@ -185,6 +185,8 @@ export const updateUser = async (req, res) => {
     if (userData.password) {
       userData.password = await hashPassword(userData)
     }
+    user.updatedAt = new Date().toISOString()
+
     const user = await User.update(userData, { where: { userId: userData.userId } }).catch((err) =>
       console.log(err)
     )
