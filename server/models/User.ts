@@ -47,8 +47,8 @@ const user = new Schema<IUser>({
   username: { type: String, required: false },
   profileImgUrl: { type: String, required: false },
   refreshToken: { type: String, required: false },
-  createdAt: { type: String, required: false },
-  lastUpdated: { type: String, required: false },
+  createdAt: { type: Date, required: false },
+  lastUpdated: { type: Date, required: false },
 })
 
 user.pre('save', function (next) {

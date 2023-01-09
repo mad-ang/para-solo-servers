@@ -31,7 +31,8 @@ export const signUp = async (req, res) => {
     }
 
     user.createdAt = new Date().toISOString()
-
+    user.refreshToken = null
+    // TODO: 삭제:
     user.save((err, user) => {
       if (err) return res.json({ success: false, message: err.message })
       return res.status(200).json({
@@ -88,16 +89,12 @@ export const login = async (req, res) => {
       )
 
       const refreshToken = 'refreshToken'
-      User.updateOne(
+      await User.updateOne(
         { userId: foundUser.userId },
         {
-          $currentDate: {
-            lastModified: true,
-            'cancellation.date': { $type: 'timestamp' },
-          },
           $set: {
-            'cancellation.reason': 'login',
             refreshToken: 'refreshToken',
+            lastUpdated: new Date().toISOString(),
           },
         }
       )
@@ -156,23 +153,23 @@ const isAuth = async (req, res, next) => {
 }
 
 export const updateUser = async (req, res) => {
-  // const next = async (userData) => {
-  //   if (userData.password) {
-  //     userData.password = await hashPassword(userData)
-  //   }
-  //   user.lastUpdated = new Date().toISOString()
-  //   const user = await User.update(userData, { where: { userId: userData.userId } }).catch((err) =>
-  //     console.log(err)
-  //   )
-  //   if (userData.password) {
-  //     delete userData.password
-  //   }
-  //   return res.status(200).json({
-  //     status: 200,
-  //     payload: userData,
-  //   })
-  // }
-  // isAuth(req, res, next.bind(null, req.body))
+  const next = async (userData) => {
+    if (userData.password) {
+      userData.password = await hashPassword(userData)
+    }
+    user.lastUpdated = new Date().toISOString()
+    const user = await User.update(userData, { where: { userId: userData.userId } }).catch((err) =>
+      console.log(err)
+    )
+    if (userData.password) {
+      delete userData.password
+    }
+    return res.status(200).json({
+      status: 200,
+      payload: userData,
+    })
+  }
+  isAuth(req, res, next.bind(null, req.body))
 }
 
 export const deleteUser = async (req, res) => {
