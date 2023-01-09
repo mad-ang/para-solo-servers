@@ -78,8 +78,8 @@ export const login = async (req, res) => {
     if (isPasswordCorrect) {
       const accessToken = jwt.sign(
         {
-          username: foundUser.username,
           userId: foundUser.userId,
+          username: foundUser.username,
         },
         config.jwt.secretKey
         // {
@@ -88,13 +88,20 @@ export const login = async (req, res) => {
       )
 
       const refreshToken = 'refreshToken'
-
-      await User.updateOne(
+      User.updateOne(
+        { userId: foundUser.userId },
         {
-          refreshToken: refreshToken,
-        },
-        { where: { userId: userId } }
+          $currentDate: {
+            lastModified: true,
+            'cancellation.date': { $type: 'timestamp' },
+          },
+          $set: {
+            'cancellation.reason': 'login',
+            refreshToken: 'refreshToken',
+          },
+        }
       )
+
       res.append('Set-Cookie', `refreshToken=${refreshToken}; Secure; HttpOnly;`)
       return res.status(200).json({
         status: 200,
@@ -153,7 +160,7 @@ export const updateUser = async (req, res) => {
   //   if (userData.password) {
   //     userData.password = await hashPassword(userData)
   //   }
-  //   user.updatedAt = new Date().toISOString()
+  //   user.lastUpdated = new Date().toISOString()
   //   const user = await User.update(userData, { where: { userId: userData.userId } }).catch((err) =>
   //     console.log(err)
   //   )

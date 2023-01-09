@@ -38,7 +38,7 @@ interface IUser {
   profileImgUrl?: string | null
   refreshToken?: string | null
   createdAt: string | null
-  updatedAt: string | null
+  lastUpdated: string | null
 }
 
 const user = new Schema<IUser>({
@@ -48,7 +48,7 @@ const user = new Schema<IUser>({
   profileImgUrl: { type: String, required: false },
   refreshToken: { type: String, required: false },
   createdAt: { type: String, required: false },
-  updatedAt: { type: String, required: false },
+  lastUpdated: { type: String, required: false },
 })
 
 user.pre('save', function (next) {
