@@ -24,7 +24,7 @@ async function hashPassword(user: IUser) {
 
 export const signUp = async (req: Request, res: Response) => {
   try {
-    const user = new User(req.body)
+    const user = req.body
 
     if (!user.userId) {
       return res.status(400).json({
@@ -47,17 +47,20 @@ export const signUp = async (req: Request, res: Response) => {
       })
     }
 
-    user.createdAt = new Date()
-    user.refreshToken = null
-    // TODO: 삭제:
-    user.save((err, user) => {
-      if (err) return res.json({ success: false, message: err.message })
-      return res.status(200).json({
-        status: 200,
-        payload: {
-          userId: user.userId,
-        },
-      })
+    user.password = await hashPassword(user)
+    const result = await User.collection.insertOne({
+      userId: user.userId,
+      password: user.password,
+      createdAt: new Date(),
+    })
+    if (!result) {
+      return res.json({ success: false, message: "회원가입 실패" })
+    }
+    return res.status(200).json({
+      status: 200,
+      payload: {
+        userId: user.userId,
+      },
     })
   } catch (error) {
     return res.status(500).json({
@@ -106,7 +109,7 @@ export const login = async (req: Request, res: Response) => {
       )
 
       const refreshToken = 'refreshToken'
-      await User.updateOne(
+      await User.collection.updateOne(
         { userId: foundUser.userId },
         {
           $set: {
@@ -177,7 +180,7 @@ export const updateUser = async (req: Request, res: Response) => {
   }
   newUserData.lastUpdated = new Date()
 
-  await User.updateOne(
+  await User.collection.updateOne(
     { userId: previousUserId },
     {
       $set: newUserData,
