@@ -1,35 +1,8 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-// const db = require('../models')
 import { config } from '../envconfig'
 const AUTH_ERROR = { message: '사용자 인증 오류' }
-// const User = db.users
-
 import User from '../models/user'
-import { config } from '../envconfig'
-
-// export const createUser = (req, res) => {
-//   const user = new User(req.body)
-
-//   user.save((err, userInfo) => {
-//     if (err) return res.json({ success: false, err })
-//     return res.status(200).json({ success: true })
-//   })
-// }
-
-async function hashPassword(user) {
-  const password = user.password
-  const saltRounds = config.bcrypt.saltRounds
-
-  const hashedPassword = await new Promise((resolve, reject) => {
-    bcrypt.hash(password, saltRounds, function (err, hash) {
-      if (err) reject(err)
-      resolve(hash)
-    })
-  })
-
-  return hashedPassword
-}
 
 export const signUp = async (req, res) => {
   try {
@@ -49,9 +22,7 @@ export const signUp = async (req, res) => {
       })
     }
 
-    let foundUser = await User.findOne({ where: { userId: user.userId } }).catch((err) =>
-      console.log(err)
-    )
+    const foundUser = await User.findOne({ userId: user.userId })
     if (foundUser) {
       return res.status(409).json({
         status: 409,
@@ -62,11 +33,10 @@ export const signUp = async (req, res) => {
     user.createdAt = new Date().toISOString()
 
     user.save((err, user) => {
-      if (err) return res.json({ success: false, err })
+      if (err) return res.json({ success: false, message: err.message })
       return res.status(200).json({
         status: 200,
         payload: {
-          username: user.username,
           userId: user.userId,
         },
       })
@@ -96,9 +66,7 @@ export const login = async (req, res) => {
     }
     const { userId, password } = req.body
 
-    let foundUser = await User.findOne({ where: { userId: userId } }).catch((err) =>
-      console.log(err)
-    )
+    const foundUser = await User.findOne({ userId: userId })
     if (!foundUser) {
       return res.status(400).json({
         status: 400,
@@ -121,7 +89,7 @@ export const login = async (req, res) => {
 
       const refreshToken = 'refreshToken'
 
-      await User.update(
+      await User.updateOne(
         {
           refreshToken: refreshToken,
         },
@@ -149,8 +117,8 @@ export const login = async (req, res) => {
   }
 }
 export const getAllUsers = async (req, res) => {
-  let users = await User.findAll({}).catch((err) => console.log(err))
-  res.status(200).send(users)
+  // let users = await User.findAll({}).catch((err) => console.log(err))
+  // res.status(200).send(users)
 }
 
 export const getUser = async (req, res) => {
@@ -181,28 +149,27 @@ const isAuth = async (req, res, next) => {
 }
 
 export const updateUser = async (req, res) => {
-  const next = async (userData) => {
-    if (userData.password) {
-      userData.password = await hashPassword(userData)
-    }
-    user.updatedAt = new Date().toISOString()
-
-    const user = await User.update(userData, { where: { userId: userData.userId } }).catch((err) =>
-      console.log(err)
-    )
-    if (userData.password) {
-      delete userData.password
-    }
-    return res.status(200).json({
-      status: 200,
-      payload: userData,
-    })
-  }
-  isAuth(req, res, next.bind(null, req.body))
+  // const next = async (userData) => {
+  //   if (userData.password) {
+  //     userData.password = await hashPassword(userData)
+  //   }
+  //   user.updatedAt = new Date().toISOString()
+  //   const user = await User.update(userData, { where: { userId: userData.userId } }).catch((err) =>
+  //     console.log(err)
+  //   )
+  //   if (userData.password) {
+  //     delete userData.password
+  //   }
+  //   return res.status(200).json({
+  //     status: 200,
+  //     payload: userData,
+  //   })
+  // }
+  // isAuth(req, res, next.bind(null, req.body))
 }
 
 export const deleteUser = async (req, res) => {
-  let id = req.params.id
-  await User.destroy({ where: { id: id } }).catch((err) => console.log(err))
-  res.status(200).send('User is deleted')
+  // let id = req.params.id
+  // await User.destroy({ where: { id: id } }).catch((err) => console.log(err))
+  // res.status(200).send('User is deleted')
 }
