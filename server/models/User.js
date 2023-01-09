@@ -35,6 +35,10 @@ const saltRounds = config.bcrypt.saltRounds
 const user = new mongoose.Schema({
   userId: String,
   password: String,
+  username: String,
+  profileImgUrl: String,
+  refreshToken: String,
+
 })
 
 // user.pre('save', function (next) {
