@@ -56,12 +56,11 @@ app.use('/auth', authRouter)
 
 connectDB()
   .then((db) => {
-    console.log('init!', db)
+    // console.log('init!', db)
     gameServer.listen(port)
     // db.collection('users').insertOne({ 이름: 'John', _id: 100 }, function (에러, 결과) {
     //   console.log('저장완료')
     // })
-
     console.log(`Listening on ws://localhost:${port}`)
   })
   .catch(console.error)

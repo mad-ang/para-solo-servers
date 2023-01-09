@@ -8,14 +8,14 @@ const AUTH_ERROR = { message: '사용자 인증 오류' }
 import User from '../models/user'
 import { config } from '../envconfig'
 
-export const createUser = (req, res) => {
-  const user = new User(req.body)
+// export const createUser = (req, res) => {
+//   const user = new User(req.body)
 
-  user.save((err, userInfo) => {
-    if (err) return res.json({ success: false, err })
-    return res.status(200).json({ success: true })
-  })
-}
+//   user.save((err, userInfo) => {
+//     if (err) return res.json({ success: false, err })
+//     return res.status(200).json({ success: true })
+//   })
+// }
 
 async function hashPassword(user) {
   const password = user.password
@@ -33,26 +33,23 @@ async function hashPassword(user) {
 
 export const signUp = async (req, res) => {
   try {
-    if (!req.body.userId) {
+    console.log('req.body', req.body)
+    const user = new User(req.body)
+
+    if (!user.userId) {
       return res.status(400).json({
         status: 400,
         message: '사용하실 아이디를 입력해주세요.',
       })
     }
-    if (!req.body.password) {
+    if (!user.password) {
       return res.status(400).json({
         status: 400,
         message: '사용하실 비밀번호를 입력해주세요.',
       })
     }
 
-    const userInfo = {
-      username: req.body.username,
-      userId: req.body.userId,
-      password: req.body.password,
-    }
-
-    let foundUser = await User.findOne({ where: { userId: userInfo.userId } }).catch((err) =>
+    let foundUser = await User.findOne({ where: { userId: user.userId } }).catch((err) =>
       console.log(err)
     )
     if (foundUser) {
@@ -62,15 +59,17 @@ export const signUp = async (req, res) => {
       })
     }
 
-    userInfo.password = await hashPassword(userInfo)
+    user.password = await hashPassword(user)
 
-    const user = await User.create(userInfo).catch((err) => console.log(err))
-    return res.status(200).json({
-      status: 200,
-      payload: {
-        username: user.username,
-        userId: user.userId,
-      },
+    user.save((err, user) => {
+      if (err) return res.json({ success: false, err })
+      return res.status(200).json({
+        status: 200,
+        payload: {
+          username: user.username,
+          userId: user.userId,
+        },
+      })
     })
   } catch (error) {
     return res.status(500).json({
