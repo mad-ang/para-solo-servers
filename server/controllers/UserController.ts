@@ -4,9 +4,22 @@ import { config } from '../envconfig'
 const AUTH_ERROR = { message: '사용자 인증 오류' }
 import User from '../models/user'
 
+async function hashPassword(user) {
+  const password = user.password
+  const saltRounds = config.bcrypt.saltRounds
+
+  const hashedPassword = await new Promise((resolve, reject) => {
+    bcrypt.hash(password, saltRounds, function (err, hash) {
+      if (err) reject(err)
+      resolve(hash)
+    })
+  })
+
+  return hashedPassword
+}
+
 export const signUp = async (req, res) => {
   try {
-    console.log('req.body', req.body)
     const user = new User(req.body)
 
     if (!user.userId) {
@@ -131,45 +144,49 @@ export const getUser = async (req, res) => {
   res.status(200).send(user)
 }
 
-const isAuth = async (req, res, next) => {
+const isAuth = async (req, res) => {
   const authHeader = req.get('Authorization')
   if (!(authHeader && authHeader?.startsWith('Bearer '))) {
-    return res.status(401).json(AUTH_ERROR)
+    return false
   }
 
   const token = authHeader.split(' ')[1]
   // 사용자가 주장하는 본인의 토큰 -> id, isAdmin값이 진실인지 아직 모름(위조되었을 수도?)
 
-  jwt.verify(token, config.jwt.secretKey, async (error, decoded) => {
+  return jwt.verify(token, config.jwt.secretKey, async (error, decoded) => {
     // secretKey로 디코딩 및 검증
-    if (error) {
-      return res.status(401).json(AUTH_ERROR)
-    }
-
-    // (권한 관련 기능 사용하려고 할 때 )이 사용자의 isAdmin이 우리 DB의 정보와 매칭되는지도 추가로 매칭 확인)
-
-    next()
+    if (error) return false
+    return decoded
   })
 }
 
 export const updateUser = async (req, res) => {
-  const next = async (userData) => {
-    if (userData.password) {
-      userData.password = await hashPassword(userData)
-    }
-    user.lastUpdated = new Date().toISOString()
-    const user = await User.update(userData, { where: { userId: userData.userId } }).catch((err) =>
-      console.log(err)
-    )
-    if (userData.password) {
-      delete userData.password
-    }
-    return res.status(200).json({
-      status: 200,
-      payload: userData,
-    })
+  const decoded = await isAuth(req, res)
+  if (!decoded) return res.status(401).json(AUTH_ERROR)
+
+  const previousUserId = decoded.userId
+
+  const newUserData = req.body
+  console.log(11111, newUserData)
+  if (newUserData.password) {
+    newUserData.password = await hashPassword(newUserData)
   }
-  isAuth(req, res, next.bind(null, req.body))
+  newUserData.lastUpdated = new Date().toISOString()
+  console.log(22222, newUserData)
+  await User.updateOne(
+    { userId: previousUserId },
+    {
+      $set: newUserData,
+    }
+  )
+
+  if (newUserData.password) {
+    delete newUserData.password
+  }
+  return res.status(200).json({
+    status: 200,
+    payload: newUserData,
+  })
 }
 
 export const deleteUser = async (req, res) => {
