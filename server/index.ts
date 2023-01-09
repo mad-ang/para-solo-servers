@@ -1,12 +1,13 @@
 import http from 'http'
 import express from 'express'
-import { ExpressPeerServer, PeerServer } from 'peer'
 import cors from 'cors'
 import { Server, LobbyRoom } from 'colyseus'
 import { monitor } from '@colyseus/monitor'
 import { RoomType } from '../types/Rooms'
 import roomRouter from './routes/room'
 import authRouter from './routes/auth'
+import dmrouter from './routes/dm'
+import io from 'socket.io'
 import { sequelize } from './DB/db'
 import { config } from './envconfig'
 // import socialRoutes from "@colyseus/social/express"
@@ -30,6 +31,7 @@ const gameServer = new Server({
   server,
 })
 
+
 // register room handlers
 gameServer.define(RoomType.LOBBY, LobbyRoom)
 gameServer.define(RoomType.PUBLIC, SkyOffice, {
@@ -38,7 +40,7 @@ gameServer.define(RoomType.PUBLIC, SkyOffice, {
   password: null,
   autoDispose: false,
 })
-gameServer.define(RoomType.CUSTOM, SkyOffice).enableRealtimeListing()
+// gameServer.define(RoomType.CUSTOM, NewTown).enableRealtimeListing()
 
 /**
  * Register @colyseus/social routes
@@ -52,5 +54,6 @@ gameServer.define(RoomType.CUSTOM, SkyOffice).enableRealtimeListing()
 app.use('/colyseus', monitor())
 app.use('/room', roomRouter)
 app.use('/auth', authRouter)
+app.use('/dm', dmrouter)
 
 gameServer.listen(port)

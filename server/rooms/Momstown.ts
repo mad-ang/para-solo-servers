@@ -4,7 +4,6 @@ import { Dispatcher } from '@colyseus/command'
 import { Player, TownState, Table, Chair } from './schema/TownState'
 import { Message } from '../../types/Messages'
 import { IRoomData } from '../../types/Rooms'
-import { whiteboardRoomIds } from './schema/TownState'
 import PlayerUpdateCommand from './commands/PlayerUpdateCommand'
 import PlayerUpdateNameCommand from './commands/PlayerUpdateNameCommand'
 import {ChairStatusUpdateCommand} from './commands/ChairStatusUpdateCommand'
@@ -39,14 +38,10 @@ export class SkyOffice extends Room<TownState> {
     }
 
     // hard coding for chair.
-    let j = 0;
-    this.state.tables.forEach((table) => {
-      j++;
-      for (let i = 0; i < 4; i++) {
-        const chair = this.state.chairs.set(String(i * j), new Chair())
-      }
-    })
-    
+    for (let i = 0; i < 16; i++){
+      this.state.chairs.set(String(i), new Chair())
+    }
+
     this.onMessage(Message.CONNECT_TO_TABLE, (client, message: { tableId: string }) => {
       this.dispatcher.dispatch(new TableAddUserCommand(), {
         client,

@@ -22,6 +22,14 @@ export interface IChatMessage extends Schema {
   content: string
 }
 
+export interface IDirectMessage extends Schema {
+  roomId: string
+  sender: string
+  receiver: string
+  time: number
+  content: string
+}
+
 export interface ITownState extends Schema {
   players: MapSchema<IPlayer>
   chatMessages: ArraySchema<IChatMessage>
