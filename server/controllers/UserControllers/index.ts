@@ -213,6 +213,10 @@ export const inquireUser = async (req: Request, res: Response) => {
       }
     })
   }
+  return res.status(400).json({
+    status: 400,
+    message: '조회에 실패했습니다.',
+  })
 }
 
 //Find user in database and return user information
