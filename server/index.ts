@@ -16,6 +16,7 @@ import { connectDB, createCollection } from './DB/db'
 const mongoose = require('mongoose')
 
 const port = Number(process.env.PORT || 2567)
+const socketPort = Number(process.env.SOCKET_PORT || 5002)
 const app = express()
 
 app.use(cors())
@@ -90,4 +91,4 @@ io.of('/chat-id').on('connection', (socket) => {
   })
 })
 
-socketServer.listen(5002, () => console.log(`server is running on ${5002}`))
+socketServer.listen(socketPort, () => console.log(`socketServer is running on ${socketPort}`))
