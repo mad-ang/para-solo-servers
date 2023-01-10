@@ -1,3 +1,6 @@
 export interface IChat {
-  from: string
+  senderId: string
+  receiverId: string
+  content?: string
+  createdAt: Date | null
 }
