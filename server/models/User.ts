@@ -10,7 +10,7 @@ const user = new Schema<IUser>({
   username: { type: String, required: false },
   profileImgUrl: { type: String, required: false },
   refreshToken: { type: String, required: false },
-  createdAt: { type: Date, required: false },
+  createdAt: { type: Date, default: Date.now, required: false },
   lastUpdated: { type: Date, required: false },
 })
 

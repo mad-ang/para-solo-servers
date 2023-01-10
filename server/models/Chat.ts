@@ -3,7 +3,10 @@ import { Schema, model, Document, Model } from 'mongoose'
 import { IChat } from '../controllers/ChatControllers/types'
 
 const chat = new Schema<IChat>({
-  from: String,
+  senderId: { type: String, required: true },
+  receiverId: { type: String, required: true },
+  content: { type: String, required: false },
+  createdAt: { type: Date, default: Date.now, required: false },
 })
 
 const Chat = model<IChatDocument>('chat', chat)
