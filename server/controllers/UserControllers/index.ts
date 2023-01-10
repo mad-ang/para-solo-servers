@@ -140,16 +140,7 @@ export const login = async (req: Request, res: Response) => {
     });
   }
 };
-export const getAllUsers = async (req: Request, res: Response) => {
-  // let users = await User.findAll({}).catch((err) => console.log(err))
-  // res.status(200).send(users)
-};
 
-export const getUser = async (req: Request, res: Response) => {
-  let id = req.params.id;
-  let user = await User.findOne({ where: { id: id } }).catch((err) => console.log(err));
-  res.status(200).send(user);
-};
 
 const isAuth = async (req: Request, res: Response) => {
   const authHeader = req.get('Authorization');
@@ -168,72 +159,105 @@ const isAuth = async (req: Request, res: Response) => {
 };
 
 export const updateUser = async (req: Request, res: Response) => {
-  const decoded = await isAuth(req, res);
-  if (!decoded) return res.status(401).json(AUTH_ERROR);
+  try {
+    const decoded = await isAuth(req, res);
+    if (!decoded) return res.status(401).json(AUTH_ERROR);
 
-  const previousUserId = decoded.userId;
+    const previousUserId = decoded.userId;
 
-  const newUserData = req.body;
+    const newUserData = req.body;
 
-  if (newUserData.password) {
-    newUserData.password = await hashPassword(newUserData);
-  }
-  newUserData.lastUpdated = new Date();
-
-  await User.collection.updateOne(
-    { userId: previousUserId },
-    {
-      $set: newUserData,
+    if (newUserData.password) {
+      newUserData.password = await hashPassword(newUserData);
     }
-  );
+    newUserData.lastUpdated = new Date();
 
-  if (newUserData.password) {
-    delete newUserData.password;
+    User.collection
+      .updateOne(
+        { userId: previousUserId },
+        {
+          $set: newUserData,
+        }
+      )
+      .then(() => {
+        if (newUserData.password) {
+          delete newUserData.password;
+        }
+        return res.status(200).json({
+          status: 200,
+          payload: newUserData,
+        });
+      })
+      .catch(function (error) {
+        return res.status(500).json({
+          status: 404,
+          message: '사용자 정보 변경에 실패했습니다.',
+        });
+      });
+  } catch (error) {
+    return res.status(500).json({
+      status: 500,
+      message: `서버 오류: ${error}`,
+    });
   }
-  return res.status(200).json({
-    status: 200,
-    payload: newUserData,
-  });
 };
 
 export const inquireUser = async (req: Request, res: Response) => {
-  const decoded = await isAuth(req, res);
-  if (!decoded) return res.status(401).json(AUTH_ERROR);
-  const userId = decoded.userId;
-  const foundUser = await User.findOne({ userId: userId });
-  console.log(decoded);
-  if (foundUser) {
-    return res.status(200).json({
-      status: 200,
-      payload: {
-        userId: foundUser.userId,
-        username: foundUser.username,
-        profileImgUrl: foundUser.profileImgUrl,
-        message: '정상적으로 조회되었습니다.',
-      },
+  try {
+    const decoded = await isAuth(req, res);
+    if (!decoded) return res.status(401).json(AUTH_ERROR);
+    const userId = decoded.userId;
+    const foundUser = await User.findOne({ userId: userId });
+
+    if (foundUser) {
+      return res.status(200).json({
+        status: 200,
+        payload: {
+          userId: foundUser.userId,
+          username: foundUser.username,
+          profileImgUrl: foundUser.profileImgUrl,
+        },
+      });
+    }
+    return res.status(404).json({
+      status: 404,
+      message: '조회에 실패했습니다.',
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: 500,
+      message: `서버 오류: ${error}`,
     });
   }
-  return res.status(400).json({
-    status: 400,
-    message: '조회에 실패했습니다.',
-  });
 };
-
-//Find user in database and return user information
 
 export const deleteUser = async (req: Request, res: Response) => {
-  const decoded = await isAuth(req, res);
-  if (!decoded) return res.status(401).json(AUTH_ERROR);
+  try {
+    const decoded = await isAuth(req, res);
+    if (!decoded) return res.status(401).json(AUTH_ERROR);
 
-  const previousUserId = decoded.userId;
+    const previousUserId = decoded.userId;
 
-  await User.collection.deleteOne({ userId: previousUserId });
-  return res.status(200).json({
-    status: 200,
-    message: '정상적으로 탈퇴되었습니다.',
-  });
+    User.collection
+      .deleteOne({ userId: previousUserId })
+      .then(() => {
+        return res.status(200).json({
+          status: 200,
+          payload: {
+            userId: previousUserId,
+          },
+        });
+      })
+      .catch(function (error) {
+        return res.status(404).json({
+          status: 404,
+          message: '삭제에 실패했습니다.',
+        });
+      });
+  } catch (error) {
+    return res.status(500).json({
+      status: 500,
+      message: `서버 오류: ${error}`,
+    });
+  }
 };
-
-// let id = req.params.id
-// await User.destroy({ where: { id: id } }).catch((err) => console.log(err))
-// res.status(200).send('User is deleted')
