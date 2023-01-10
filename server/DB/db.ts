@@ -11,7 +11,7 @@ export async function connectDB() {
     useNewUrlParser: true,
   });
   createCollection('user');
-  // createCollection('chat');
+  createCollection('chat');
 }
 
 export const createCollection = (modelName) => {
@@ -25,5 +25,6 @@ export const createCollection = (modelName) => {
       break;
     case 'chat':
       new Chat();
+      break;
   }
 };
