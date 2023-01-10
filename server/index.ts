@@ -80,4 +80,14 @@ io.on('connection', (socket) => {
   })
 })
 
+io.of('/chat-id').on('connection', (socket) => {
+  console.log('chat id에 접속')
+  socket.on('chatId', async (senderId) => {
+    console.log('보내는 사람 아이디', senderId)
+  })
+  socket.on('message', (message) => {
+    console.log('메시지 내용', message)
+  })
+})
+
 socketServer.listen(5002, () => console.log(`server is running on ${5002}`))
