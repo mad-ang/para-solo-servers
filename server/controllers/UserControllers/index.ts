@@ -54,7 +54,7 @@ export const signUp = async (req: Request, res: Response) => {
       createdAt: new Date(),
     })
     if (!result) {
-      return res.json({ success: false, message: "회원가입 실패" })
+      return res.json({ success: false, message: '회원가입 실패' })
     }
     return res.status(200).json({
       status: 200,
@@ -195,6 +195,27 @@ export const updateUser = async (req: Request, res: Response) => {
     payload: newUserData,
   })
 }
+
+export const inquireUser = async (req: Request, res: Response) => {
+  const decoded = await isAuth(req, res)
+  if (!decoded) return res.status(401).json(AUTH_ERROR)
+  const userId = decoded.userId
+  const foundUser = await User.findOne({ userId: userId })
+  console.log(decoded);
+  if (foundUser) {
+    return res.status(200).json({
+      status: 200,
+      payload: {
+        userId: foundUser.userId,
+        username: foundUser.username,
+        profileImgUrl: foundUser.profileImgUrl,
+        message : '정상적으로 조회되었습니다.'
+      }
+    })
+  }
+}
+
+//Find user in database and return user information
 
 export const deleteUser = async (req: Request, res: Response) => {
   // let id = req.params.id
