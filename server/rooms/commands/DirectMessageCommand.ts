@@ -4,14 +4,14 @@ import { IPlayer, ITownState } from '../../../types/ITownState'
 
 type Payload = {
   client: Client
-  x: number
-  y: number
-  anim: string
+  chatId: string
+  receiver: string
+  content: string
 }
 
 export default class PlayerUpdateCommand extends Command<ITownState, Payload> {
   execute(data: Payload) {
-    const { client, x, y, anim } = data
+    const { client ,chatId, receiver, content } = data
     
     const player = this.room.state.players.get(client.sessionId)
 
@@ -21,4 +21,3 @@ export default class PlayerUpdateCommand extends Command<ITownState, Payload> {
     player.anim = anim
   }
 }
-

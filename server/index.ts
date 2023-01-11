@@ -11,7 +11,7 @@ import io from 'socket.io'
 import { sequelize } from './DB/db'
 import { config } from './envconfig'
 // import socialRoutes from "@colyseus/social/express"
-
+import Socket from 'socket.io'
 import { SkyOffice } from './rooms/Momstown'
 
 const port = Number(process.env.PORT || 2567)
@@ -40,7 +40,11 @@ gameServer.define(RoomType.PUBLIC, SkyOffice, {
   password: null,
   autoDispose: false,
 })
+<<<<<<< Updated upstream
 // gameServer.define(RoomType.CUSTOM, NewTown).enableRealtimeListing()
+=======
+// gameServer.define(RoomType.CUSTOM, SkyOffice).enableRealtimeListing()
+>>>>>>> Stashed changes
 
 /**
  * Register @colyseus/social routes

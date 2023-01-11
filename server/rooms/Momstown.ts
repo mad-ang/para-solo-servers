@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt'
-import { Room, Client, ServerError } from 'colyseus'
+import { Room, Client, ServerError, getMessageBytes } from 'colyseus'
 import { Dispatcher } from '@colyseus/command'
 import { Player, TownState, Table, Chair } from './schema/TownState'
 import { Message } from '../../types/Messages'
@@ -9,7 +9,14 @@ import PlayerUpdateNameCommand from './commands/PlayerUpdateNameCommand'
 import {ChairStatusUpdateCommand} from './commands/ChairStatusUpdateCommand'
 import ChatMessageUpdateCommand from './commands/ChatMessageUpdateCommand'
 import { TableAddUserCommand, TableRemoveUserCommand } from './commands/TableUpdateArrayCommand'
+<<<<<<< Updated upstream
 import { userDB } from '../DB/db'
+=======
+import Chat from '../models/Chat'
+import { addChatMessage, getChatMessage } from '../controllers/ChatControllers'
+import { sanitizeFilter } from 'mongoose'
+import { createCollection } from '../DB/db'
+>>>>>>> Stashed changes
 
 export class SkyOffice extends Room<TownState> {
   private dispatcher = new Dispatcher(this)
@@ -42,6 +49,7 @@ export class SkyOffice extends Room<TownState> {
       this.state.chairs.set(String(i), new Chair())
     }
 
+<<<<<<< Updated upstream
     this.onMessage(Message.CONNECT_TO_TABLE, (client, message: { tableId: string }) => {
       this.dispatcher.dispatch(new TableAddUserCommand(), {
         client,
@@ -75,6 +83,9 @@ export class SkyOffice extends Room<TownState> {
         }),
       ])
     })
+=======
+    
+>>>>>>> Stashed changes
     // when a player stop sharing screen
     // this.onMessage(Message.STOP_SCREEN_SHARE, (client, message: { computerId: string }) => {
     // const computer = this.state.computers.get(message.computerId)
@@ -102,10 +113,11 @@ export class SkyOffice extends Room<TownState> {
     )
 
     // when receiving updatePlayerName message, call the PlayerUpdateNameCommand
-    this.onMessage(Message.UPDATE_PLAYER_NAME, (client, message: { name: string }) => {
+    this.onMessage(Message.UPDATE_PLAYER_NAME, (client, message: { name: string, userId: string }) => {
       this.dispatcher.dispatch(new PlayerUpdateNameCommand(), {
         client,
         name: message.name,
+        userId: message.userId
       })
     })
 
@@ -145,6 +157,62 @@ export class SkyOffice extends Room<TownState> {
         { except: client }
       )
     })
+
+    this.onMessage(Message.SEND_DM, (client, message: { sender: string, receiver: string, content: string } ) => {
+      console.log(message)
+      console.log(this.state.players.get(client.sessionId)?.userId)
+      console.log(this.state.players.get(message.receiver)?.userId)
+      let senderId = String(this.state.players.get(client.sessionId)?.userId)
+      let receiverId = String(this.state.players.get(message.receiver)?.userId)
+      let content = String(message.content)
+      addChatMessage({senderId: senderId, receiverId: receiverId, content: content})
+      // let chat = new Chat(senderId, receiverId);
+      // console.log(this.state.players.get(sanitizeFilter(message.receiver)))
+      // message.receiver.send(Message.RECEIVE_DM, { sender : message.sender, content : message.content })
+    })
+
+    this.onMessage(Message.RECEIVE_DM, (client, message: { senderId: string }) => {
+      let clientId = String(this.state.players.get(client.sessionId)?.userId)
+      let otherId = String(this.state.players.get(message.senderId)?.userId)
+      client.send(Message.RECEIVE_DM, getChatMessage(clientId, otherId))
+    })
+
+    this.onMessage(Message.CONNECT_TO_TABLE, (client, message: { tableId: string }) => {
+      this.dispatcher.dispatch(new TableAddUserCommand(), {
+        client,
+        tableId: message.tableId,
+      })
+    })
+
+    this.onMessage(Message.DISCONNECT_FROM_TABLE, (client, message: { tableId: string }) => {
+      this.dispatcher.dispatch(new TableRemoveUserCommand(), {
+        client,
+        tableId: message.tableId,
+      })
+    })
+    // dispatcher 로 관리해야함.
+    this.onMessage(
+      Message.UPDATE_CHAIR_STATUS,
+      (client, message: { tableId: string; chairId: string; status: boolean }) => {
+        this.dispatcher.dispatch(new ChairStatusUpdateCommand(), {
+          client,
+          tableId: message.tableId,
+          chairId: message.chairId,
+          status: message.status,
+        })
+      }
+    )
+
+    this.onMessage(Message.STOP_TABLE_TALK, (client, message: { tableId: string }) => {
+      const table = this.state.tables.get(message.tableId)
+      table?.connectedUser.forEach((id) => [
+        this.clients.forEach((cli) => {
+          if (cli.sessionId === id && cli.sessionId !== client.sessionId) {
+            cli.send(Message.STOP_TABLE_TALK, client.sessionId)
+          }
+        }),
+      ])
+    })
   }
 
   async onAuth(client: Client, options: { password: string | null }) {
@@ -160,6 +228,7 @@ export class SkyOffice extends Room<TownState> {
   onJoin(client: Client, options: any) {
     this.state.players.set(client.sessionId, new Player())
     console.log('this.roomId', this.roomId)
+<<<<<<< Updated upstream
     const rooms = userDB.rooms
     let currentRoomUserCnt = 1
     if (!Object.hasOwnProperty.call(rooms, this.roomId)) {
@@ -174,6 +243,12 @@ export class SkyOffice extends Room<TownState> {
           userCnt: currentRoomUserCnt,
         })
     }
+=======
+    console.log('the playerId', client.id);
+    
+    console.log('the userId', this.state.players.get(client.sessionId))
+    console.log('the userId', this.state.players.get(client.sessionId)?.userId)
+>>>>>>> Stashed changes
 
     client.send(Message.SEND_ROOM_DATA, {
       id: this.roomId,
