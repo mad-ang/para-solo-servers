@@ -94,21 +94,23 @@ export class SkyOffice extends Room<TownState> {
 
     this.onMessage(
       Message.UPDATE_PLAYER,
-      (client, message: { x: number; y: number; anim: string }) => {
+      (client, message: { x: number; y: number; anim: string, currentUserId: string }) => {
         this.dispatcher.dispatch(new PlayerUpdateCommand(), {
           client,
           x: message.x,
           y: message.y,
           anim: message.anim,
+          userId: message.currentUserId,
         })
       }
     )
 
     // when receiving updatePlayerName message, call the PlayerUpdateNameCommand
-    this.onMessage(Message.UPDATE_PLAYER_NAME, (client, message: { name: string }) => {
+    this.onMessage(Message.UPDATE_PLAYER_NAME, (client, message: { name: string, userId: string }) => {
       this.dispatcher.dispatch(new PlayerUpdateNameCommand(), {
         client,
         name: message.name,
+        userId: message.userId
       })
     })
 

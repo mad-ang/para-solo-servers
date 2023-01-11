@@ -7,11 +7,12 @@ type Payload = {
   x: number
   y: number
   anim: string
+  userId: string
 }
 
 export default class PlayerUpdateCommand extends Command<ITownState, Payload> {
   execute(data: Payload) {
-    const { client, x, y, anim } = data
+    const { client, x, y, anim, userId } = data
 
     const player = this.room.state.players.get(client.sessionId)
 
@@ -19,5 +20,6 @@ export default class PlayerUpdateCommand extends Command<ITownState, Payload> {
     player.x = x
     player.y = y
     player.anim = anim
+    player.userId = userId
   }
 }

@@ -7,6 +7,7 @@ export interface IPlayer extends Schema {
   anim: string
   readyToConnect: boolean
   videoConnected: boolean
+  userId: string
 }
 export interface IChair extends Schema {
   occupied: boolean
