@@ -1,6 +1,5 @@
 import http from 'http';
 import express from 'express';
-import { ExpressPeerServer, PeerServer } from 'peer';
 import cors from 'cors';
 import { Server, LobbyRoom } from 'colyseus';
 import { monitor } from '@colyseus/monitor';
@@ -17,7 +16,7 @@ import { connectDB, createCollection } from './DB/db';
 const mongoose = require('mongoose');
 
 const port = Number(process.env.PORT || 2567);
-const socketPort = Number(process.env.SOCKET_PORT || 5002);
+// const socketPort = Number(process.env.SOCKET_PORT || 5002);
 const app = express();
 
 app.use(cors());
@@ -72,31 +71,31 @@ connectDB()
   })
   .catch(console.error);
 
-const socketServer = http.createServer(app);
-const io = require('socket.io')(socketServer, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST'],
-  },
-});
-io.on('connection', (socket) => {
-  console.log(111111);
-  socket.on('join', async (gameId) => {
-    console.log(222222);
-  });
-  socket.on('message', (message) => {
-    console.log(333333);
-  });
-});
+// const socketServer = http.createServer(app);
+// const io = require('socket.io')(socketServer, {
+//   cors: {
+//     origin: '*',
+//     methods: ['GET', 'POST'],
+//   },
+// });
+// io.on('connection', (socket) => {
+//   console.log(111111);
+//   socket.on('join', async (gameId) => {
+//     console.log(222222);
+//   });
+//   socket.on('message', (message) => {
+//     console.log(333333);
+//   });
+// });
 
-io.of('/chat-id').on('connection', (socket) => {
-  console.log('chat id에 접속');
-  socket.on('chatId', async (senderId) => {
-    console.log('보내는 사람 아이디', senderId);
-  });
-  socket.on('message', (message) => {
-    console.log('메시지 내용', message);
-  });
-});
+// io.of('/chat-id').on('connection', (socket) => {
+//   console.log('chat id에 접속');
+//   socket.on('chatId', async (senderId) => {
+//     console.log('보내는 사람 아이디', senderId);
+//   });
+//   socket.on('message', (message) => {
+//     console.log('메시지 내용', message);
+//   });
+// });
 
-socketServer.listen(socketPort, () => console.log(`socketServer is running on ${socketPort}`));
+// socketServer.listen(socketPort, () => console.log(`socketServer is running on ${socketPort}`));
