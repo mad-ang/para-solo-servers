@@ -40,7 +40,6 @@ gameServer.define(RoomType.PUBLIC, SkyOffice, {
   password: null,
   autoDispose: false,
 });
-gameServer.define(RoomType.CUSTOM, SkyOffice).enableRealtimeListing();
 
 /**
  * Register @colyseus/social routes
@@ -54,6 +53,7 @@ gameServer.define(RoomType.CUSTOM, SkyOffice).enableRealtimeListing();
 // app.use('/colyseus', monitor())
 app.use('/auth', authRouter);
 app.use('/chat', chatRouter);
+
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({
