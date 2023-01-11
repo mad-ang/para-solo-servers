@@ -26,13 +26,20 @@ export const addChatMessage = (message: {
 export const getChatMessage = (
   sender: string,
   recipient: string) => {
-  let result = Chat.collection.find({
+  let result = [];
+  Chat.collection.find({
     $or: [
       { $and: [{ senderId: sender }, { receiverId: recipient }] },
       { $and: [{ senderId: recipient }, { receiverId: sender }] },
     ]
+  }).limit(100)
+  .sort({ _id: -1 }).toArray(
+  ).then((res)=>{
+    console.log(res)
   })
-  .sort({ _id: -1 })
+  .catch((err)=> {
+    console.error(err);
+  })
   console.log(result);
   return result
 }
