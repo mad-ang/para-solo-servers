@@ -5,6 +5,7 @@ import { ITownState } from '../../../types/ITownState'
 type Payload = {
   client: Client
   name: string
+  userId: string
 }
 
 export default class PlayerUpdateNameCommand extends Command<ITownState, Payload> {
