@@ -18,5 +18,6 @@ export default class PlayerUpdateCommand extends Command<ITownState, Payload> {
     if (!player) return
     player.x = x
     player.y = y
+    player.anim = anim
   }
 }
