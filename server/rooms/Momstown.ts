@@ -9,14 +9,10 @@ import PlayerUpdateNameCommand from './commands/PlayerUpdateNameCommand'
 import {ChairStatusUpdateCommand} from './commands/ChairStatusUpdateCommand'
 import ChatMessageUpdateCommand from './commands/ChatMessageUpdateCommand'
 import { TableAddUserCommand, TableRemoveUserCommand } from './commands/TableUpdateArrayCommand'
-<<<<<<< Updated upstream
-import { userDB } from '../DB/db'
-=======
 import Chat from '../models/Chat'
 import { addChatMessage, getChatMessage } from '../controllers/ChatControllers'
 import { sanitizeFilter } from 'mongoose'
 import { createCollection } from '../DB/db'
->>>>>>> Stashed changes
 
 export class SkyOffice extends Room<TownState> {
   private dispatcher = new Dispatcher(this)
@@ -49,43 +45,7 @@ export class SkyOffice extends Room<TownState> {
       this.state.chairs.set(String(i), new Chair())
     }
 
-<<<<<<< Updated upstream
-    this.onMessage(Message.CONNECT_TO_TABLE, (client, message: { tableId: string }) => {
-      this.dispatcher.dispatch(new TableAddUserCommand(), {
-        client,
-        tableId: message.tableId,
-      })
-    })
-
-    this.onMessage(Message.DISCONNECT_FROM_TABLE, (client, message: { tableId: string }) => {
-      this.dispatcher.dispatch(new TableRemoveUserCommand(), {
-        client,
-        tableId: message.tableId,
-      })
-    })
-    // dispatcher 로 관리해야함.
-    this.onMessage(Message.UPDATE_CHAIR_STATUS, (client, message: { tableId: string, chairId: string, status : boolean}) =>{
-      this.dispatcher.dispatch(new ChairStatusUpdateCommand(), {
-        client,
-        tableId: message.tableId,
-        chairId: message.chairId,
-        status: message.status
-      })
-    })
-
-    this.onMessage(Message.STOP_TABLE_TALK, (client, message: { tableId: string }) => {
-      const table = this.state.tables.get(message.tableId)
-      table?.connectedUser.forEach((id) => [
-        this.clients.forEach((cli) => {
-          if (cli.sessionId === id && cli.sessionId !== client.sessionId) {
-            cli.send(Message.STOP_TABLE_TALK, client.sessionId)
-          }
-        }),
-      ])
-    })
-=======
     
->>>>>>> Stashed changes
     // when a player stop sharing screen
     // this.onMessage(Message.STOP_SCREEN_SHARE, (client, message: { computerId: string }) => {
     // const computer = this.state.computers.get(message.computerId)
@@ -228,33 +188,15 @@ export class SkyOffice extends Room<TownState> {
   onJoin(client: Client, options: any) {
     this.state.players.set(client.sessionId, new Player())
     console.log('this.roomId', this.roomId)
-<<<<<<< Updated upstream
-    const rooms = userDB.rooms
-    let currentRoomUserCnt = 1
-    if (!Object.hasOwnProperty.call(rooms, this.roomId)) {
-      userDB.rooms[this.roomId] = {
-        userCnt: 1,
-      }
-    } else {
-      const currentRoom = userDB.rooms[this.roomId]
-      ;(currentRoomUserCnt = currentRoom.userCnt + 1),
-        (userDB.rooms[this.roomId] = {
-          ...currentRoom,
-          userCnt: currentRoomUserCnt,
-        })
-    }
-=======
     console.log('the playerId', client.id);
     
     console.log('the userId', this.state.players.get(client.sessionId))
     console.log('the userId', this.state.players.get(client.sessionId)?.userId)
->>>>>>> Stashed changes
 
     client.send(Message.SEND_ROOM_DATA, {
       id: this.roomId,
       name: this.name,
       description: this.description,
-      userCnt: currentRoomUserCnt,
     })
   }
 
