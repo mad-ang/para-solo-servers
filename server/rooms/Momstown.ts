@@ -10,6 +10,7 @@ import PlayerUpdateNameCommand from './commands/PlayerUpdateNameCommand'
 import { ChairStatusUpdateCommand } from './commands/ChairStatusUpdateCommand'
 import ChatMessageUpdateCommand from './commands/ChatMessageUpdateCommand'
 import { TableAddUserCommand, TableRemoveUserCommand } from './commands/TableUpdateArrayCommand'
+import { addChatMessage, getChatMessage } from '../controllers/ChatControllers'
 
 export class SkyOffice extends Room<TownState> {
   private dispatcher = new Dispatcher(this)
@@ -117,6 +118,24 @@ export class SkyOffice extends Room<TownState> {
     this.onMessage(Message.READY_TO_CONNECT, (client) => {
       const player = this.state.players.get(client.sessionId)
       if (player) player.readyToConnect = true
+    })
+    this.onMessage(Message.SEND_PRIVATE_MESSAGE, (client, message: { sender: string, receiver: string, content: string } ) => {
+      console.log(message)
+      console.log(this.state.players.get(client.sessionId)?.userId)
+      console.log(this.state.players.get(message.receiver)?.userId)
+      let senderId = String(this.state.players.get(client.sessionId)?.userId)
+      let receiverId = String(this.state.players.get(message.receiver)?.userId)
+      let content = String(message.content)
+      addChatMessage({senderId: senderId, receiverId: receiverId, content: content})
+      // let chat = new Chat(senderId, receiverId);
+      // console.log(this.state.players.get(sanitizeFilter(message.receiver)))
+      // message.receiver.send(Message.RECEIVE_DM, { sender : message.sender, content : message.content })
+    })
+
+    this.onMessage(Message.CHECK_PRIVATE_MESSAGE, (client, message: { senderId: string }) => {
+      let clientId = String(this.state.players.get(client.sessionId)?.userId)
+      let otherId = String(this.state.players.get(message.senderId)?.userId)
+      client.send(Message.CHECK_PRIVATE_MESSAGE, getChatMessage(clientId, otherId))
     })
 
     // when a player is ready to connect, call the PlayerReadyToConnectCommand
