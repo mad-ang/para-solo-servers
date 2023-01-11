@@ -8,38 +8,41 @@ export const createChat = () => {
   //   const chat = new Chat({})
   //   chat.save()
 };
+const time_diff = 9 * 60 * 60 * 1000;
 
 export const addChatMessage = (message: {
   senderId: string;
   receiverId: string;
   content: string;
 }) => {
-  let createAt = new Date();
+  let cur_date = new Date();
+  let utc = cur_date.getTime() + cur_date.getTimezoneOffset() * 60 * 1000;
+  let createAt = new Date(utc + time_diff);
   const result = Chat.collection.insertOne({
     senderId: message.senderId,
     receiverId: message.receiverId,
     content: message.content,
     createdAt: createAt,
   });
+  console.log('in addChatresult', createAt);
 };
 
-export const getChatMessage = (
-  sender: string,
-  recipient: string) => {
-  let result = [];
-  Chat.collection.find({
-    $or: [
-      { $and: [{ senderId: sender }, { receiverId: recipient }] },
-      { $and: [{ senderId: recipient }, { receiverId: sender }] },
-    ]
-  }).limit(100)
-  .sort({ _id: -1 }).toArray(
-  ).then((res)=>{
-    console.log(res)
-  })
-  .catch((err)=> {
-    console.error(err);
-  })
-  console.log(result);
-  return result
-}
+export const getChatMessage = async (sender: string, recipient: string) => {
+  let result = new Array();
+  await Chat.collection
+    .find({
+      $or: [
+        { $and: [{ senderId: sender }, { receiverId: recipient }] },
+        { $and: [{ senderId: recipient }, { receiverId: sender }] },
+      ],
+    })
+    .limit(100)
+    .sort({ _id: -1 })
+    .toArray()
+    .then((elem) => {
+      elem.forEach((json) => {
+        result.push(json);
+      });
+    });
+  return result;
+};
