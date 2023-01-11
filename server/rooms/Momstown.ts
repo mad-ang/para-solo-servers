@@ -119,23 +119,36 @@ export class SkyOffice extends Room<TownState> {
       const player = this.state.players.get(client.sessionId)
       if (player) player.readyToConnect = true
     })
-    this.onMessage(Message.SEND_PRIVATE_MESSAGE, (client, message: { sender: string, receiver: string, content: string } ) => {
+    this.onMessage(Message.SEND_PRIVATE_MESSAGE, (client, message: { senderId: string, receiverId: string, content: string } ) => {
       console.log(message)
-      console.log(this.state.players.get(client.sessionId)?.userId)
-      console.log(this.state.players.get(message.receiver)?.userId)
-      let senderId = String(this.state.players.get(client.sessionId)?.userId)
-      let receiverId = String(this.state.players.get(message.receiver)?.userId)
-      let content = String(message.content)
+      // console.log(this.state.players.get(client.sessionId)?.userId)
+      // console.log(this.state.players.get(message.receiver)?.userId)
+      // let senderId = String(this.state.players.get(client.sessionId)?.userId)
+      // let receiverId = String(this.state.players.get(message.receiver)?.userId)
+      // let content = String(message.content)
+      const { senderId, receiverId, content } = message
       addChatMessage({senderId: senderId, receiverId: receiverId, content: content})
       // let chat = new Chat(senderId, receiverId);
       // console.log(this.state.players.get(sanitizeFilter(message.receiver)))
       // message.receiver.send(Message.RECEIVE_DM, { sender : message.sender, content : message.content })
     })
 
-    this.onMessage(Message.CHECK_PRIVATE_MESSAGE, (client, message: { senderId: string }) => {
-      let clientId = String(this.state.players.get(client.sessionId)?.userId)
-      let otherId = String(this.state.players.get(message.senderId)?.userId)
-      client.send(Message.CHECK_PRIVATE_MESSAGE, getChatMessage(clientId, otherId))
+    this.onMessage(Message.CHECK_PRIVATE_MESSAGE, (client, message: { requestId: string, targetId:string }) => {
+      const { requestId, targetId } = message
+      // let clientId = String(this.state.players.get(client.sessionId)?.userId)
+      // let otherId = String(this.state.players.get(message.senderId)?.userId)
+      // let chatMessage = await getChatMessage(requestId, targetId);
+      // console.log(chatMessage);
+      
+      getChatMessage(requestId, targetId).then(
+        (chatMessage)=>{
+          console.log(chatMessage);
+          client.send(Message.CHECK_PRIVATE_MESSAGE, chatMessage)
+        }
+      ).catch((error)=>{
+        console.log(error)
+      })
+      
     })
 
     // when a player is ready to connect, call the PlayerReadyToConnectCommand
