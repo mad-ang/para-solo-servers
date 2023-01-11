@@ -105,10 +105,11 @@ export class SkyOffice extends Room<TownState> {
     )
 
     // when receiving updatePlayerName message, call the PlayerUpdateNameCommand
-    this.onMessage(Message.UPDATE_PLAYER_NAME, (client, message: { name: string }) => {
+    this.onMessage(Message.UPDATE_PLAYER_NAME, (client, message: { name: string, userId: string }) => {
       this.dispatcher.dispatch(new PlayerUpdateNameCommand(), {
         client,
         name: message.name,
+        userId: message.userId
       })
     })
 
