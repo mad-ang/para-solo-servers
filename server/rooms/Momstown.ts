@@ -94,13 +94,12 @@ export class SkyOffice extends Room<TownState> {
 
     this.onMessage(
       Message.UPDATE_PLAYER,
-      (client, message: { x: number; y: number; anim: string, currentUserId: string }) => {
+      (client, message: { x: number; y: number; anim: string }) => {
         this.dispatcher.dispatch(new PlayerUpdateCommand(), {
           client,
           x: message.x,
           y: message.y,
           anim: message.anim,
-          userId: message.currentUserId,
         })
       }
     )
