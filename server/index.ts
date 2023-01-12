@@ -15,7 +15,7 @@ import { SkyOffice } from './rooms/Momstown';
 import { connectDB, createCollection } from './DB/db';
 const mongoose = require('mongoose');
 
-const port = Number(process.env.PORT || 2567);
+const port = Number(process.env.PORT || 8080);
 // const socketPort = Number(process.env.SOCKET_PORT || 5002);
 const app = express();
 
