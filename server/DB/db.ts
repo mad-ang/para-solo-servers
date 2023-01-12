@@ -14,7 +14,7 @@ export async function connectDB() {
   createCollection('chat');
 }
 
-export const createCollection = (modelName) => {
+export const createCollection = (modelName : string) => {
   if (mongoose.modelNames().includes(modelName)) {
     return mongoose.model(modelName);
   }

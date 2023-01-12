@@ -14,7 +14,7 @@ router.get('/me', inquireUser);
 
 router.delete('/delete', deleteUser);
 
-router.use((err, req, res, next) => {
+router.use((err,res ) => {
   console.error(err);
   res.status(500).json({
     status: 500,
