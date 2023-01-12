@@ -19,7 +19,21 @@ const port = Number(process.env.PORT || 2567);
 // const socketPort = Number(process.env.SOCKET_PORT || 5002);
 const app = express();
 
-app.use(cors());
+const options: cors.CorsOptions = {
+  allowedHeaders: [
+    'Origin',
+    'X-Requested-With',
+    'Content-Type',
+    'Accept',
+    'X-Access-Token',
+  ],
+  credentials: true,
+  methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
+  origin: '*',
+  preflightContinue: false,
+};
+
+app.use(cors(options));
 app.use(express.json());
 // app.use(express.static('dist'))
 
