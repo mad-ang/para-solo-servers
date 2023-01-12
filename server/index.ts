@@ -19,7 +19,10 @@ const port = Number(process.env.PORT || 2567);
 // const socketPort = Number(process.env.SOCKET_PORT || 5002);
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: '*', // 출처 허용 옵션
+  credential: 'true' // 사용자 인증이 필요한 리소스(쿠키 ..등) 접근
+}));
 app.use(express.json());
 // app.use(express.static('dist'))
 
