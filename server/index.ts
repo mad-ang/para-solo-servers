@@ -54,7 +54,7 @@ gameServer.define(RoomType.PUBLIC, SkyOffice, {
 app.use('/auth', authRouter);
 app.use('/chat', chatRouter);
 
-app.use((err, req, res, next) => {
+app.use((err, res) => {
   console.error(err);
   res.status(500).json({
     status: 500,
