@@ -6,6 +6,7 @@ import { monitor } from '@colyseus/monitor';
 import { RoomType } from '../types/Rooms';
 import authRouter from './routes/auth';
 import chatRouter from './routes/chat';
+
 // import { sequelize } from './DB/db'
 import { config } from './envconfig';
 // import socialRoutes from "@colyseus/social/express"
@@ -20,12 +21,14 @@ const socketPort = Number(process.env.SOCKET_PORT || 5002);
 const app = express();
 app.use(cookieParser());
 const options: cors.CorsOptions = {
-  allowedHeaders: [
+  allowedHeaders: 
+  [
     'Origin',
     'X-Requested-With',
     'Content-Type',
     'Accept',
     'X-Access-Token',
+    'authorization',
   ],
   credentials: true,
   methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
@@ -102,14 +105,14 @@ io.on('connection', (socket) => {
   });
 });
 
-io.of('/chat-id').on('connection', (socket) => {
-  console.log('chat id에 접속');
-  socket.on('chatId', async (senderId) => {
-    console.log('보내는 사람 아이디', senderId);
-  });
-  socket.on('message', (message) => {
-    console.log('메시지 내용', message);
-  });
-});
+// io.of(/^\/dynamic-\d+$/).on('connection', (socket) => {
+//   console.log('chat id에 접속');
+//   socket.on(/^\/dynamic-\d+$/, async (senderId) => {
+//     console.log('보내는 사람 아이디', senderId);
+//   });
+//   socket.on('message', (message) => {
+//     console.log('메시지 내용', message);
+//   });
+// });
 
 socketServer.listen(socketPort, () => console.log(`socketServer is running on ${socketPort}`));

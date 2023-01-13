@@ -49,7 +49,7 @@ export class SkyOffice extends Room<TownState> {
         tableId: message.tableId,
       })
     })
-
+    
     this.onMessage(Message.DISCONNECT_FROM_TABLE, (client, message: { tableId: string }) => {
       this.dispatcher.dispatch(new TableRemoveUserCommand(), {
         client,
@@ -148,6 +148,9 @@ export class SkyOffice extends Room<TownState> {
       ).catch((error)=>{
         console.log(error)
       })
+    })
+
+    this.onMessage("make_friend", (client, message : {}) => {
       
     })
 
