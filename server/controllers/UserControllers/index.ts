@@ -112,8 +112,8 @@ export const login = async (req: Request, res: Response) => {
       }
     );
 
-    res.append('Set-Cookie', `refreshToken=${refreshToken}; Secure; HttpOnly;`);
-    return res.status(200).json({
+    res.cookie('refreshToken', refreshToken, { path: '/', secure: true });
+    res.status(200).json({
       status: 200,
       payload: {
         userId: foundUser.userId,

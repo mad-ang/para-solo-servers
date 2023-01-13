@@ -14,11 +14,11 @@ import 'express-async-errors';
 import { SkyOffice } from './rooms/Momstown';
 import { connectDB, createCollection } from './DB/db';
 const mongoose = require('mongoose');
-
+var cookieParser = require('cookie-parser');
 const port = Number(process.env.PORT || 8080);
 const socketPort = Number(process.env.SOCKET_PORT || 5002);
 const app = express();
-
+app.use(cookieParser());
 const options: cors.CorsOptions = {
   allowedHeaders: [
     'Origin',
