@@ -144,7 +144,25 @@ const isAuth = async (req: Request, res: Response) => {
   });
 };
 
-export const updateUser = async (req: Request, res: Response) => {
+export const updateUser = async (userId: string, name: string) => {
+  User.collection
+    .updateOne(
+      { userId: userId },
+      {
+        $set: {
+          username: name,
+        },
+      }
+    )
+    .then(() => {
+      console.log('successfully updated');
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+};
+
+export const updateUserWithAuth = async (req: Request, res: Response) => {
   const decoded = await isAuth(req, res);
   if (!decoded) return res.status(401).json(AUTH_ERROR);
 
