@@ -112,7 +112,7 @@ export const login = async (req: Request, res: Response) => {
       }
     );
 
-    res.cookie('refreshToken', refreshToken, { path: '/', secure: true, httpOnly: true });
+    res.cookie('refreshToken', refreshToken, { path: '/', secure: true });
     res.status(200).json({
       status: 200,
       payload: {
