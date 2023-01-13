@@ -19,7 +19,6 @@ const port = Number(process.env.PORT || 8080);
 // const socketPort = Number(process.env.SOCKET_PORT || 5002);
 const app = express();
 
-const allowOrigin = ['https://www.momstown.site/', 'http://127.0.0.1:5173']
 const options: cors.CorsOptions = {
   allowedHeaders: [
     'Origin',
@@ -30,7 +29,7 @@ const options: cors.CorsOptions = {
   ],
   credentials: true,
   methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
-  origin: allowOrigin,
+  origin: ['https://www.momstown.site', 'http://127.0.0.1:5173'],
   preflightContinue: false,
 };
 
