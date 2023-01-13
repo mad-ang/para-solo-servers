@@ -38,6 +38,7 @@
     "bcrypt": "^5.1.0",
     "colyseus": "^0.14.0",
     "colyseus.js": "^0.14.12",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.16.4",
