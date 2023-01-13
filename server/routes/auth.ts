@@ -1,6 +1,6 @@
 import express from 'express';
 import 'express-async-errors';
-import { signUp, login, updateUser, inquireUser, deleteUser } from '../controllers/UserControllers';
+import { signUp, login, updateUserWithAuth, inquireUser, deleteUser } from '../controllers/UserControllers';
 
 const router = express.Router();
 
@@ -8,7 +8,7 @@ router.post('/signup', signUp);
 
 router.post('/login', login);
 
-router.patch('/update', updateUser);
+router.patch('/update', updateUserWithAuth);
 
 router.get('/me', inquireUser);
 
