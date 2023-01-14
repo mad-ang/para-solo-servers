@@ -14,7 +14,8 @@ interface IRoomParams {
 const time_diff = 9 * 60 * 60 * 1000;
 
 const createRoom = () => {
-  const roomId = uuidV4();
+  // const roomId = uuidV4();
+  const roomId = 'test';
   rooms[roomId] = [];
   rooms_chat[roomId] = [];
   // socket.emit('room-created', { roomId });
@@ -34,8 +35,7 @@ export const requestRoom = (req: Request, res: Response) => {
       rooms[roomId].push(user.userId);
     });
   }
-  if (rooms[roomId])
-    res.status(200).send({roomId: roomId});
+  if (rooms[roomId]) res.status(200).send({ roomId: roomId });
 };
 
 export const chatController = (socket: Socket) => {
@@ -47,9 +47,11 @@ export const chatController = (socket: Socket) => {
   //   console.log('chatroom[', roomId, '] created.');
   //   return roomId;
   // };
-  const joinRoom = (host: { roomId: string; hostId: string; guestId: string }) => {
-    const { roomId, hostId, guestId } = host;
-    // const roomId = createRoom();
+  const joinRoom = (host: { roomId: string; userId: string; friendId: string }) => {
+    let { roomId, userId: hostId, friendId: guestId } = host;
+    // roomId = 'test';
+    roomId = createRoom();
+    console.log(host);
     if (rooms[roomId]) {
       console.log('user Joined the room.', roomId, host);
       // rooms[roomId].push(host.hostId);
@@ -74,17 +76,21 @@ export const chatController = (socket: Socket) => {
     socket.to(roomId).emit('user-stopped-chat');
   };
 
-  const sendMessage = (message: {
+  const sendMessage = (obj: {
+    id: number;
     roomId: string;
     userId: string;
     friendId: string;
-    content: string;
+    message: string;
   }) => {
-    const { roomId, userId: senderId, friendId: receiverId, content } = message;
-    rooms_chat[roomId].push(message);
+    const { roomId, userId: senderId, friendId: receiverId, message: content } = obj;
+    // rooms_chat[roomId].push(message);
     addChatMessage({ senderId: senderId, receiverId: receiverId, content: content });
     // LastChat.
-    socket.to(roomId).emit('message', message);
+    console.log(obj);
+
+    socket.to('test').emit('message', obj);
+    // socket.to(roomId).emit('message', obj);
   };
   // room이 살아 있을 경우.
   // Array를 만들고 거기에 푸쉬. Array를 만들어서 룸 데이터로 가지고 있는다.
@@ -136,6 +142,8 @@ export const addChatMessage = (message: {
     content: message.content,
     createdAt: createAt,
   });
+  console.log('in addChatresult', message.content);
+
   console.log('in addChatresult', createAt);
 };
 

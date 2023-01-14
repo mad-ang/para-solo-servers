@@ -22,8 +22,7 @@ const socketPort = Number(process.env.SOCKET_PORT || 5002);
 const app = express();
 app.use(cookieParser());
 const options: cors.CorsOptions = {
-  allowedHeaders: 
-  [
+  allowedHeaders: [
     'Origin',
     'X-Requested-With',
     'Content-Type',
@@ -33,7 +32,13 @@ const options: cors.CorsOptions = {
   ],
   credentials: true,
   methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
-  origin: ['https://www.momstown.site', 'http://127.0.0.1:5173', 'http://127.0.0.1:5174', 'http://localhost:5173', 'http://localhost:5174'],
+  origin: [
+    'https://www.momstown.site',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:5174',
+    'http://localhost:5173',
+    'http://localhost:5174',
+  ],
   preflightContinue: false,
 };
 
@@ -97,11 +102,10 @@ const io = require('socket.io')(socketServer, {
   },
 });
 io.on('connection', (socket) => {
-  console.log(111111);
-  chatController(socket)
-  socket.on('message', (message) => {
-    console.log(333333);
-  });
+  chatController(socket);
+  // socket.on('message', (message) => {
+  //   console.log(333333);
+  // });
 });
 
 // io.of(/^\/dynamic-\d+$/).on('connection', (socket) => {
