@@ -244,3 +244,11 @@ export const deleteUser = async (req: Request, res: Response) => {
       });
     });
 };
+
+export const lookupUser = async(req: Request, res: Response) => {
+  const user = req.body
+  const result = []
+  // User.collection.findOne().then((uesr)=>{
+  //   result.push(user.userId)
+  // })
+}
