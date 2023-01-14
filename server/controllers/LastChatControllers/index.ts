@@ -16,11 +16,16 @@ export const loaddata = async (req : Request, res : Response) => {
   })
 }
 
+export const firstdata = async (req: Request, res: Response) => {
+  const user = req.body
+  addLastChat({senderId: user.userId, receiverId: user.targetId, content: user.content})
+}
+
 export const LastChatControler = (message : {readerId: string, targetId: string, content: string}) => {
   const { readerId, targetId, content } = message;
   checkLast(readerId, targetId).then((res : number) => {
     if (res === 1) {
-      // updateLastChat(message)
+      updateLastChat({senderId: readerId, receiverId: targetId, content: content})
     }
   });
 };
@@ -94,7 +99,7 @@ export const checkLast  = async (readerId : string, targetId : string) => {
       return result;
     }).catch((err) => {
       console.error(err)
-      return -1;
+      return 0;
     });
-    return -1;
+    return 0;
 };

@@ -14,6 +14,7 @@ import 'express-async-errors';
 
 import { SkyOffice } from './rooms/Momstown';
 import { connectDB, createCollection } from './DB/db';
+import { chatController } from './controllers/ChatControllers';
 const mongoose = require('mongoose');
 var cookieParser = require('cookie-parser');
 const port = Number(process.env.PORT || 8080);
@@ -97,9 +98,7 @@ const io = require('socket.io')(socketServer, {
 });
 io.on('connection', (socket) => {
   console.log(111111);
-  socket.on('join', async (gameId) => {
-    console.log(222222);
-  });
+  chatController(socket)
   socket.on('message', (message) => {
     console.log(333333);
   });
