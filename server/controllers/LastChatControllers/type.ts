@@ -3,8 +3,9 @@ export type Token = string
 export interface ILastChat {
   readerId: string
   targetId: string
-  username: string
+  username?: string
   lastMessage?: string
+  roomId?: string
   unreadCount?: number
   updatedAt: Date | null
 }
