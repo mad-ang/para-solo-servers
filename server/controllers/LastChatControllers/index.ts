@@ -1,6 +1,7 @@
 import Chat from '../../models/Chat';
 import LastChat from '../../models/LastChat';
 import { Request, Response } from 'express';
+import { RoomListingData } from 'colyseus';
 
 const time_diff = 9 * 60 * 60 * 1000;
 
@@ -24,7 +25,7 @@ export const firstdata = async (req: Request, res: Response) => {
   let result: boolean[] = [];
   result.push(true);
   await addLastChat(
-    { senderId: user.userId, receiverId: user.receiverId, content: user.content },
+    { senderId: user.userId, receiverId: user.receiverId, username: user.username, content: user.content },
     result
   ).then(() => {
     console.log(result[0]);
@@ -49,7 +50,7 @@ export const LastChatControler = async (message: {
 };
 
 export const addLastChat = async (
-  message: { senderId: string; receiverId: string; content: string },
+  message: { senderId: string; receiverId: string; username: string, content: string },
   result: boolean[]
 ) => {
   let cur_date = new Date();
@@ -62,14 +63,18 @@ export const addLastChat = async (
     const result1 = LastChat.collection.insertOne({
       readerId: message.senderId,
       targetId: message.receiverId,
+      username: message.username,
       content: message.content,
+      roomId: 'start',
       unread: 0,
       updatedAt: createAt,
     });
     const result2 = LastChat.collection.insertOne({
       readerId: message.receiverId,
       targetId: message.senderId,
+      username: message.username,
       content: message.content,
+      roomId: 'start',
       unread: 1,
       updatedAt: createAt,
     });
@@ -97,6 +102,22 @@ export const updateLastChat = async (message: {
   );
 };
 
+export const updateRoomId = async (message: {
+  senderId: string;
+  receiverId: string;
+  roomId: string;
+}) => {
+  const { senderId, receiverId, roomId } = message;
+  await LastChat.collection.findOneAndUpdate(
+    { $and: [{ readerId: senderId }, { targetId: receiverId }] },
+    { roomId: roomId }
+  );
+  await LastChat.collection.findOneAndUpdate(
+    { $and: [{ readerId: receiverId }, { targetId: senderId }] },
+    { roomId: roomId }
+  );
+};
+
 export const getLastChat = async (readerId: string) => {
   let result = new Array();
   try {
@@ -112,7 +133,7 @@ export const getLastChat = async (readerId: string) => {
           result.push(json);
         });
       });
-    
+
     return result;
   } catch (err) {
     console.error(err);
@@ -123,9 +144,8 @@ export const checkLast = async (readerId: string, targetId: string, result: bool
   await LastChat.collection
     .count({ $and: [{ readerId: readerId }, { targetId: targetId }] })
     .then((cnt) => {
-      console.log("cnt", cnt);
-      
-      console.log("in cnt", result);
+      console.log('cnt', cnt);
+      console.log('in cnt', result);
       if (cnt > 0) result[0] = false;
     })
     .catch((err) => {
