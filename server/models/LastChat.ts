@@ -1,5 +1,5 @@
 import { Schema, model, Document, Model } from 'mongoose'
-import { ILastChat } from '../controllers/LastChatControl/type'
+import { ILastChat } from '../controllers/LastChatControllers/type'
 
 const lastchat = new Schema<ILastChat>({
   readerId: { type: String, required: true },
