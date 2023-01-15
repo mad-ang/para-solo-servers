@@ -1,6 +1,13 @@
 import { Schema, ArraySchema, SetSchema, MapSchema, type } from '@colyseus/schema';
 import { IPlayer, ITownState, ITable, IChatMessage, IChair } from '../../../types/ITownState';
 import { IUserInfo } from '../../controllers/UserControllers/types';
+
+export class User extends Schema implements IUserInfo {
+  @type('string') profileImgUrl = '';
+  @type('string') gender = '';
+  @type('string') age = '';
+  @type('string') height = '';
+}
 export class Player extends Schema implements IPlayer {
   @type('string') name = '';
   @type('number') x = 705;
@@ -9,16 +16,7 @@ export class Player extends Schema implements IPlayer {
   @type('boolean') readyToConnect = false;
   @type('boolean') videoConnected = false;
   @type('string') userId = '';
-  @type({ set: 'string' }) userInfo = {
-    userId: '',
-    password: '',
-  };
-  // userinfo: IUserInfo = {
-  //   userId: '',
-  //   password: '',
-  // };
-  // createdAt: Date | null;
-  // lastUpdated: Date | null;
+  @type({ map: 'string' }) userInfo = new MapSchema<string>();
 }
 
 export class ChatMessage extends Schema implements IChatMessage {

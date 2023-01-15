@@ -5,16 +5,19 @@ import { ITownState } from '../../../types/ITownState';
 
 type Payload = {
   client: Client;
-  userinfo: IUserInfo;
+  userInfo: IUserInfo;
 };
 
 export default class PlayerUpdateInfoCommand extends Command<ITownState, Payload> {
   execute(data: Payload) {
-    const { client, userinfo } = data;
-
+    const { client, userInfo } = data;
     const player = this.room.state.players.get(client.sessionId);
-
     if (!player) return;
-    player.userinfo = userinfo;
+
+    const keys = Object.keys(userInfo);
+    keys.forEach((key) => {
+      console.log(99999, key, userInfo[key]);
+      if (userInfo[key]) player.userInfo.set(key, userInfo[key]);
+    });
   }
 }

@@ -12,6 +12,8 @@ import ChatMessageUpdateCommand from './commands/ChatMessageUpdateCommand';
 import { TableAddUserCommand, TableRemoveUserCommand } from './commands/TableUpdateArrayCommand';
 import { addChatMessage, getChatMessage } from '../controllers/ChatControllers';
 import { updateUser } from '../controllers/UserControllers';
+import PlayerUpdateInfoCommand from './commands/PlayerUpdateInfoCommand';
+import { IUserInfo } from '../controllers/UserControllers/types';
 
 export class SkyOffice extends Room<TownState> {
   private dispatcher = new Dispatcher(this);
@@ -94,6 +96,7 @@ export class SkyOffice extends Room<TownState> {
 
     // when receiving updatePlayer message, call the PlayerUpdateCommand
 
+    // 플레이어의 anim, x, y 좌표 변경
     this.onMessage(
       Message.UPDATE_PLAYER,
       (client, message: { x: number; y: number; anim: string }) => {
@@ -106,19 +109,21 @@ export class SkyOffice extends Room<TownState> {
       }
     );
 
+    // 플레이어의 username, anim, x,y 좌표를 제외한 정보들 변경
     this.onMessage(
       Message.UPDATE_PLAYER_INFO,
-      (client, message: { x: number; y: number; anim: string }) => {
-        // this.dispatcher.dispatch(new PlayerUpdateCommand(), {
-        //   client,
-        //   x: message.x,
-        //   y: message.y,
-        //   anim: message.anim,
-        // });
+      (client, message: { userInfo: IUserInfo; userId: string }) => {
+        console.log(message);
+        if (!message || !message.userInfo) return;
+        this.dispatcher.dispatch(new PlayerUpdateInfoCommand(), {
+          client,
+          userInfo: message.userInfo,
+        });
+        updateUser(message.userId, message.userInfo);
       }
     );
 
-    // when receiving updatePlayerName message, call the PlayerUpdateNameCommand
+    //  플레이어의 username 변경
     this.onMessage(
       Message.UPDATE_PLAYER_NAME,
       (client, message: { name: string; userId: string }) => {
@@ -127,7 +132,7 @@ export class SkyOffice extends Room<TownState> {
           name: message.name,
           userId: message.userId,
         });
-        updateUser(message.userId, message.name);
+        updateUser(message.userId, { username: message.name });
       }
     );
 

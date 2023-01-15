@@ -1,8 +1,8 @@
 export type Token = string;
 
 export interface IUserInfo {
-  userId: string;
-  password: string;
+  userId?: string;
+  password?: string;
   username?: string;
   profileImgUrl?: string;
   gender?: string;
@@ -13,4 +13,6 @@ export interface IUserInfo {
   // 성별
   // 나이
   refreshToken?: Token | null;
+  createdAt?: Date | null;
+  lastUpdated?: Date | null;
 }

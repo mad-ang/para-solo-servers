@@ -157,14 +157,12 @@ export const authenticateUser = async (req: Request, res: Response): Promise<any
   });
 };
 
-export const updateUser = async (userId: string, name: string) => {
+export const updateUser = async (userId: string, userinfo: IUserInfo) => {
   User.collection
     .updateOne(
       { userId: userId },
       {
-        $set: {
-          username: name,
-        },
+        $set: userinfo,
       }
     )
     .then(() => {

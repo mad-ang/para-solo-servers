@@ -1,5 +1,5 @@
 import { Schema, ArraySchema, SetSchema, MapSchema } from '@colyseus/schema';
-import { IUserInfo } from '../server/controllers/UserControllers/types';
+import { User } from '../server/rooms/schema/TownState';
 
 export interface IPlayer extends Schema {
   name: string;
@@ -9,7 +9,7 @@ export interface IPlayer extends Schema {
   readyToConnect: boolean;
   videoConnected: boolean;
   userId: string;
-  userInfo: IUserInfo;
+  userInfo: MapSchema<string>;
 }
 export interface IChair extends Schema {
   occupied: boolean;
