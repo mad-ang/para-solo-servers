@@ -97,11 +97,7 @@ const io = require('socket.io')(socketServer, {
   },
 });
 io.on('connection', (socket) => {
-  console.log(111111);
   chatController(socket)
-  socket.on('message', (message) => {
-    console.log(333333);
-  });
 });
 
 // io.of(/^\/dynamic-\d+$/).on('connection', (socket) => {

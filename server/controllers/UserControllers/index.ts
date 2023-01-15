@@ -193,7 +193,7 @@ export const inquireUser = async (req: Request, res: Response) => {
       payload: {
         userId: foundUser.userId,
         username: foundUser.username,
-        profileImgUrl: foundUser.profileImgUrl,
+        // profileImgUrl: foundUser.profileImgUrl,
       },
     });
   }

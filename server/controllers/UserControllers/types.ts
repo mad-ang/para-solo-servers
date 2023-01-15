@@ -4,13 +4,18 @@ export interface IUser {
   userId: string
   password: string
   username?: string
-  profileImgUrl?: string | null
-  // 키
-  // 몸무게
-  // 사는 곳
-  // 성별 
-  // 나이
+  profileImgUrl: string
+  heigth: number
+  weight: number
+  region: string
+  sex: sex
+  age: number
   refreshToken?: Token | null
   createdAt: Date | null
   lastUpdated: Date | null
+}
+
+enum sex {
+  FEMALE,
+  MALE
 }

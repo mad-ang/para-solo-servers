@@ -38,20 +38,29 @@ export const firstdata = async (req: Request, res: Response) => {
     });
 };
 
+export const setfriend = async (req: Request, res: Response) => {
+  const user = req.body;
+
+  acceptFriend({ myId: user.myId, friendId: user.friendId, isAccept: user.isAccept })
+}
+
 export const LastChatControler = async (obj: {
   myId: string;
   friendId: string;
   message: string;
 }) => {
   const { myId, friendId, message } = obj;
-  checkLast(myId, friendId).then((res) => {
+  const res = await checkLast(myId, friendId);
+  try {
     if (res) {
       updateLastChat({ myId, friendId, message });
     }
-  });
+  } catch (err) {
+    console.error(err);
+  }
 };
 
-export const addLastChat = async (obj: {
+const addLastChat = async (obj: {
   myInfo: UserResponseDto;
   friendInfo: UserResponseDto;
   status: IChatRoomStatus;
@@ -89,6 +98,39 @@ export const addLastChat = async (obj: {
     console.error(err);
   }
 };
+
+const acceptFriend = async (obj: { myId: string; friendId: string; isAccept: number }) => {
+  const { myId, friendId, isAccept } = obj;
+  let status = IChatRoomStatus.SOCKET_OFF
+  if (isAccept) updateRoomStatus({ myId, friendId, status});
+};
+
+export const updateRoomStatus = async (obj: {
+  myId: string;
+  friendId: string;
+  status: IChatRoomStatus;
+}) => {
+  const { myId, friendId, status } = obj;
+  await LastChat.collection.findOneAndUpdate(
+    { $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }] },
+    { $set: { status: status } }
+  );
+  await LastChat.collection.findOneAndUpdate(
+    { $and: [{ 'myInfo.userId': friendId }, { 'friendInfo.userId': myId }] },
+    { $set: { status: status } }
+  );
+};
+
+const deleteChatRoom = async (obj:{
+  myId: string;
+  friendId: string;
+}) => {
+  const {myId, friendId} = obj
+  let docs = await LastChat.collection.findOne(
+    { $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }] }
+  )
+  // 삭제한 상대방에게 상대방이 채팅방에서 나갔음을 알림.
+}
 
 export const updateLastChat = async (obj: { myId: string; friendId: string; message: string }) => {
   const { myId, friendId, message } = obj;

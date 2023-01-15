@@ -1,16 +1,17 @@
-import bcrypt from 'bcrypt'
-import { Room, Client, ServerError } from 'colyseus'
-import { Dispatcher } from '@colyseus/command'
-import { Player, TownState, Table, Chair } from './schema/TownState'
-import { Message } from '../../types/Messages'
-import { IRoomData } from '../../types/Rooms'
-import { whiteboardRoomIds } from './schema/TownState'
-import PlayerUpdateCommand from './commands/PlayerUpdateCommand'
-import PlayerUpdateNameCommand from './commands/PlayerUpdateNameCommand'
-import { ChairStatusUpdateCommand } from './commands/ChairStatusUpdateCommand'
-import ChatMessageUpdateCommand from './commands/ChatMessageUpdateCommand'
-import { TableAddUserCommand, TableRemoveUserCommand } from './commands/TableUpdateArrayCommand'
-import { addChatMessage, getChatMessage } from '../controllers/ChatControllers'
+import bcrypt from 'bcrypt';
+import { Room, Client, ServerError } from 'colyseus';
+import { Dispatcher } from '@colyseus/command';
+import { Player, TownState, Table, Chair } from './schema/TownState';
+import { Message } from '../../types/Messages';
+import { IRoomData } from '../../types/Rooms';
+import PlayerUpdateCommand from './commands/PlayerUpdateCommand';
+import PlayerUpdateNameCommand from './commands/PlayerUpdateNameCommand';
+import { ChairStatusUpdateCommand } from './commands/ChairStatusUpdateCommand';
+import ChatMessageUpdateCommand from './commands/ChatMessageUpdateCommand';
+import { TableAddUserCommand, TableRemoveUserCommand } from './commands/TableUpdateArrayCommand';
+import { addChatMessage, getChatMessage } from '../controllers/ChatControllers';
+import { updateUser } from '../controllers/UserControllers';
+import mongoose from 'mongoose';
 
 export class SkyOffice extends Room<TownState> {
   private dispatcher = new Dispatcher(this)

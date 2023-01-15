@@ -8,7 +8,6 @@ const user = new Schema<IUser>({
   userId: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   username: { type: String, required: false },
-  profileImgUrl: { type: String, required: false },
   refreshToken: { type: String, required: false },
   createdAt: { type: Date, default: Date.now, required: false },
   lastUpdated: { type: Date, required: false },
