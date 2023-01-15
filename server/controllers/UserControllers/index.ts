@@ -3,13 +3,13 @@ const jwt = require('jsonwebtoken');
 import { config } from '../../envconfig';
 const AUTH_ERROR = { message: '사용자 인증 오류' };
 
-import { IUser } from './types';
+import { IUserInfo } from './types';
 import { Request, Response } from 'express';
 import { Token } from './types';
 import User from '../../models/User';
 import 'express-async-errors';
 
-async function hashPassword(user: IUser) {
+async function hashPassword(user: IUserInfo) {
   const password = user.password;
   const saltRounds = config.bcrypt.saltRounds;
 
