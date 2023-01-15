@@ -1,7 +1,7 @@
 import Chat from '../../models/Chat';
 import LastChat from '../../models/LastChat';
+import { UserResponseDto, IChatRoomStatus } from './type';
 import { Request, Response } from 'express';
-import { RoomListingData } from 'colyseus';
 
 const time_diff = 9 * 60 * 60 * 1000;
 
@@ -21,109 +21,121 @@ export const loaddata = async (req: Request, res: Response) => {
 
 export const firstdata = async (req: Request, res: Response) => {
   const user = req.body;
-  console.log(user);
-  let result: boolean[] = [];
-  result.push(true);
-  await addLastChat(
-    { senderId: user.userId, receiverId: user.receiverId, username: user.username, content: user.content },
-    result
-  ).then(() => {
-    console.log(result[0]);
-    if (result[0]) res.status(200).send('add frieds');
+  
+  addLastChat(
+    {
+      myInfo: user.myInfo,
+      friendInfo: user.friendInfo,
+      status: user.status,
+      message: user.message
+    }
+  ).then((result) => {
+    console.log(result);
+    if (result) res.status(200).send('add frieds');
     else res.status(200).send('already exist');
+  }).catch((err)=>{
+    console.error(err);
+    
   });
 };
 
-export const LastChatControler = async (message: {
-  readerId: string;
-  targetId: string;
-  content: string;
+export const LastChatControler = async (obj: {
+  myId: string;
+  friendId: string;
+  message: string;
 }) => {
-  const { readerId, targetId, content } = message;
-  let result: boolean[] = [];
-  result.push(true);
-  checkLast(readerId, targetId, result).then(() => {
-    if (result) {
-      updateLastChat({ senderId: readerId, receiverId: targetId, content: content });
+  const { myId, friendId, message } = obj;
+  checkLast(myId, friendId).then((res) => {
+    if (res) {
+      updateLastChat({ myId, friendId, message });
     }
   });
 };
 
 export const addLastChat = async (
-  message: { senderId: string; receiverId: string; username: string, content: string },
-  result: boolean[]
+  obj: {
+    myInfo: UserResponseDto;
+    friendInfo: UserResponseDto;
+    status: IChatRoomStatus;
+    message: string;
+  }
 ) => {
   let cur_date = new Date();
   let utc = cur_date.getTime() + cur_date.getTimezoneOffset() * 60 * 1000;
   let createAt = utc + time_diff;
-  checkLast(message.senderId, message.receiverId, result).then(() => {
-    console.log('in addLastChat', result[0]);
 
-    if (!result[0]) return;
-    const result1 = LastChat.collection.insertOne({
-      readerId: message.senderId,
-      targetId: message.receiverId,
-      username: message.username,
-      content: message.content,
+  const res = await checkLast(obj.myInfo.userId, obj.friendInfo.userId);
+  try {
+    if (res) return false;
+    LastChat.collection.insertOne({
+      myInfo: obj.myInfo,
+      friendInfo: obj.friendInfo,
+      status: obj.status,
+      message: obj.message,
       roomId: 'start',
       unread: 0,
       updatedAt: createAt,
     });
-    const result2 = LastChat.collection.insertOne({
-      readerId: message.receiverId,
-      targetId: message.senderId,
-      username: message.username,
-      content: message.content,
+    LastChat.collection.insertOne({
+      myInfo: obj.friendInfo,
+      friendInfo: obj.myInfo,
+      status: obj.status,
+      message: obj.message,
       roomId: 'start',
       unread: 1,
       updatedAt: createAt,
     });
+
     console.log('in addLastChatresult');
-  });
+    return true;
+  } catch (err) {
+    console.error(err);
+    
+  }
 };
 
-export const updateLastChat = async (message: {
-  senderId: string;
-  receiverId: string;
-  content: string;
+export const updateLastChat = async (obj: {
+  myId: string;
+  friendId: string;
+  message: string;
 }) => {
-  const { senderId, receiverId, content } = message;
+  const { myId, friendId, message } = obj;
   let cur_date = new Date();
   let utc = cur_date.getTime() + cur_date.getTimezoneOffset() * 60 * 1000;
   let createAt = utc + time_diff;
   await LastChat.collection.findOneAndUpdate(
-    { $and: [{ readerId: senderId }, { targetId: receiverId }] },
-    { content: content, updatedAt: createAt }
+    { $and: [ {myInfo:{ userId: myId }}, {myInfo:{ userId: friendId }}] },
+    { $set : { message: message, updatedAt: createAt }}
   );
   let docs = await LastChat.collection.findOneAndUpdate(
-    { $and: [{ readerId: receiverId }, { targetId: senderId }] },
-    { content: content, updatedAt: createAt },
-    { upsert: true }
-  );
+    { $and: [ {myInfo:{ userId: friendId }}, {myInfo:{ userId: myId }}] },
+    { $set : { message: message, updatedAt: createAt }, $inc : {unreadCount: 1}}
+  )
+  docs.value?.set()
 };
 
-export const updateRoomId = async (message: {
-  senderId: string;
-  receiverId: string;
+export const updateRoomId = async (obj: {
+  myId: string;
+  friendId: string;
   roomId: string;
 }) => {
-  const { senderId, receiverId, roomId } = message;
+  const { myId, friendId, roomId } = obj;
   await LastChat.collection.findOneAndUpdate(
-    { $and: [{ readerId: senderId }, { targetId: receiverId }] },
-    { roomId: roomId }
+    {$and : [{"myInfo.userId" : myId}, {"friendInfo.userId" : friendId}]},
+    { $set : { roomId: roomId }}
   );
   await LastChat.collection.findOneAndUpdate(
-    { $and: [{ readerId: receiverId }, { targetId: senderId }] },
-    { roomId: roomId }
+    {$and : [{"myInfo.userId" : friendId}, {"friendInfo.userId" : myId}]},
+    { $set : { roomId: roomId }}
   );
 };
 
-export const getLastChat = async (readerId: string) => {
+export const getLastChat = async (myId: string) => {
   let result = new Array();
   try {
     await LastChat.collection
       .find({
-        readerId: readerId,
+        myInfo : { userId : myId }
       })
       .limit(20)
       .sort({ _id: -1 })
@@ -140,18 +152,13 @@ export const getLastChat = async (readerId: string) => {
   }
 };
 
-export const checkLast = async (readerId: string, targetId: string, result: boolean[]) => {
-  await LastChat.collection
-    .count({ $and: [{ readerId: readerId }, { targetId: targetId }] })
-    .then((cnt) => {
-      console.log('cnt', cnt);
-      console.log('in cnt', result);
-      if (cnt > 0) result[0] = false;
-    })
-    .catch((err) => {
-      console.error(err);
-    })
-    .then(() => {
-      return -1;
-    });
+export const checkLast = async (myId: string, friendId: string) => {
+  try {
+  const res = await LastChat.collection
+    .count({$and : [{"myInfo.userId" : myId}, {"friendInfo.userId" : friendId}]})
+    return res
+  } catch (err){
+    console.error(err);
+    
+  }
 };

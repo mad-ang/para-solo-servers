@@ -30,12 +30,11 @@ export const requestRoom = (req: Request, res: Response) => {
     // socket.emit('get-users', { roomId, participants: rooms[roomId] });
   } else {
     roomId = createRoom();
-    updateRoomId({ senderId: user.userId, receiverId: user.friendId, roomId: roomId }).then(() => {
+    updateRoomId({ myId: user.myId, friendId: user.friendId, roomId: roomId }).then(() => {
       rooms[roomId].push(user.userId);
     });
   }
-  if (rooms[roomId])
-    res.status(200).send({roomId: roomId});
+  if (rooms[roomId]) res.status(200).send({ roomId: roomId });
 };
 
 export const chatController = (socket: Socket) => {
@@ -47,34 +46,35 @@ export const chatController = (socket: Socket) => {
   //   console.log('chatroom[', roomId, '] created.');
   //   return roomId;
   // };
-  const joinRoom = (host: { roomId: string; hostId: string; guestId: string }) => {
-    const { roomId, hostId, guestId } = host;
+  const joinRoom = (host: { roomId: string; userId: string; guestId: string }) => {
+    const { roomId, userId, guestId } = host;
     // const roomId = createRoom();
     if (rooms[roomId]) {
       console.log('user Joined the room.', roomId, host);
-      // rooms[roomId].push(host.hostId);
+      // rooms[roomId].push(host.userId);
       // socket.to(roomId).emit('get-roomId', { roomId });
       socket.join(roomId);
       // socket.emit('get-users', { roomId, participants: rooms[roomId] });
     }
     socket.on('disconnect', () => {
       console.log('user left the room', host);
-      leaveRoom({ roomId, userId: hostId, friendId: guestId });
+      leaveRoom({ roomId, userId: userId, friendId: guestId });
     });
   };
 
-  const leaveRoom = ({ roomId, userId: hostId, friendId: guestId }: IRoomParams) => {
-    rooms[roomId] = rooms[roomId].filter((id) => id !== hostId);
-    socket.to(roomId).emit('user-disconnected', hostId);
+  const leaveRoom = ({ roomId, userId: userId, friendId: guestId }: IRoomParams) => {
+    rooms[roomId] = rooms[roomId].filter((id) => id !== userId);
+    socket.to(roomId).emit('user-disconnected', userId);
   };
-  const startChat = ({ roomId, userId: hostId, friendId: guestId }: IRoomParams) => {
-    socket.to(roomId).emit('uesr-started-chat', hostId);
+  const startChat = ({ roomId, userId: userId, friendId: guestId }: IRoomParams) => {
+    socket.to(roomId).emit('uesr-started-chat', userId);
   };
   const stopChat = (roomId: string) => {
     socket.to(roomId).emit('user-stopped-chat');
   };
 
   const sendMessage = (message: {
+    id: number;
     roomId: string;
     userId: string;
     friendId: string;
@@ -84,7 +84,7 @@ export const chatController = (socket: Socket) => {
     rooms_chat[roomId].push(message);
     addChatMessage({ senderId: senderId, receiverId: receiverId, content: content });
     // LastChat.
-    socket.to(roomId).emit('message', message);
+    socket.to(roomId).except(socket.id).emit('message', message);
   };
   // room이 살아 있을 경우.
   // Array를 만들고 거기에 푸쉬. Array를 만들어서 룸 데이터로 가지고 있는다.
