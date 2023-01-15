@@ -3,13 +3,13 @@ const jwt = require('jsonwebtoken');
 import { config } from '../../envconfig';
 const AUTH_ERROR = { message: '사용자 인증 오류' };
 
-import { IUser } from './types';
+import { IUserInfo } from './types';
 import { Request, Response } from 'express';
 import { Token } from './types';
 import User from '../../models/User';
 import 'express-async-errors';
 
-async function hashPassword(user: IUser) {
+async function hashPassword(user: IUserInfo) {
   const password = user.password;
   const saltRounds = config.bcrypt.saltRounds;
 
@@ -157,14 +157,12 @@ export const authenticateUser = async (req: Request, res: Response): Promise<any
   });
 };
 
-export const updateUser = async (userId: string, name: string) => {
+export const updateUser = async (userId: string, userinfo: IUserInfo) => {
   User.collection
     .updateOne(
       { userId: userId },
       {
-        $set: {
-          username: name,
-        },
+        $set: userinfo,
       }
     )
     .then(() => {
