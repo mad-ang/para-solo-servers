@@ -21,22 +21,21 @@ export const loaddata = async (req: Request, res: Response) => {
 
 export const firstdata = async (req: Request, res: Response) => {
   const user = req.body;
-  
-  addLastChat(
-    {
-      myInfo: user.myInfo,
-      friendInfo: user.friendInfo,
-      status: user.status,
-      message: user.message
-    }
-  ).then((result) => {
-    console.log(result);
-    if (result) res.status(200).send('add frieds');
-    else res.status(200).send('already exist');
-  }).catch((err)=>{
-    console.error(err);
-    
-  });
+
+  addLastChat({
+    myInfo: user.myInfo,
+    friendInfo: user.friendInfo,
+    status: user.status,
+    message: user.message,
+  })
+    .then((result) => {
+      console.log(result);
+      if (result) res.status(200).send('add frieds');
+      else res.status(200).send('already exist');
+    })
+    .catch((err) => {
+      console.error(err);
+    });
 };
 
 export const LastChatControler = async (obj: {
@@ -52,14 +51,12 @@ export const LastChatControler = async (obj: {
   });
 };
 
-export const addLastChat = async (
-  obj: {
-    myInfo: UserResponseDto;
-    friendInfo: UserResponseDto;
-    status: IChatRoomStatus;
-    message: string;
-  }
-) => {
+export const addLastChat = async (obj: {
+  myInfo: UserResponseDto;
+  friendInfo: UserResponseDto;
+  status: IChatRoomStatus;
+  message: string;
+}) => {
   let cur_date = new Date();
   let utc = cur_date.getTime() + cur_date.getTimezoneOffset() * 60 * 1000;
   let createAt = utc + time_diff;
@@ -90,43 +87,34 @@ export const addLastChat = async (
     return true;
   } catch (err) {
     console.error(err);
-    
   }
 };
 
-export const updateLastChat = async (obj: {
-  myId: string;
-  friendId: string;
-  message: string;
-}) => {
+export const updateLastChat = async (obj: { myId: string; friendId: string; message: string }) => {
   const { myId, friendId, message } = obj;
   let cur_date = new Date();
   let utc = cur_date.getTime() + cur_date.getTimezoneOffset() * 60 * 1000;
   let createAt = utc + time_diff;
   await LastChat.collection.findOneAndUpdate(
-    { $and: [ {myInfo:{ userId: myId }}, {myInfo:{ userId: friendId }}] },
-    { $set : { message: message, updatedAt: createAt }}
+    { $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }] },
+    { $set: { message: message, updatedAt: createAt } }
   );
   let docs = await LastChat.collection.findOneAndUpdate(
-    { $and: [ {myInfo:{ userId: friendId }}, {myInfo:{ userId: myId }}] },
-    { $set : { message: message, updatedAt: createAt }, $inc : {unreadCount: 1}}
-  )
-  docs.value?.set()
+    { $and: [{ 'myInfo.userId': friendId }, { 'friendInfo.userId': myId }] },
+    { $set: { message: message, updatedAt: createAt }, $inc: { unreadCount: 1 } }
+  );
+  docs.value?.set();
 };
 
-export const updateRoomId = async (obj: {
-  myId: string;
-  friendId: string;
-  roomId: string;
-}) => {
+export const updateRoomId = async (obj: { myId: string; friendId: string; roomId: string }) => {
   const { myId, friendId, roomId } = obj;
   await LastChat.collection.findOneAndUpdate(
-    {$and : [{"myInfo.userId" : myId}, {"friendInfo.userId" : friendId}]},
-    { $set : { roomId: roomId }}
+    { $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }] },
+    { $set: { roomId: roomId } }
   );
   await LastChat.collection.findOneAndUpdate(
-    {$and : [{"myInfo.userId" : friendId}, {"friendInfo.userId" : myId}]},
-    { $set : { roomId: roomId }}
+    { $and: [{ 'myInfo.userId': friendId }, { 'friendInfo.userId': myId }] },
+    { $set: { roomId: roomId } }
   );
 };
 
@@ -135,7 +123,7 @@ export const getLastChat = async (myId: string) => {
   try {
     await LastChat.collection
       .find({
-        myInfo : { userId : myId }
+        myInfo: { userId: myId },
       })
       .limit(20)
       .sort({ _id: -1 })
@@ -154,11 +142,11 @@ export const getLastChat = async (myId: string) => {
 
 export const checkLast = async (myId: string, friendId: string) => {
   try {
-  const res = await LastChat.collection
-    .count({$and : [{"myInfo.userId" : myId}, {"friendInfo.userId" : friendId}]})
-    return res
-  } catch (err){
+    const res = await LastChat.collection.count({
+      $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }],
+    });
+    return res;
+  } catch (err) {
     console.error(err);
-    
   }
 };
