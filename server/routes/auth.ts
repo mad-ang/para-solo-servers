@@ -1,6 +1,13 @@
 import express from 'express';
 import 'express-async-errors';
-import { signUp, login, updateUserWithAuth, inquireUser, deleteUser } from '../controllers/UserControllers';
+import {
+  signUp,
+  login,
+  updateUserWithAuth,
+  inquireUser,
+  deleteUser,
+  authenticateUser,
+} from '../controllers/UserControllers';
 
 const router = express.Router();
 
@@ -12,9 +19,11 @@ router.patch('/update', updateUserWithAuth);
 
 router.get('/me', inquireUser);
 
+router.get('/isAuth', authenticateUser);
+
 router.delete('/delete', deleteUser);
 
-router.use((err,res ) => {
+router.use((err, res) => {
   console.error(err);
   res.status(500).json({
     status: 500,

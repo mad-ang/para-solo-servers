@@ -128,10 +128,10 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-const isAuth = async (req: Request, res: Response) => {
+const isAuth = async (req: Request, res: Response): Promise<any> => {
   const authHeader = req.get('Authorization');
   if (!(authHeader && authHeader?.startsWith('Bearer '))) {
-    return false;
+    return null;
   }
 
   const token = authHeader.split(' ')[1];
@@ -141,6 +141,19 @@ const isAuth = async (req: Request, res: Response) => {
     // secretKey로 디코딩 및 검증
     if (error) return false;
     return decoded;
+  });
+};
+
+export const authenticateUser = async (req: Request, res: Response): Promise<any> => {
+  const decoded = await isAuth(req, res);
+  const userId = decoded.userId;
+  const foundUser = await User.findOne({ userId: userId });
+  if (!foundUser) return res.status(401).json(AUTH_ERROR);
+  return res.status(200).json({
+    status: 200,
+    payload: {
+      userId: userId,
+    },
   });
 };
 
@@ -245,10 +258,10 @@ export const deleteUser = async (req: Request, res: Response) => {
     });
 };
 
-export const lookupUser = async(req: Request, res: Response) => {
-  const user = req.body
-  const result = []
+export const lookupUser = async (req: Request, res: Response) => {
+  const user = req.body;
+  const result = [];
   // User.collection.findOne().then((uesr)=>{
   //   result.push(user.userId)
   // })
-}
+};
