@@ -6,6 +6,7 @@ import { monitor } from '@colyseus/monitor';
 import { RoomType } from '../types/Rooms';
 import authRouter from './routes/auth';
 import chatRouter from './routes/chat';
+
 // import { sequelize } from './DB/db'
 import { config } from './envconfig';
 // import socialRoutes from "@colyseus/social/express"
@@ -13,19 +14,22 @@ import 'express-async-errors';
 
 import { SkyOffice } from './rooms/Momstown';
 import { connectDB, createCollection } from './DB/db';
+import { chatController } from './controllers/ChatControllers';
 const mongoose = require('mongoose');
-
+var cookieParser = require('cookie-parser');
 const port = Number(process.env.PORT || 8080);
-// const socketPort = Number(process.env.SOCKET_PORT || 5002);
+const socketPort = Number(process.env.SOCKET_PORT || 5002);
 const app = express();
-
+app.use(cookieParser());
 const options: cors.CorsOptions = {
-  allowedHeaders: [
+  allowedHeaders: 
+  [
     'Origin',
     'X-Requested-With',
     'Content-Type',
     'Accept',
     'X-Access-Token',
+    'authorization',
   ],
   credentials: true,
   methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
@@ -85,26 +89,24 @@ connectDB()
   })
   .catch(console.error);
 
-// const socketServer = http.createServer(app);
-// const io = require('socket.io')(socketServer, {
-//   cors: {
-//     origin: '*',
-//     methods: ['GET', 'POST'],
-//   },
-// });
-// io.on('connection', (socket) => {
-//   console.log(111111);
-//   socket.on('join', async (gameId) => {
-//     console.log(222222);
-//   });
-//   socket.on('message', (message) => {
-//     console.log(333333);
-//   });
-// });
+const socketServer = http.createServer(app);
+const io = require('socket.io')(socketServer, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+  },
+});
+io.on('connection', (socket) => {
+  console.log(111111);
+  chatController(socket)
+  socket.on('message', (message) => {
+    console.log(333333);
+  });
+});
 
-// io.of('/chat-id').on('connection', (socket) => {
+// io.of(/^\/dynamic-\d+$/).on('connection', (socket) => {
 //   console.log('chat id에 접속');
-//   socket.on('chatId', async (senderId) => {
+//   socket.on(/^\/dynamic-\d+$/, async (senderId) => {
 //     console.log('보내는 사람 아이디', senderId);
 //   });
 //   socket.on('message', (message) => {
@@ -112,4 +114,4 @@ connectDB()
 //   });
 // });
 
-// socketServer.listen(socketPort, () => console.log(`socketServer is running on ${socketPort}`));
+socketServer.listen(socketPort, () => console.log(`socketServer is running on ${socketPort}`));

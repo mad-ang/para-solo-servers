@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { config } from '../envconfig';
 import Chat from '../models/Chat';
+import LastChat from '../models/LastChat';
 import User from '../models/User';
 const mongoose = require('mongoose');
 
@@ -12,6 +13,7 @@ export async function connectDB() {
   });
   createCollection('user');
   createCollection('chat');
+  createCollection('lastchat');
 }
 
 export const createCollection = (modelName : string) => {
@@ -25,6 +27,9 @@ export const createCollection = (modelName : string) => {
       break;
     case 'chat':
       new Chat();
+      break;
+    case 'lastchat':
+      new LastChat();
       break;
   }
 };
