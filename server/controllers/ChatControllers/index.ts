@@ -74,16 +74,16 @@ export const chatController = (socket: Socket) => {
     socket.to(roomId).emit('user-stopped-chat');
   };
 
-  const sendMessage = (message: {
+  const sendMessage = (obj: {
     id: number;
     roomId: string;
     userId: string;
     friendId: string;
-    content: string;
+    message: string;
   }) => {
-    const { roomId, userId: senderId, friendId: receiverId, content } = message;
+    const { roomId, userId: senderId, friendId: receiverId, message } = obj;
     rooms_chat[roomId].push(message);
-    addChatMessage({ senderId: senderId, receiverId: receiverId, content: content });
+    addChatMessage({ senderId: senderId, receiverId: receiverId, content: message });
     // LastChat.
     socket.to(roomId).except(socket.id).emit('message', message);
   };
