@@ -157,12 +157,13 @@ export const authenticateUser = async (req: Request, res: Response): Promise<any
   });
 };
 
-export const updateUser = async (userId: string, userinfo: IUserInfo) => {
+export const updateUser = async (userId: string, userInfo: IUserInfo) => {
+  console.log('DB 업데이트', userId, userInfo);
   User.collection
     .updateOne(
       { userId: userId },
       {
-        $set: userinfo,
+        $set: userInfo,
       }
     )
     .then(() => {
@@ -223,6 +224,9 @@ export const inquireUser = async (req: Request, res: Response) => {
         userId: foundUser.userId,
         username: foundUser.username,
         profileImgUrl: foundUser.profileImgUrl,
+        gender: foundUser.gender,
+        age: foundUser.age,
+        height: foundUser.height,
       },
     });
   }

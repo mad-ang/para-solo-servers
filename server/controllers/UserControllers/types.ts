@@ -7,6 +7,7 @@ export interface IUserInfo {
   profileImgUrl?: string;
   gender?: string;
   age?: string;
+  height?: string;
   // 키
   // 몸무게
   // 사는 곳
