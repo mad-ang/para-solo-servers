@@ -41,8 +41,11 @@ export const firstdata = async (req: Request, res: Response) => {
 
 export const setfriend = async (req: Request, res: Response) => {
   const user = req.body;
+  if(!user) res.status(404).send('not found')
 
-  acceptFriend({ myId: user.myId, friendId: user.friendId, isAccept: user.isAccept })
+  acceptFriend({ myId: user.myId, friendId: user.friendId, isAccept: user.isAccept }).then((resultStatus)=> {
+    res.status(200).send(resultStatus);
+  })
 }
 
 export const LastChatControler = async (obj: {
@@ -104,12 +107,13 @@ const acceptFriend = async (obj: { myId: string; friendId: string; isAccept: num
   const { myId, friendId, isAccept } = obj;
   let status = IChatRoomStatus.SOCKET_OFF
   if (isAccept) {
-    updateRoomStatus({ myId, friendId, status});
+    await updateRoomStatus({ myId, friendId, status});
   }
   else {
     status = IChatRoomStatus.REJECTED
-    updateRoomStatus({myId, friendId, status})
+    await updateRoomStatus({myId, friendId, status})
   }
+  return status
 };
 
 export const updateRoomStatus = async (obj: {
