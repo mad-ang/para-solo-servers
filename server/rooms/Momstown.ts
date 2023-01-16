@@ -132,6 +132,7 @@ export class SkyOffice extends Room<TownState> {
           name: message.name,
           userId: message.userId,
         });
+        
         updateUser(message.userId, { username: message.name });
       }
     );

@@ -158,7 +158,6 @@ export const authenticateUser = async (req: Request, res: Response): Promise<any
 };
 
 export const updateUser = async (userId: string, userInfo: IUserInfo) => {
-  console.log('DB 업데이트', userId, userInfo);
   User.collection
     .updateOne(
       { userId: userId },
@@ -167,6 +166,7 @@ export const updateUser = async (userId: string, userInfo: IUserInfo) => {
       }
     )
     .then(() => {
+      console.log('DB 업데이트', userId, userInfo);
       console.log('successfully updated');
     })
     .catch(function (error) {
