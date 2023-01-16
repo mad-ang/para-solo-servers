@@ -21,7 +21,7 @@ export default class PlayerUpdateInfoCommand extends Command<ITownState, Payload
         changed = true;
         newInfomap.set(key, userInfo[key]);
       } else {
-        newInfomap.set(key, player?.userInfo[key]);
+        newInfomap.set(key, player?.userInfo[key] || '');
       }
     });
     if (changed) player.userInfo = newInfomap;
