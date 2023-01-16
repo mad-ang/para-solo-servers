@@ -162,7 +162,7 @@ export const updateUser = async (userId: string, userinfo: IUserInfo) => {
     .updateOne(
       { userId: userId },
       {
-        $set: { userProfile: userinfo },
+        $set: userinfo,
       }
     )
     .then(() => {
@@ -222,7 +222,7 @@ export const inquireUser = async (req: Request, res: Response) => {
       payload: {
         userId: foundUser.userId,
         username: foundUser.username,
-        // profileImgUrl: foundUser.profileImgUrl,
+        profileImgUrl: foundUser.userProfile?.progileImgUrl,
       },
     });
   }

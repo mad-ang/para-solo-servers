@@ -14,6 +14,7 @@ import { addChatMessage, getChatMessage } from '../controllers/ChatControllers';
 import { updateUser } from '../controllers/UserControllers';
 import PlayerUpdateInfoCommand from './commands/PlayerUpdateInfoCommand';
 import { IUserInfo } from '../controllers/UserControllers/types';
+import { } from '../controllers/UserControllers/types'
 
 export class SkyOffice extends Room<TownState> {
   private dispatcher = new Dispatcher(this);
@@ -119,6 +120,7 @@ export class SkyOffice extends Room<TownState> {
           userInfo: message.userInfo,
         });
         updateUser(message.userId, message.userInfo);
+
       }
     );
 

@@ -12,6 +12,7 @@ export const loaddata = async (req: Request, res: Response) => {
   console.log('userId = ', user.userId);
   getLastChat(user.userId)
     .then((result) => {
+      console.log(result);
       res.status(200).send(result);
     })
     .catch((error) => {
@@ -121,6 +122,17 @@ export const updateRoomStatus = async (obj: {
   );
 };
 
+export const updateRoomImg = async (userId : string, profileImgUrl : string) => {
+  await LastChat.collection.findAndModify(
+    {'friendInfo.userId' : userId},
+    { $set: {'friendInfo.profileImgUrl' : profileImgUrl }}
+  )
+  await LastChat.collection.findAndModify(
+    {'myInfo.userId' : userId},
+    { $set: {'myInfo.profileImgUrl' : profileImgUrl }}
+  )
+}
+
 const deleteChatRoom = async (obj:{
   myId: string;
   friendId: string;
@@ -164,9 +176,9 @@ export const getLastChat = async (myId: string) => {
   let result = new Array();
   try {
     await LastChat.collection
-      .find({
-        myInfo: { userId: myId },
-      })
+      .find(
+        {'myInfo.userId' : myId },
+      )
       .limit(20)
       .sort({ _id: -1 })
       .toArray()
