@@ -103,7 +103,13 @@ const addLastChat = async (obj: {
 const acceptFriend = async (obj: { myId: string; friendId: string; isAccept: number }) => {
   const { myId, friendId, isAccept } = obj;
   let status = IChatRoomStatus.SOCKET_OFF
-  if (isAccept) updateRoomStatus({ myId, friendId, status});
+  if (isAccept) {
+    updateRoomStatus({ myId, friendId, status});
+  }
+  else {
+    status = IChatRoomStatus.REJECTED
+    updateRoomStatus({myId, friendId, status})
+  }
 };
 
 export const updateRoomStatus = async (obj: {

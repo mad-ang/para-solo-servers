@@ -1,5 +1,5 @@
 import express from 'express'
-import { firstdata, loaddata } from '../controllers/LastChatControllers'
+import { firstdata, loaddata, setfriend } from '../controllers/LastChatControllers'
 import { requestRoom } from '../controllers/ChatControllers'
 
 const router = express.Router()
@@ -8,5 +8,6 @@ const router = express.Router()
 router.post('/roomList', loaddata)
 router.post('/joinRoom', requestRoom)
 router.post('/addFriend', firstdata)
+router.post('/acceptFriend', setfriend)
 
 export default router
