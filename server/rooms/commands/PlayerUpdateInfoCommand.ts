@@ -13,7 +13,7 @@ export default class PlayerUpdateInfoCommand extends Command<ITownState, Payload
     const { client, userInfo } = data;
     const player = this.room.state.players.get(client.sessionId);
     if (!player) return;
-
+    console.log(333333);
     const keys = Object.keys(userInfo);
     keys.forEach((key) => {
       console.log(99999, key, userInfo[key]);
