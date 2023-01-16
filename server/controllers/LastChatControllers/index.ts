@@ -12,6 +12,7 @@ export const loaddata = async (req: Request, res: Response) => {
   console.log('userId = ', user.userId);
   getLastChat(user.userId)
     .then((result) => {
+      console.log(result);
       res.status(200).send(result);
     })
     .catch((error) => {
@@ -38,20 +39,29 @@ export const firstdata = async (req: Request, res: Response) => {
     });
 };
 
+export const setfriend = async (req: Request, res: Response) => {
+  const user = req.body;
+
+  acceptFriend({ myId: user.myId, friendId: user.friendId, isAccept: user.isAccept })
+}
+
 export const LastChatControler = async (obj: {
   myId: string;
   friendId: string;
   message: string;
 }) => {
   const { myId, friendId, message } = obj;
-  checkLast(myId, friendId).then((res) => {
+  const res = await checkLast(myId, friendId);
+  try {
     if (res) {
       updateLastChat({ myId, friendId, message });
     }
-  });
+  } catch (err) {
+    console.error(err);
+  }
 };
 
-export const addLastChat = async (obj: {
+const addLastChat = async (obj: {
   myInfo: UserResponseDto;
   friendInfo: UserResponseDto;
   status: IChatRoomStatus;
@@ -90,6 +100,50 @@ export const addLastChat = async (obj: {
   }
 };
 
+const acceptFriend = async (obj: { myId: string; friendId: string; isAccept: number }) => {
+  const { myId, friendId, isAccept } = obj;
+  let status = IChatRoomStatus.SOCKET_OFF
+  if (isAccept) updateRoomStatus({ myId, friendId, status});
+};
+
+export const updateRoomStatus = async (obj: {
+  myId: string;
+  friendId: string;
+  status: IChatRoomStatus;
+}) => {
+  const { myId, friendId, status } = obj;
+  await LastChat.collection.findOneAndUpdate(
+    { $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }] },
+    { $set: { status: status } }
+  );
+  await LastChat.collection.findOneAndUpdate(
+    { $and: [{ 'myInfo.userId': friendId }, { 'friendInfo.userId': myId }] },
+    { $set: { status: status } }
+  );
+};
+
+export const updateRoomImg = async (userId : string, profileImgUrl : string) => {
+  await LastChat.collection.findAndModify(
+    {'friendInfo.userId' : userId},
+    { $set: {'friendInfo.profileImgUrl' : profileImgUrl }}
+  )
+  await LastChat.collection.findAndModify(
+    {'myInfo.userId' : userId},
+    { $set: {'myInfo.profileImgUrl' : profileImgUrl }}
+  )
+}
+
+const deleteChatRoom = async (obj:{
+  myId: string;
+  friendId: string;
+}) => {
+  const {myId, friendId} = obj
+  let docs = await LastChat.collection.findOne(
+    { $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }] }
+  )
+  // 삭제한 상대방에게 상대방이 채팅방에서 나갔음을 알림.
+}
+
 export const updateLastChat = async (obj: { myId: string; friendId: string; message: string }) => {
   const { myId, friendId, message } = obj;
   let cur_date = new Date();
@@ -122,9 +176,9 @@ export const getLastChat = async (myId: string) => {
   let result = new Array();
   try {
     await LastChat.collection
-      .find({
-        myInfo: { userId: myId },
-      })
+      .find(
+        {'myInfo.userId' : myId },
+      )
       .limit(20)
       .sort({ _id: -1 })
       .toArray()

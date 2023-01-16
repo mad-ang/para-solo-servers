@@ -102,8 +102,10 @@ const io = require('socket.io')(socketServer, {
     methods: ['GET', 'POST'],
   },
 });
+
 io.on('connection', (socket: Socket) => {
   chatController(socket);
+
 });
 
 // io.of(/^\/dynamic-\d+$/).on('connection', (socket) => {

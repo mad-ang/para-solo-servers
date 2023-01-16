@@ -223,10 +223,8 @@ export const inquireUser = async (req: Request, res: Response) => {
       payload: {
         userId: foundUser.userId,
         username: foundUser.username,
-        profileImgUrl: foundUser.profileImgUrl,
-        gender: foundUser.gender,
-        age: foundUser.age,
-        height: foundUser.height,
+        profileImgUrl: foundUser.userProfile?.progileImgUrl,
+
       },
     });
   }
