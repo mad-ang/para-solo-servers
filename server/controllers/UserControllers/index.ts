@@ -112,7 +112,7 @@ export const login = async (req: Request, res: Response) => {
       }
     );
 
-    res.cookie('refreshToken', refreshToken, { path: '/', secure: true });
+    res.cookie('refreshToken', refreshToken, { path: '/', secure: true, maxAge: 600 });
     res.status(200).json({
       status: 200,
       payload: {
@@ -157,15 +157,16 @@ export const authenticateUser = async (req: Request, res: Response): Promise<any
   });
 };
 
-export const updateUser = async (userId: string, userinfo: IUserInfo) => {
+export const updateUser = async (userId: string, userInfo: IUserInfo) => {
   User.collection
     .updateOne(
       { userId: userId },
       {
-        $set: userinfo,
+        $set: userInfo,
       }
     )
     .then(() => {
+      console.log('DB 업데이트', userId, userInfo);
       console.log('successfully updated');
     })
     .catch(function (error) {
@@ -223,6 +224,7 @@ export const inquireUser = async (req: Request, res: Response) => {
         userId: foundUser.userId,
         username: foundUser.username,
         profileImgUrl: foundUser.userProfile?.progileImgUrl,
+
       },
     });
   }

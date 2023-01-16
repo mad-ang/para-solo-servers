@@ -1,6 +1,7 @@
 export type Token = string;
 
 export interface IUserInfo {
+
   userId?: string
   password?: string
   username?: string
