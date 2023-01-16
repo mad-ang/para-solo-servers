@@ -112,9 +112,8 @@ export class SkyOffice extends Room<TownState> {
     // 플레이어의 username, anim, x,y 좌표를 제외한 정보들 변경
     this.onMessage(
       Message.UPDATE_PLAYER_INFO,
-      (client, message: { userInfo: IUserInfo; userId: string }) => {
-        console.log(message);
-        if (!message || !message.userInfo) return;
+      (client, message: { userInfo: IUserInfo; userId: string; authFlag: number }) => {
+        if (!message || !message.authFlag || !message.userInfo) return;
         this.dispatcher.dispatch(new PlayerUpdateInfoCommand(), {
           client,
           userInfo: message.userInfo,
@@ -126,7 +125,8 @@ export class SkyOffice extends Room<TownState> {
     //  플레이어의 username 변경
     this.onMessage(
       Message.UPDATE_PLAYER_NAME,
-      (client, message: { name: string; userId: string }) => {
+      (client, message: { name: string; userId: string; authFlag: number }) => {
+        if (!message.authFlag) return;
         this.dispatcher.dispatch(new PlayerUpdateNameCommand(), {
           client,
           name: message.name,
