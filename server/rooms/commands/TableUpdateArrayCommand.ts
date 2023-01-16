@@ -23,7 +23,7 @@ export class TableRemoveUserCommand extends Command<ITownState, Payload> {
     const { client, tableId } = data
     const table = this.state.tables.get(tableId)
 
-    if (table.connectedUser.has(client.sessionId)) {
+    if (table?.connectedUser.has(client.sessionId)) {
       table.connectedUser.delete(client.sessionId)
     }
   }

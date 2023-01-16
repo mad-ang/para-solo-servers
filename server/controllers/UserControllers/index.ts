@@ -3,13 +3,13 @@ const jwt = require('jsonwebtoken');
 import { config } from '../../envconfig';
 const AUTH_ERROR = { message: '사용자 인증 오류' };
 
-import { IUser } from './types';
+import { IUserInfo } from './types';
 import { Request, Response } from 'express';
 import { Token } from './types';
 import User from '../../models/User';
 import 'express-async-errors';
 
-async function hashPassword(user: IUser) {
+async function hashPassword(user: IUserInfo) {
   const password = user.password;
   const saltRounds = config.bcrypt.saltRounds;
 
@@ -112,8 +112,8 @@ export const login = async (req: Request, res: Response) => {
       }
     );
 
-    res.append('Set-Cookie', `refreshToken=${refreshToken}; Secure; HttpOnly;`);
-    return res.status(200).json({
+    res.cookie('refreshToken', refreshToken, { path: '/', secure: true });
+    res.status(200).json({
       status: 200,
       payload: {
         userId: foundUser.userId,
@@ -128,10 +128,10 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-const isAuth = async (req: Request, res: Response) => {
+const isAuth = async (req: Request, res: Response): Promise<any> => {
   const authHeader = req.get('Authorization');
   if (!(authHeader && authHeader?.startsWith('Bearer '))) {
-    return false;
+    return null;
   }
 
   const token = authHeader.split(' ')[1];
@@ -144,7 +144,36 @@ const isAuth = async (req: Request, res: Response) => {
   });
 };
 
-export const updateUser = async (req: Request, res: Response) => {
+export const authenticateUser = async (req: Request, res: Response): Promise<any> => {
+  const decoded = await isAuth(req, res);
+  const userId = decoded.userId;
+  const foundUser = await User.findOne({ userId: userId });
+  if (!foundUser) return res.status(401).json(AUTH_ERROR);
+  return res.status(200).json({
+    status: 200,
+    payload: {
+      userId: userId,
+    },
+  });
+};
+
+export const updateUser = async (userId: string, userinfo: IUserInfo) => {
+  User.collection
+    .updateOne(
+      { userId: userId },
+      {
+        $set: { userProfile: userinfo },
+      }
+    )
+    .then(() => {
+      console.log('successfully updated');
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+};
+
+export const updateUserWithAuth = async (req: Request, res: Response) => {
   const decoded = await isAuth(req, res);
   if (!decoded) return res.status(401).json(AUTH_ERROR);
 
@@ -227,10 +256,10 @@ export const deleteUser = async (req: Request, res: Response) => {
     });
 };
 
-export const lookupUser = async(req: Request, res: Response) => {
-  const user = req.body
-  const result = []
+export const lookupUser = async (req: Request, res: Response) => {
+  const user = req.body;
+  const result = [];
   // User.collection.findOne().then((uesr)=>{
   //   result.push(user.userId)
   // })
-}
+};
