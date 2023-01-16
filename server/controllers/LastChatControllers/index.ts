@@ -7,6 +7,7 @@ const time_diff = 9 * 60 * 60 * 1000;
 
 export const loaddata = async (req: Request, res: Response) => {
   const user = req.body;
+  if (!user.userId) res.status(404).send('not found')
   console.log('check post req');
   console.log(user);
   console.log('userId = ', user.userId);
@@ -22,7 +23,8 @@ export const loaddata = async (req: Request, res: Response) => {
 
 export const firstdata = async (req: Request, res: Response) => {
   const user = req.body;
-
+  if (!user) res.status(404).send('not found')
+  if (!(user.myInfo && user.friendInfo && user.status && user.message)) res.status(400).send('invalid input')
   addLastChat({
     myInfo: user.myInfo,
     friendInfo: user.friendInfo,
@@ -44,25 +46,25 @@ export const setfriend = async (req: Request, res: Response) => {
   if(!user) res.status(404).send('not found')
 
   acceptFriend({ myId: user.myId, friendId: user.friendId, isAccept: user.isAccept }).then((resultStatus)=> {
-    res.status(200).send(resultStatus);
+    res.status(200).send(resultStatus)
   })
 }
 
-export const LastChatControler = async (obj: {
-  myId: string;
-  friendId: string;
-  message: string;
-}) => {
-  const { myId, friendId, message } = obj;
-  const res = await checkLast(myId, friendId);
-  try {
-    if (res) {
-      updateLastChat({ myId, friendId, message });
-    }
-  } catch (err) {
-    console.error(err);
-  }
-};
+// export const LastChatControler = async (obj: {
+//   myId: string;
+//   friendId: string;
+//   message: string;
+// }) => {
+//   const { myId, friendId, message } = obj;
+//   const res = await checkLast(myId, friendId);
+//   try {
+//     if (res) {
+//       updateLastChat({ myId, friendId, message });
+//     }
+//   } catch (err) {
+//     console.error(err);
+//   }
+// };
 
 const addLastChat = async (obj: {
   myInfo: UserResponseDto;
@@ -73,7 +75,7 @@ const addLastChat = async (obj: {
   let cur_date = new Date();
   let utc = cur_date.getTime() + cur_date.getTimezoneOffset() * 60 * 1000;
   let createAt = utc + time_diff;
-
+  if (obj.myInfo.userId === obj.friendInfo.userId) return false
   const res = await checkLast(obj.myInfo.userId, obj.friendInfo.userId);
   try {
     if (res) return false;

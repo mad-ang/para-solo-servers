@@ -21,6 +21,7 @@ const createRoom = () => {
   console.log('chatroom[', roomId, '] created.');
   return roomId;
 };
+
 export const requestRoom = (req: Request, res: Response) => {
   const user = req.body;
   let roomId = user.roomId;
@@ -30,7 +31,7 @@ export const requestRoom = (req: Request, res: Response) => {
     // socket.emit('get-users', { roomId, participants: rooms[roomId] });
   } else {
     roomId = createRoom();
-    updateRoomId({ myId: user.myId, friendId: user.friendId, roomId: roomId }).then(() => {
+    updateRoomId({ myId: user.userId, friendId: user.friendId, roomId: roomId }).then(() => {
       rooms[roomId].push(user.userId);
     });
   }
