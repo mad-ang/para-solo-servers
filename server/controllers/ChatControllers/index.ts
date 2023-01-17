@@ -95,13 +95,15 @@ export const chatController = (socket: Socket) => {
     friendId: string;
     message: string;
   }) => {
-    const { roomId, userId: senderId, friendId: receiverId, message } = obj;
+    const { roomId, userId, friendId, message } = obj;
     if (message)
       // rooms_chat[roomId].push(message);
-    addChatMessage({ senderId: senderId, receiverId: receiverId, message: message });
+    addChatMessage({ senderId: userId, receiverId: friendId, message: message });
     // LastChat.
     console.log(roomId, socket.id);
-    io.to(roomId).except(socket.id).emit('message', obj)
+    // io.to(roomId).except(socket.id).emit('message', obj)
+    
+    userMap.get(friendId)?.emit('message', obj)
     // io.to(roomId).emit('message', obj)
     // socket.emit('message',obj)
     // socket.to(roomId).except(socket.id).emit('message', obj);

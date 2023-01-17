@@ -72,7 +72,11 @@ export const setfriend = async (req: Request, res: Response) => {
           resultStatus: resultStatus,
         },
       });
+      //for alarm
       userMap.get(user.friendId)?.emit('accept-friend', user.myId);
+
+      
+      // res.status(200).send(resultStatus)
     }
   );
 };
