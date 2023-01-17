@@ -7,8 +7,9 @@ import { Request, Response } from 'express';
 const time_diff = 9 * 60 * 60 * 1000;
 
 export const loaddata = async (req: Request, res: Response) => {
+  console.log('!!!!!!loaddata?!!!!');
   const user = req.body;
-  if (!user.userId) res.status(404).send('not found');
+  if (!user.userId) return res.status(404).send('not found');
   console.log('check post req');
   console.log(user);
   console.log('userId = ', user.userId);
@@ -25,7 +26,8 @@ export const loaddata = async (req: Request, res: Response) => {
 export const firstdata = async (req: Request, res: Response) => {
   const user = req.body;
   if (!user) res.status(404).send('not found');
-  if (!(user.myInfo && user.friendInfo && user.message)) return res.status(400).send('invalid input');
+  if (!(user.myInfo && user.friendInfo && user.message))
+    return res.status(400).send('invalid input');
 
   addLastChat({
     myInfo: user.myInfo,
@@ -61,8 +63,8 @@ export const firstdata = async (req: Request, res: Response) => {
 
 export const setfriend = async (req: Request, res: Response) => {
   const user = req.body;
-  if (!user) res.status(404).send('not found');
-  console.log(user);
+  if (!user) return res.status(404).send('not found');
+  console.log('setfriend req body', user);
 
   acceptFriend({ myId: user.myId, friendId: user.friendId, isAccept: user.isAccept }).then(
     (resultStatus) => {
@@ -75,7 +77,6 @@ export const setfriend = async (req: Request, res: Response) => {
       //for alarm
       userMap.get(user.friendId)?.emit('accept-friend', user.myId);
 
-      
       // res.status(200).send(resultStatus)
     }
   );
@@ -129,11 +130,10 @@ const addLastChat = async (obj: {
 const acceptFriend = async (obj: { myId: string; friendId: string; isAccept: number }) => {
   const { myId, friendId, isAccept } = obj;
   let status = IChatRoomStatus.SOCKET_OFF;
-  if (isAccept) {
-    await updateRoomStatus({ myId, friendId, status });
-  } else {
+  if (!isAccept) {
     status = IChatRoomStatus.REJECTED;
   }
+  await updateRoomStatus({ myId, friendId, status, isAccept });
   return status;
 };
 
@@ -141,8 +141,16 @@ export const updateRoomStatus = async (obj: {
   myId: string;
   friendId: string;
   status: IChatRoomStatus;
+  isAccept: number;
 }) => {
-  const { myId, friendId, status } = obj;
+  const { myId, friendId, status, isAccept } = obj;
+  console.log('updateRoomStatus', obj);
+  if (!isAccept) {
+    LastChat.collection.deleteOne({ $and: [{ 'myInfo.userId': myId }, { unread: 1 }] });
+    LastChat.collection.deleteOne({ $and: [{ 'friendInfo.userId': myId }, { unread: 0 }] });
+    return;
+  }
+
   await LastChat.collection.findOneAndUpdate(
     { $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }] },
     { $set: { status: status } }
@@ -224,11 +232,9 @@ export const getLastChat = async (myId: string) => {
 
 export const checkLast = async (myId: string, friendId: string) => {
   try {
-    console.log('11111 받은 정보!!!!', myId, friendId);
     const res = await LastChat.collection.count({
       $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }],
     });
-    console.log('11111 그래서 result는?? ', res);
     return res;
   } catch (err) {
     console.error(err);

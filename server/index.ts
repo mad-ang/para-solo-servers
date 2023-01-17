@@ -106,14 +106,13 @@ export const io = require('socket.io')(socketServer, {
 export const userMap = new Map<string, Socket>();
 
 io.on('connection', (socket: Socket) => {
-  
-  console.log("here comes new challenge !!", socket.id)
+  console.log('here comes new challenge !!', socket.id);
   socket.on('whoAmI', (userId) => {
     userMap.set(userId, socket);
-  })
+  });
   chatController(socket);
-  socket.on('disconnect', ()=>{
-    console.log("the challenger disconnected");
+  socket.on('disconnect', () => {
+    console.log('the challenger disconnected');
   });
 });
 
