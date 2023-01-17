@@ -59,9 +59,6 @@ export const setfriend = async (req: Request, res: Response) => {
         },
       });
       userMap.get(user.friendId)?.emit('accept-friend', user.myId);
-      if (resultStatus === IChatRoomStatus.REJECTED) {
-        // TODO: DB에서 삭제
-      }
       // res.status(200).send(resultStatus)
     }
   );
@@ -129,7 +126,6 @@ const acceptFriend = async (obj: { myId: string; friendId: string; isAccept: num
     await updateRoomStatus({ myId, friendId, status });
   } else {
     status = IChatRoomStatus.REJECTED;
-    await updateRoomStatus({ myId, friendId, status });
   }
   return status;
 };
