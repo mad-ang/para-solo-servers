@@ -37,6 +37,7 @@ export const firstdata = async (req: Request, res: Response) => {
       console.log(result);
       if (result) {
         res.status(200).send('add frieds');
+        //for alarm.
         userMap.get(user.friendInfo.userId)?.emit('request-friend', user.myInfo as any);
       } else res.status(200).send('already exist');
     })
@@ -58,7 +59,10 @@ export const setfriend = async (req: Request, res: Response) => {
           resultStatus: resultStatus,
         },
       });
+      //for alarm
       userMap.get(user.friendId)?.emit('accept-friend', user.myId);
+
+      
       // res.status(200).send(resultStatus)
     }
   );
