@@ -35,9 +35,18 @@ export const loaddata = async (req: Request, res: Response) => {
 
 export const firstdata = async (req: Request, res: Response) => {
   const user = req.body;
-  if (!user) return res.status(404).send('not found');
-  if (!(user.myInfo && user.friendInfo && user.message))
-    return res.status(400).send('invalid input');
+  if (!user) {
+    return res.status(404).json({
+      status: 404,
+      message: 'not found',
+    });
+  }
+  if (!(user.myInfo && user.friendInfo && user.message)) {
+    return res.status(400).json({
+      status: 400,
+      message: 'invalid input',
+    });
+  }
 
   addLastChat({
     myInfo: user.myInfo,
