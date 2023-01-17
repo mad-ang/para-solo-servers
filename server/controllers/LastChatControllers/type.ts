@@ -20,5 +20,6 @@ export interface UserResponseDto {
 export enum IChatRoomStatus {
   FRIEND_REQUEST,
   SOCKET_ON,
-  SOCKET_OFF
+  SOCKET_OFF,
+  REJECTED
 }

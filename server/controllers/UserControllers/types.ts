@@ -23,7 +23,7 @@ export interface IUserProfile {
   weight?: number
   region?: string
   gender?: gender
-  age?: string
+  age?: number
 }
 
 export enum gender {
