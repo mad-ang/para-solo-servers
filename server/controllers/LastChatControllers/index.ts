@@ -8,23 +8,34 @@ const time_diff = 9 * 60 * 60 * 1000;
 
 export const loaddata = async (req: Request, res: Response) => {
   const user = req.body;
-  if (!user.userId) return res.status(404).send('not found');
+  if (!user.userId)
+    return res.status(404).json({
+      status: 404,
+      message: 'not found',
+    });
   console.log('check post req');
   console.log(user);
   console.log('userId = ', user.userId);
   getLastChat(user.userId)
     .then((result) => {
       console.log(result);
-      res.status(200).send(result);
+      res.status(200).json({
+        status: 200,
+        paylad: result,
+      });
     })
     .catch((error) => {
       console.error(error);
+      return res.status(500).json({
+        status: 500,
+        message: '서버 오류',
+      });
     });
 };
 
 export const firstdata = async (req: Request, res: Response) => {
   const user = req.body;
-  if (!user) res.status(404).send('not found');
+  if (!user) return res.status(404).send('not found');
   if (!(user.myInfo && user.friendInfo && user.message))
     return res.status(400).send('invalid input');
 
