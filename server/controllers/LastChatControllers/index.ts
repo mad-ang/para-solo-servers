@@ -7,7 +7,6 @@ import { Request, Response } from 'express';
 const time_diff = 9 * 60 * 60 * 1000;
 
 export const loaddata = async (req: Request, res: Response) => {
-  console.log('!!!!!!loaddata?!!!!');
   const user = req.body;
   if (!user.userId) return res.status(404).send('not found');
   console.log('check post req');
@@ -64,7 +63,6 @@ export const firstdata = async (req: Request, res: Response) => {
 export const setfriend = async (req: Request, res: Response) => {
   const user = req.body;
   if (!user) return res.status(404).send('not found');
-  console.log('setfriend req body', user);
 
   acceptFriend({ myId: user.myId, friendId: user.friendId, isAccept: user.isAccept }).then(
     (resultStatus) => {
@@ -96,7 +94,6 @@ const addLastChat = async (obj: {
 
   try {
     if (alreadyFriend) {
-      console.log('checkLast함수 에 대한 response?', alreadyFriend);
       return false;
     }
 
