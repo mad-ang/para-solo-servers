@@ -153,7 +153,7 @@ export class SkyOffice extends Room<TownState> {
         // let receiverId = String(this.state.players.get(message.receiver)?.userId)
         // let content = String(message.content)
         const { senderId, receiverId, content } = message;
-        addChatMessage({ senderId: senderId, receiverId: receiverId, content: content });
+        // addChatMessage({ senderId: senderId, receiverId: receiverId, content: content });
         // let chat = new Chat(senderId, receiverId);
         // console.log(this.state.players.get(sanitizeFilter(message.receiver)))
         // message.receiver.send(Message.RECEIVE_DM, { sender : message.sender, content : message.content })
