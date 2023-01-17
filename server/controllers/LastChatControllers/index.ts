@@ -52,7 +52,12 @@ export const setfriend = async (req: Request, res: Response) => {
 
   acceptFriend({ myId: user.myId, friendId: user.friendId, isAccept: user.isAccept }).then(
     (resultStatus) => {
-      res.status(200).send(resultStatus);
+      res.status(200).json({
+        status: 200,
+        payload: {
+          resultStatus: resultStatus,
+        },
+      });
       userMap.get(user.friendId)?.emit('accept-friend', user.myId);
       // res.status(200).send(resultStatus)
     }
