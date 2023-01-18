@@ -21,7 +21,7 @@ export const loaddata = async (req: Request, res: Response) => {
       console.log(result);
       res.status(200).json({
         status: 200,
-        paylad: result,
+        payload: result,
       });
     })
     .catch((error) => {
