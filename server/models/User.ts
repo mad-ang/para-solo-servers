@@ -1,6 +1,7 @@
 import { config } from '../envconfig';
 import { Schema, model, Document, Model } from 'mongoose';
-import { IUserInfo } from '../controllers/UserControllers/types';
+import { IUserInfo, gender } from '../controllers/UserControllers/types';
+
 const bcrypt = require('bcrypt');
 const saltRounds = config.bcrypt.saltRounds;
 
@@ -8,9 +9,16 @@ const user = new Schema<IUserInfo>({
   userId: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   username: { type: String, required: false },
-  profileImgUrl: { type: String, required: false },
-  gender: { type: String, required: false },
-  age: { type: String, required: false },
+  userProfile: {
+    progileImgUrl: { type: String, required: false },
+    heigth: { type: Number, required: false },
+    weight: { type: Number, required: false },
+    region: { type: String, required: false },
+    gender: { type: Number, required: false },
+    age: { type: Number, required: false },
+  },
+  // gender: { type: Number, required: false },
+  // age: { type: String, required: false },
   refreshToken: { type: String, required: false },
   createdAt: { type: Date, default: Date.now, required: false },
   lastUpdated: { type: Date, required: false },

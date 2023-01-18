@@ -96,14 +96,24 @@ connectDB()
   .catch(console.error);
 
 const socketServer = http.createServer(app);
-const io = require('socket.io')(socketServer, {
+export const io = require('socket.io')(socketServer, {
   cors: {
     origin: '*',
     methods: ['GET', 'POST'],
   },
 });
+
+export const userMap = new Map<string, Socket>();
+
 io.on('connection', (socket: Socket) => {
+  console.log('here comes new challenge !!', socket.id);
+  socket.on('whoAmI', (userId) => {
+    userMap.set(userId, socket);
+  });
   chatController(socket);
+  socket.on('disconnect', () => {
+    console.log('the challenger disconnected');
+  });
 });
 
 // io.of(/^\/dynamic-\d+$/).on('connection', (socket) => {

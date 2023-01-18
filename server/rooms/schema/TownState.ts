@@ -1,13 +1,21 @@
 import { Schema, ArraySchema, SetSchema, MapSchema, type } from '@colyseus/schema';
 import { IPlayer, ITownState, ITable, IChatMessage, IChair } from '../../../types/ITownState';
-import { IUserInfo } from '../../controllers/UserControllers/types';
+import { IUserInfo, IUserProfile } from '../../controllers/UserControllers/types';
 
-export class User extends Schema implements IUserInfo {
-  @type('string') profileImgUrl = '';
-  @type('string') gender = '';
-  @type('string') age = '';
-  @type('string') height = '';
+export class UserProfile extends Schema implements IUserProfile{
+  @type('string') progileImgUrl = '';
+  @type('number') heigth = 0;
+  @type('number') weight = 0;
+  @type('string') region = '';
+  @type('number') gender = -1;
+  @type('number') age = 0;
 }
+// export class User extends Schema implements IUserInfo {
+//   @type('string') gender = '';
+//   @type('string') age = '';
+//   @type('string') height = '';
+//   @type([IUserProfile]) 
+// }
 export class Player extends Schema implements IPlayer {
   @type('string') name = '';
   @type('number') x = 705;

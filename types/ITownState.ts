@@ -1,5 +1,5 @@
 import { Schema, ArraySchema, SetSchema, MapSchema } from '@colyseus/schema';
-import { User } from '../server/rooms/schema/TownState';
+// import { User } from '../server/rooms/schema/TownState';
 
 export interface IPlayer extends Schema {
   name: string;

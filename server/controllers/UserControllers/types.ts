@@ -1,19 +1,32 @@
 export type Token = string;
 
 export interface IUserInfo {
-  userId?: string;
-  password?: string;
-  username?: string;
-  profileImgUrl?: string;
-  gender?: string;
-  age?: string;
-  height?: string;
-  // 키
-  // 몸무게
-  // 사는 곳
-  // 성별
-  // 나이
-  refreshToken?: Token | null;
-  createdAt?: Date | null;
-  lastUpdated?: Date | null;
+
+  userId?: string
+  password?: string
+  username?: string
+  // profileImgUrl?: string
+  // heigth?: number
+  // weight?: number
+  // region?: string
+  // gender?: gender
+  // age?: string
+  userProfile?: IUserProfile
+  refreshToken?: Token | null
+  createdAt?: Date | null
+  lastUpdated?: Date | null
+}
+
+export interface IUserProfile {
+  progileImgUrl?: string
+  heigth?: number
+  weight?: number
+  region?: string
+  gender?: gender
+  age?: number
+}
+
+export enum gender {
+  FEMALE,
+  MALE
 }

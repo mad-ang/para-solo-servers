@@ -14,6 +14,7 @@ import { addChatMessage, getChatMessage } from '../controllers/ChatControllers';
 import { updateUser } from '../controllers/UserControllers';
 import PlayerUpdateInfoCommand from './commands/PlayerUpdateInfoCommand';
 import { IUserInfo } from '../controllers/UserControllers/types';
+import { } from '../controllers/UserControllers/types'
 
 export class SkyOffice extends Room<TownState> {
   private dispatcher = new Dispatcher(this);
@@ -105,9 +106,8 @@ export class SkyOffice extends Room<TownState> {
           x: message.x,
           y: message.y,
           anim: message.anim,
+        })
         });
-      }
-    );
 
     // 플레이어의 username, anim, x,y 좌표를 제외한 정보들 변경
     this.onMessage(
@@ -119,6 +119,7 @@ export class SkyOffice extends Room<TownState> {
           userInfo: message.userInfo,
         });
         updateUser(message.userId, message.userInfo);
+
       }
     );
 
@@ -152,7 +153,7 @@ export class SkyOffice extends Room<TownState> {
         // let receiverId = String(this.state.players.get(message.receiver)?.userId)
         // let content = String(message.content)
         const { senderId, receiverId, content } = message;
-        addChatMessage({ senderId: senderId, receiverId: receiverId, content: content });
+        // addChatMessage({ senderId: senderId, receiverId: receiverId, content: content });
         // let chat = new Chat(senderId, receiverId);
         // console.log(this.state.players.get(sanitizeFilter(message.receiver)))
         // message.receiver.send(Message.RECEIVE_DM, { sender : message.sender, content : message.content })
