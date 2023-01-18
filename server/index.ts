@@ -107,8 +107,10 @@ export const userMap = new Map<string, Socket>();
 
 io.on('connection', (socket: Socket) => {
   
-  console.log("here comes new challenge !!", socket.id)
+  console.log("here comes new challenger !!", socket.id)
   socket.on('whoAmI', (userId) => {
+    console.log("whoAmI");
+    
     userMap.set(userId, socket);
   })
   chatController(socket);
