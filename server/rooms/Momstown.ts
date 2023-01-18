@@ -14,7 +14,7 @@ import { addChatMessage, getChatMessage } from '../controllers/ChatControllers';
 import { updateUser } from '../controllers/UserControllers';
 import PlayerUpdateInfoCommand from './commands/PlayerUpdateInfoCommand';
 import { IUserInfo } from '../controllers/UserControllers/types';
-import { } from '../controllers/UserControllers/types'
+import {} from '../controllers/UserControllers/types';
 
 export class SkyOffice extends Room<TownState> {
   private dispatcher = new Dispatcher(this);
@@ -38,12 +38,30 @@ export class SkyOffice extends Room<TownState> {
 
     this.setState(new TownState());
     // hard coding for talbe.
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 21; i++) {
       this.state.tables.set(String(i), new Table());
     }
 
     // hard coding for chair.
-    for (let i = 0; i < 16; i++) {
+    for (let i = 0; i < 42; i++) {
+      this.state.chairs.set(String(i), new Chair());
+    }
+    for (let i = 21; i < 23; i++) {
+      this.state.tables.set(String(i), new Table());
+    }
+    for (let i = 42; i < 48; i++) {
+      this.state.chairs.set(String(i), new Chair());
+    }
+    for (let i = 23; i < 32; i++) {
+      this.state.tables.set(String(i), new Table());
+    }
+    for (let i = 48; i < 84; i++) {
+      this.state.chairs.set(String(i), new Chair());
+    }
+    for (let i = 32; i < 33; i++) {
+      this.state.tables.set(String(i), new Table());
+    }
+    for (let i = 84; i < 90; i++) {
       this.state.chairs.set(String(i), new Chair());
     }
 
@@ -106,8 +124,9 @@ export class SkyOffice extends Room<TownState> {
           x: message.x,
           y: message.y,
           anim: message.anim,
-        })
         });
+      }
+    );
 
     // 플레이어의 username, anim, x,y 좌표를 제외한 정보들 변경
     this.onMessage(
@@ -119,7 +138,6 @@ export class SkyOffice extends Room<TownState> {
           userInfo: message.userInfo,
         });
         updateUser(message.userId, message.userInfo);
-
       }
     );
 
@@ -133,7 +151,7 @@ export class SkyOffice extends Room<TownState> {
           name: message.name,
           userId: message.userId,
         });
-        
+
         updateUser(message.userId, { username: message.name });
       }
     );
