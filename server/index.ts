@@ -19,7 +19,7 @@ import { Socket } from 'socket.io';
 const mongoose = require('mongoose');
 var cookieParser = require('cookie-parser');
 const port = Number(process.env.PORT || 8080);
-const socketPort = Number(process.env.SOCKET_PORT || 4711);
+const socketPort = Number(process.env.SOCKET_PORT || 5002);
 const app = express();
 app.use(cookieParser());
 const options: cors.CorsOptions = {
