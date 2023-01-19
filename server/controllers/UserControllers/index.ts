@@ -158,6 +158,7 @@ export const authenticateUser = async (req: Request, res: Response): Promise<any
 };
 
 export const updateUser = async (userId: string, userInfo: IUserInfo) => {
+  //  TODO: 한 뎁스 더 들어가서 userProfile 변경시키는 쿼리 확인하기
   User.collection
     .updateOne(
       { userId: userId },
@@ -186,7 +187,7 @@ export const updateUserWithAuth = async (req: Request, res: Response) => {
     newUserData.password = await hashPassword(newUserData);
   }
   newUserData.lastUpdated = new Date();
-
+  //  TODO: 한 뎁스 더 들어가서 userProfile 변경시키는 쿼리 확인하기
   User.collection
     .updateOne(
       { userId: previousUserId },
@@ -223,8 +224,7 @@ export const inquireUser = async (req: Request, res: Response) => {
       payload: {
         userId: foundUser.userId,
         username: foundUser.username,
-        profileImgUrl: foundUser.userProfile?.progileImgUrl,
-
+        userProfile: foundUser.userProfile,
       },
     });
   }

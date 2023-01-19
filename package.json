@@ -1,7 +1,7 @@
 {
-  "name": "skyoffice",
+  "name": "parasolo",
   "version": "1.0.0",
-  "description": "Server for SkyOffice",
+  "description": "Server for parasolo",
   "main": ".eslintrc.js",
   "scripts": {
     "start": "cd server && ts-node-dev --project tsconfig.server.json --respawn --transpile-only index.ts",
@@ -10,15 +10,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kevinshen56714/SkyOffice.git"
+    "url": "https://github.com/mad-ang/momstown-servers"
   },
   "keywords": [],
-  "author": "kevinshen56714",
+  "author": "parasolo",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/kevinshen56714/SkyOffice/issues"
+    "url": "https://github.com/mad-ang/momstown-servers/issues"
   },
-  "homepage": "https://github.com/kevinshen56714/SkyOffice#readme",
+  "homepage": "https://github.com/mad-ang/momstown-servers#readme",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",
@@ -50,6 +50,7 @@
     "mongoose": "^6.8.3",
     "peer": "^0.6.1",
     "phaser": "^3.55.2",
+    "pm2": "^5.2.2",
     "regenerator-runtime": "^0.13.7",
     "socket.io": "^4.5.4",
     "typescript": "^4.8.2",

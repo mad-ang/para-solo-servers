@@ -112,10 +112,10 @@ io.on('connection', (socket: Socket) => {
     console.log("whoAmI");
     
     userMap.set(userId, socket);
-  })
+  });
   chatController(socket);
-  socket.on('disconnect', ()=>{
-    console.log("the challenger disconnected");
+  socket.on('disconnect', () => {
+    console.log('the challenger disconnected');
   });
 });
 
