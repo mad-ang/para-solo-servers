@@ -6,7 +6,7 @@ export const getUrlToUpload = async (req: Request, res: Response) => {
     const { photoKey } = req.body;
     const url = await S3.getPresignedUploadUrl(photoKey);
     if (!url) {
-      res.append('Access-Control-Allow-Origin', '*');
+      res.header('Access-Control-Allow-Origin', '*');
       return res.status(404).json({
         status: 404,
         message: '이미지 저장소를 찾을 수 없습니다.',
