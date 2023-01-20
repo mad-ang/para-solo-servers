@@ -3,7 +3,7 @@ import { Socket } from 'socket.io';
 import { io } from '../..';
 import { v4 as uuidV4 } from 'uuid';
 import { Request, Response } from 'express';
-import { updateRoomId } from '../LastChatControllers';
+import { updateLastChat, updateRoomId } from '../LastChatControllers';
 import { userMap } from '../..';
 const rooms: Record<string, string[]> = {};
 const rooms_chat: Record<string, Array<Object>> = {};
@@ -68,6 +68,7 @@ export const chatController = (socket: Socket) => {
     if (message) {
       // rooms_chat[roomId].push(message);
       addChatMessage({ senderId: userId, receiverId: friendId, message: message });
+      updateLastChat({myId: userId, friendId: friendId, message: message})
       console.log(userId, ' to ', friendId,' : ', message);
       // io.to(roomId).except(socket.id).emit('message', obj)
       userMap.get(friendId)?.emit('message', obj);
