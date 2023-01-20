@@ -16,6 +16,7 @@ import { SkyOffice } from './rooms/Momstown';
 import { connectDB, createCollection } from './DB/db';
 import { chatController } from './controllers/ChatControllers';
 import { Socket } from 'socket.io';
+import S3 from './s3';
 const mongoose = require('mongoose');
 var cookieParser = require('cookie-parser');
 const port = Number(process.env.PORT || 8080);
@@ -106,11 +107,10 @@ export const io = require('socket.io')(socketServer, {
 export const userMap = new Map<string, Socket>();
 
 io.on('connection', (socket: Socket) => {
-  
-  console.log("here comes new challenger !!", socket.id)
+  console.log('here comes new challenger !!', socket.id);
   socket.on('whoAmI', (userId) => {
-    console.log("whoAmI");
-    
+    console.log('whoAmI');
+
     userMap.set(userId, socket);
   });
   chatController(socket);
@@ -130,3 +130,4 @@ io.on('connection', (socket: Socket) => {
 // });
 
 socketServer.listen(socketPort, () => console.log(`socketServer is running on ${socketPort}`));
+S3.init();
