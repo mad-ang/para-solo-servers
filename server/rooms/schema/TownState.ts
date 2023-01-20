@@ -2,20 +2,20 @@ import { Schema, ArraySchema, SetSchema, MapSchema, type } from '@colyseus/schem
 import { IPlayer, ITownState, ITable, IChatMessage, IChair } from '../../../types/ITownState';
 import { IUserInfo, IUserProfile } from '../../controllers/UserControllers/types';
 
-export class UserProfile extends Schema implements IUserProfile{
+export class UserProfile extends Schema implements IUserProfile {
   @type('string') progileImgUrl = '';
-  @type('number') heigth = 0;
-  @type('number') weight = 0;
+  @type('string') heigth = '';
+  @type('string') weight = '';
   @type('string') region = '';
-  @type('number') gender = -1;
-  @type('number') age = 0;
+  @type('string') gender = '';
+  @type('string') age = '';
 }
-// export class User extends Schema implements IUserInfo {
-//   @type('string') gender = '';
-//   @type('string') age = '';
-//   @type('string') height = '';
-//   @type([IUserProfile]) 
-// }
+export class UserInfo extends Schema implements IUserInfo {
+  @type('string') userId = '';
+  @type('string') password = '';
+  @type('string') username = '';
+  @type('string') refreshToken = '';
+}
 export class Player extends Schema implements IPlayer {
   @type('string') name = '';
   @type('number') x = 705;
@@ -25,6 +25,7 @@ export class Player extends Schema implements IPlayer {
   @type('boolean') videoConnected = false;
   @type('string') userId = '';
   @type({ map: 'string' }) userInfo = new MapSchema<string>();
+  @type({ map: 'string' || 'number' }) userProfile = new MapSchema<string>();
 }
 
 export class ChatMessage extends Schema implements IChatMessage {
