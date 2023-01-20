@@ -219,7 +219,7 @@ export const updateRoomId = async (obj: { myId: string; friendId: string; roomId
 
   await LastChat.collection.findOneAndUpdate(
     { $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }] },
-    { $set: { roomId: roomId } }
+    { $set: [{ roomId: roomId }, { unreadCount: 0 }] }
   );
   await LastChat.collection.findOneAndUpdate(
     { $and: [{ 'myInfo.userId': friendId }, { 'friendInfo.userId': myId }] },
