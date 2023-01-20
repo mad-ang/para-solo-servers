@@ -24,7 +24,6 @@ export class Player extends Schema implements IPlayer {
   @type('boolean') readyToConnect = false;
   @type('boolean') videoConnected = false;
   @type('string') userId = '';
-  @type({ map: 'string' }) userInfo = new MapSchema<string>();
   @type({ map: 'string' || 'number' }) userProfile = new MapSchema<string>();
 }
 
