@@ -210,7 +210,6 @@ export const updateLastChat = async (obj: { myId: string; friendId: string; mess
     { $and: [{ 'myInfo.userId': friendId }, { 'friendInfo.userId': myId }] },
     { $set: { message: message, updatedAt: createAt }, $inc: { unreadCount: 1 } }
   );
-  docs.value?.set();
 };
 
 export const updateRoomId = async (obj: { myId: string; friendId: string; roomId: string }) => {
