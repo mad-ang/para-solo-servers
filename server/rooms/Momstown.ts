@@ -132,7 +132,6 @@ export class SkyOffice extends Room<TownState> {
     this.onMessage(
       Message.UPDATE_PLAYER_INFO,
       (client, message: { userProfile: IUserProfile; userId: string; authFlag: number }) => {
-        console.log('서버에서 받은 업데이트할 정보?? ', message);
         if (!message || !message.authFlag || !message.userProfile) return;
         this.dispatcher.dispatch(new PlayerUpdateInfoCommand(), {
           client,
