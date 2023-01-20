@@ -6,7 +6,7 @@ import { Request, Response } from 'express';
 import { updateLastChat, updateRoomId } from '../LastChatControllers';
 import { userMap } from '../..';
 const rooms: Record<string, string[]> = {};
-const rooms_chat: Record<string, Array<Object>> = {};
+// const rooms_chat: Record<string, Object[]> = {};
 interface IRoomParams {
   roomId: string;
   userId: string;
@@ -18,7 +18,7 @@ const time_diff = 9 * 60 * 60 * 1000;
 const createRoom = () => {
   const roomId = uuidV4();
   rooms[roomId] = [];
-  rooms_chat[roomId] = [];
+  // rooms_chat[roomId] = [];
   console.log('chatroom[', roomId, '] created.');
   return roomId;
 };
@@ -66,6 +66,8 @@ export const chatController = (socket: Socket) => {
   }) => {
     const { roomId, userId, friendId, message } = obj;
     if (message) {
+      // console.log(rooms_chat[roomId]);
+      
       // rooms_chat[roomId].push(message);
       addChatMessage({ senderId: userId, receiverId: friendId, message: message });
       updateLastChat({myId: userId, friendId: friendId, message: message})
@@ -82,15 +84,15 @@ export const chatController = (socket: Socket) => {
 const readMessage = (message: { roomId: string; userId: string; friendId: string }) => {
   const { roomId, userId, friendId } = message;
 
-  if (rooms_chat[roomId]) {
-    socket.to(roomId).emit('show-messages', rooms_chat[roomId]);
-  } else {
+  // if (rooms_chat[roomId]) {
+  //   socket.to(roomId).emit('show-messages', rooms_chat[roomId]);
+  // } else {
     console.log('check readMessage');
     getChatMessage(userId, friendId)
       .then((chatMessage) => {
         console.log('chatroomId after getChatMessage:', roomId);
-        // console.log(chatMessage);
-        rooms_chat[roomId] = chatMessage;
+        // rooms_chat[roomId].push(chatMessage)
+        // console.log(rooms_chat[roomId]);
         // socket.to(roomId).emit('show-messages', chatMessage);
         socket.emit('show-messages', chatMessage);
       })
@@ -98,14 +100,14 @@ const readMessage = (message: { roomId: string; userId: string; friendId: string
         console.log(error);
       });
     }
-  }
+  // }
 
   // socket.on("create-room", createRoom);
   socket.on('join-room', joinRoom);
 
   // socket.on('start-chat', startChat);
   // socket.on('stop-chat', stopChat);
-  socket.on('show-messages', readMessage);
+  // socket.on('show-messages', readMessage);
   socket.on('message', sendMessage);
 };
 // join-room
