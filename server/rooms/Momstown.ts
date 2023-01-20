@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { Room, Client, ServerError } from 'colyseus';
 import { Dispatcher } from '@colyseus/command';
-import { Player, TownState, Table, Chair } from './schema/TownState';
+import { Player, TownState, Table, Chair, UserProfile } from './schema/TownState';
 import { Message } from '../../types/Messages';
 import { IRoomData } from '../../types/Rooms';
 import { whiteboardRoomIds } from './schema/TownState';
@@ -11,9 +11,9 @@ import { ChairStatusUpdateCommand } from './commands/ChairStatusUpdateCommand';
 import ChatMessageUpdateCommand from './commands/ChatMessageUpdateCommand';
 import { TableAddUserCommand, TableRemoveUserCommand } from './commands/TableUpdateArrayCommand';
 import { addChatMessage, getChatMessage } from '../controllers/ChatControllers';
-import { updateUser } from '../controllers/UserControllers';
+import { updateUser, updateUserName } from '../controllers/UserControllers';
 import PlayerUpdateInfoCommand from './commands/PlayerUpdateInfoCommand';
-import { IUserInfo } from '../controllers/UserControllers/types';
+import { IUserInfo, IUserProfile } from '../controllers/UserControllers/types';
 import {} from '../controllers/UserControllers/types';
 
 export class SkyOffice extends Room<TownState> {
@@ -131,13 +131,14 @@ export class SkyOffice extends Room<TownState> {
     // 플레이어의 username, anim, x,y 좌표를 제외한 정보들 변경
     this.onMessage(
       Message.UPDATE_PLAYER_INFO,
-      (client, message: { userInfo: IUserInfo; userId: string; authFlag: number }) => {
-        if (!message || !message.authFlag || !message.userInfo) return;
+      (client, message: { userProfile: IUserProfile; userId: string; authFlag: number }) => {
+        console.log('서버에서 받은 업데이트할 정보?? ', message);
+        if (!message || !message.authFlag || !message.userProfile) return;
         this.dispatcher.dispatch(new PlayerUpdateInfoCommand(), {
           client,
-          userInfo: message.userInfo,
+          userProfile: message.userProfile,
         });
-        updateUser(message.userId, message.userInfo);
+        updateUser(message.userId, message.userProfile);
       }
     );
 
@@ -152,7 +153,7 @@ export class SkyOffice extends Room<TownState> {
           userId: message.userId,
         });
 
-        updateUser(message.userId, { username: message.name });
+        updateUserName(message.userId, message.name);
       }
     );
 

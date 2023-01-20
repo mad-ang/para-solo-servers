@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 import { config } from '../../envconfig';
 const AUTH_ERROR = { message: '사용자 인증 오류' };
 
-import { IUserInfo } from './types';
+import { IUserInfo, IUserProfile } from './types';
 import { Request, Response } from 'express';
 import { Token } from './types';
 import User from '../../models/User';
@@ -51,6 +51,14 @@ export const signUp = async (req: Request, res: Response) => {
   const result = await User.collection.insertOne({
     userId: user.userId,
     password: user.password,
+    userProfile: {
+      progileImgUrl: '',
+      heigth: '',
+      weight: '',
+      region: '',
+      gender: '',
+      age: '',
+    },
     createdAt: new Date(),
   });
   if (!result) {
@@ -157,17 +165,46 @@ export const authenticateUser = async (req: Request, res: Response): Promise<any
   });
 };
 
-export const updateUser = async (userId: string, userInfo: IUserInfo) => {
-  //  TODO: 한 뎁스 더 들어가서 userProfile 변경시키는 쿼리 확인하기
+export const updateUser = async (userId: string, userProfile: IUserProfile) => {
+  console.log('888 updateUser', userProfile);
+  if (!userProfile) return;
+  const keys = Object.keys(userProfile);
+  keys?.forEach((key) => {
+    if (!userProfile[key] || userProfile[key].length === 0) {
+      delete userProfile[key];
+    }
+  });
+
   User.collection
     .updateOne(
       { userId: userId },
       {
-        $set: userInfo,
+        $set: {
+          userProfile: userProfile,
+        },
       }
     )
     .then(() => {
-      console.log('DB 업데이트', userId, userInfo);
+      console.log('DB 업데이트', userId, userProfile);
+      console.log('successfully updated');
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+};
+
+export const updateUserName = async (userId: string, username: string) => {
+  User.collection
+    .updateOne(
+      { userId: userId },
+      {
+        $set: {
+          username: username,
+        },
+      }
+    )
+    .then(() => {
+      console.log('DB 업데이트', userId, username);
       console.log('successfully updated');
     })
     .catch(function (error) {
@@ -192,7 +229,9 @@ export const updateUserWithAuth = async (req: Request, res: Response) => {
     .updateOne(
       { userId: previousUserId },
       {
-        $set: newUserData,
+        $set: {
+          userProfile: newUserData.userProfile,
+        },
       }
     )
     .then(() => {
