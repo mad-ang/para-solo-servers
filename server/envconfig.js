@@ -9,6 +9,9 @@ export const config = {
   bcrypt: {
     saltRounds: parseInt(process.env.BCRYPT_SALT_ROUNDS),
   },
+  db: {
+    host: process.env.DB_HOST,
+  },
   aws: {
     bucketName: process.env.AWS_BUCKET_NAME,
     bucketRegion: process.env.AWS_BUCKET_REGION,

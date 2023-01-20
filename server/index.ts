@@ -6,6 +6,7 @@ import { monitor } from '@colyseus/monitor';
 import { RoomType } from '../types/Rooms';
 import authRouter from './routes/auth';
 import chatRouter from './routes/chat';
+import imageRouter from './routes/image';
 
 // import { sequelize } from './DB/db'
 import { config } from './envconfig';
@@ -78,6 +79,7 @@ gameServer.define(RoomType.PUBLIC, SkyOffice, {
 // app.use('/colyseus', monitor())
 app.use('/auth', authRouter);
 app.use('/chat', chatRouter);
+app.use('/image', imageRouter);
 
 app.use((err, res) => {
   console.error(err);

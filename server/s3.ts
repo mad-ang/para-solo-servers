@@ -1,8 +1,8 @@
 import AWS from 'aws-sdk';
 import { config } from './envconfig';
+import { v4 as uuidv4 } from 'uuid';
 const { bucketName, bucketRegion, identityPoolId, accessKeyId, secretAccessKey } = config.aws;
 
-import { v4 as uuidv4 } from 'uuid';
 // import { updateUserInfo } from './auth';
 
 class _S3 {
@@ -24,52 +24,28 @@ class _S3 {
       this.secretAccessKey = secretAccessKey!;
 
       AWS.config.update({
-        region: bucketRegion,
-        credentials: new AWS.CognitoIdentityCredentials({
-          IdentityPoolId: identityPoolId,
-        }),
+        accessKeyId: this.accessKeyId,
+        secretAccessKey: this.secretAccessKey,
+        region: this.bucketRegion,
       });
 
-      this.s3 = new AWS.S3({
-        params: { Bucket: bucketName },
-        region: bucketRegion,
-      });
+      this.s3 = new AWS.S3();
     } catch (error) {
       console.log(error);
     }
   }
-}
 
-// 이미지 한개 업로드
-export const addImage = (albumName: string, files: any, next: any) => {
-  if (!files || files.length === 0) {
-    return alert('이미지를 선택해주세요.');
+  async getPresignedUploadUrl(photoKey) {
+    const url = await this.s3.getSignedUrl('putObject', {
+      Bucket: this.bucketName,
+      Key: `${photoKey}`,
+      ContentType: 'image/*',
+      Expires: 300,
+    });
+
+    return url;
   }
-
-  // const file = files[0];
-  // const originalFileName = file.name;
-  // const originalFiletype = file.type.split('/')[1];
-  // const fileName = uuidv4();
-  // const albumPhotoKey = encodeURIComponent(albumName);
-  // const photoKey = `${albumPhotoKey}/${fileName}.${originalFiletype}`;
-  // const params = {
-  //   Key: photoKey,
-  //   Bucket: bucketName,
-  //   Body: file,
-  //   ContentType: 'image/jpeg',
-  //   ACL: 'public-read',
-  // };
-
-  // s3.upload(params, function (err, data): void {
-  //   if (err) {
-  //     console.log(err);
-  //     alert(`이미지 업로드에 실패했습니다. ${err.message}`);
-  //   }
-  //   console.log('이미지 업로드에 성공했습니다.', data);
-  //   const url = data.Location;
-  //   next(url);
-  // });
-};
+}
 
 const S3 = new _S3();
 
