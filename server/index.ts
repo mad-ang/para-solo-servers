@@ -6,6 +6,7 @@ import { monitor } from '@colyseus/monitor';
 import { RoomType } from '../types/Rooms';
 import authRouter from './routes/auth';
 import chatRouter from './routes/chat';
+import imageRouter from './routes/image';
 
 // import { sequelize } from './DB/db'
 import { config } from './envconfig';
@@ -16,6 +17,7 @@ import { SkyOffice } from './rooms/Momstown';
 import { connectDB, createCollection } from './DB/db';
 import { chatController } from './controllers/ChatControllers';
 import { Socket } from 'socket.io';
+import S3 from './s3';
 const mongoose = require('mongoose');
 var cookieParser = require('cookie-parser');
 const port = Number(process.env.PORT || 8080);
@@ -77,6 +79,7 @@ gameServer.define(RoomType.PUBLIC, SkyOffice, {
 // app.use('/colyseus', monitor())
 app.use('/auth', authRouter);
 app.use('/chat', chatRouter);
+app.use('/image', imageRouter);
 
 app.use((err, res) => {
   console.error(err);
@@ -106,11 +109,10 @@ export const io = require('socket.io')(socketServer, {
 export const userMap = new Map<string, Socket>();
 
 io.on('connection', (socket: Socket) => {
-  
-  console.log("here comes new challenger !!", socket.id)
+  console.log('here comes new challenger !!', socket.id);
   socket.on('whoAmI', (userId) => {
-    console.log("whoAmI");
-    
+    console.log('whoAmI');
+
     userMap.set(userId, socket);
   });
   chatController(socket);
@@ -130,3 +132,4 @@ io.on('connection', (socket: Socket) => {
 // });
 
 socketServer.listen(socketPort, () => console.log(`socketServer is running on ${socketPort}`));
+S3.init();
