@@ -11,8 +11,8 @@ export interface IUserInfo {
 }
 
 export interface IUserProfile {
-  progileImgUrl?: string;
-  heigth?: string;
+  profileImgUrl?: string;
+  height?: string;
   weight?: string;
   region?: string;
   gender?: string;

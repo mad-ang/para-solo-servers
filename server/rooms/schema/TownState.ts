@@ -3,8 +3,8 @@ import { IPlayer, ITownState, ITable, IChatMessage, IChair } from '../../../type
 import { IUserInfo, IUserProfile } from '../../controllers/UserControllers/types';
 
 export class UserProfile extends Schema implements IUserProfile {
-  @type('string') progileImgUrl = '';
-  @type('string') heigth = '';
+  @type('string') profileImgUrl = '';
+  @type('string') height = '';
   @type('string') weight = '';
   @type('string') region = '';
   @type('string') gender = '';

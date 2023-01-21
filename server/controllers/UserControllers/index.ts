@@ -53,8 +53,8 @@ export const signUp = async (req: Request, res: Response) => {
     userId: user.userId,
     password: user.password,
     userProfile: {
-      progileImgUrl: '',
-      heigth: '',
+      profileImgUrl: '',
+      height: '',
       weight: '',
       region: '',
       gender: '',

@@ -10,8 +10,8 @@ const user = new Schema<IUserInfo>({
   password: { type: String, required: true },
   username: { type: String, required: false },
   userProfile: {
-    progileImgUrl: { type: String, required: false },
-    heigth: { type: String, required: false },
+    profileImgUrl: { type: String, required: false },
+    height: { type: String, required: false },
     weight: { type: String, required: false },
     region: { type: String, required: false },
     gender: { type: String, required: false },
