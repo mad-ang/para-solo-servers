@@ -53,23 +53,40 @@ export const firstdata = async (req: Request, res: Response) => {
     status: user.status,
     message: user.message,
   })
-    .then((result) => {
+    .then(async (result) => {
       // 만약 이미 친구였다면 false가 오고, 이제 새로 친구를 요청했다면 true가 온다
       if (result) {
-
         // 친구 요청을 보낸 사람의 코인을 1개 차감한다
         const userId = user.myInfo.userId;
+        // DB에서 이 유저의 userCoin을 찾아온다
+        const foundUser = await User.findOne({
+          userId: userId,
+        });
+        if (!foundUser || foundUser?.userCoin === undefined) {
+          return res.status(400).json({
+            status: 400,
+            message: '유효한 사용자가 아닙니다.',
+          });
+        }
 
+        // 만약에 유저코인이 0이면 리턴 404
+        if (foundUser!.userCoin <= 0) {
+          return res.status(404).json({
+            status: 404,
+            message: '코인이 부족합니다.',
+          });
+        }
         User.collection.updateOne(
           { userId: userId },
-          { $inc: { 
-              userCoin: -1 
-            } 
+          {
+            $inc: {
+              userCoin: -1,
+            },
           }
-        )
+        );
 
         userMap.get(user.friendInfo.userId)?.emit('request-friend', user.myInfo as any);
-        
+
         return res.status(200).json({
           status: 200,
           payload: {
