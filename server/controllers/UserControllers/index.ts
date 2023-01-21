@@ -52,6 +52,7 @@ export const signUp = async (req: Request, res: Response) => {
   const result = await User.collection.insertOne({
     userId: user.userId,
     password: user.password,
+    userCoin : 3,
     userProfile: {
       profileImgUrl: '',
       height: '',

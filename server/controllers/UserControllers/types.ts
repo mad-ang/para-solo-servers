@@ -4,6 +4,7 @@ export interface IUserInfo {
   userId?: string;
   password?: string;
   username?: string;
+  userCoin?: number;
   userProfile?: IUserProfile;
   refreshToken?: Token | null;
   createdAt?: Date | null;

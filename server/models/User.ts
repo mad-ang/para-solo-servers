@@ -9,6 +9,7 @@ const user = new Schema<IUserInfo>({
   userId: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   username: { type: String, required: false },
+  userCoin: { type: Number, required: false},
   userProfile: {
     profileImgUrl: { type: String, required: false },
     height: { type: String, required: false },
