@@ -1,6 +1,5 @@
 import AWS from 'aws-sdk';
 import { config } from './envconfig';
-import { v4 as uuidv4 } from 'uuid';
 const { bucketName, bucketRegion, identityPoolId, accessKeyId, secretAccessKey } = config.aws;
 
 // import { updateUserInfo } from './auth';

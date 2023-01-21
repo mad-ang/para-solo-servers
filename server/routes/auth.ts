@@ -7,6 +7,7 @@ import {
   inquireUser,
   deleteUser,
   authenticateUser,
+  issueAccessToken,
 } from '../controllers/UserControllers';
 
 const router = express.Router();
@@ -20,6 +21,8 @@ router.patch('/update', updateUserWithAuth);
 router.get('/me', inquireUser);
 
 router.get('/isAuth', authenticateUser);
+
+router.post('/issueAccessToken', issueAccessToken);
 
 router.delete('/delete', deleteUser);
 

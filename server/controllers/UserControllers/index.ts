@@ -8,6 +8,7 @@ import { Request, Response } from 'express';
 import { Token } from './types';
 import User from '../../models/User';
 import 'express-async-errors';
+import { v4 as uuidv4 } from 'uuid';
 
 async function hashPassword(user: IUserInfo) {
   const password = user.password;
@@ -102,6 +103,7 @@ export const login = async (req: Request, res: Response) => {
       {
         userId: foundUser.userId,
         username: foundUser.username,
+        uuid: uuidv4(),
       },
       config.jwt.secretKey
       // {
@@ -109,18 +111,27 @@ export const login = async (req: Request, res: Response) => {
       // }
     );
 
-    const refreshToken = 'refreshToken';
+    const refreshToken = jwt.sign(
+      {
+        userId: foundUser.userId,
+        username: foundUser.username,
+        uuid1: uuidv4(),
+        uuid2: uuidv4(),
+      },
+      config.jwt.secretKey
+    );
+
     await User.collection.updateOne(
       { userId: foundUser.userId },
       {
         $set: {
-          refreshToken: 'refreshToken',
+          refreshToken: refreshToken,
           lastUpdated: new Date(),
         },
       }
     );
 
-    res.cookie('refreshToken', refreshToken, { path: '/', secure: true, maxAge: 600 });
+    res.cookie('refreshToken', refreshToken, { path: '/', secure: true, maxAge: 60 * 60 * 24 }); // 60초 * 60분 * 1시간
     res.status(200).json({
       status: 200,
       payload: {
@@ -132,6 +143,76 @@ export const login = async (req: Request, res: Response) => {
     return res.status(400).json({
       status: 400,
       message: '비밀번호가 올바르지 않습니다.',
+    });
+  }
+};
+
+export const issueAccessToken = async (req: Request, res: Response): Promise<any> => {
+  try {
+    // let { refreshToken } = req.body;
+    console.log(88888888, req.body);
+    // if (!refreshToken) return res.status(401).json(AUTH_ERROR);
+
+    // const decoded = jwt.verify(
+    //   refreshToken,
+    //   config.jwt.secretKey,
+    //   async (error: any, decoded: Token) => {
+    //     // secretKey로 디코딩 및 검증
+    //     if (error) return false;
+    //     return decoded;
+    //   }
+    // );
+
+    // if (!decoded) return res.status(401).json(AUTH_ERROR);
+    // console.log(333333, decoded);
+    // const userId = decoded.userId;
+    // const foundUser = await User.findOne({ userId: userId });
+    // if (!foundUser) res.status(401).json(AUTH_ERROR);
+
+    // refreshToken = jwt.sign(
+    //   {
+    //     userId: foundUser!.userId,
+    //     username: foundUser!.username,
+    //     uuid1: uuidv4(),
+    //     uuid2: uuidv4(),
+    //   },
+    //   config.jwt.secretKey
+    // );
+
+    // await User.collection.updateOne(
+    //   { userId: foundUser!.userId },
+    //   {
+    //     $set: {
+    //       refreshToken: refreshToken,
+    //       lastUpdated: new Date(),
+    //     },
+    //   }
+    // );
+
+    // const accessToken = jwt.sign(
+    //   {
+    //     userId: foundUser!.userId,
+    //     username: foundUser!.username,
+    //     uuid: uuidv4(),
+    //   },
+    //   config.jwt.secretKey
+    //   // {
+    //   //   expiresIn: config.jwt.expiresInSec,
+    //   // }
+    // );
+
+    // res.cookie('refreshToken', refreshToken, { path: '/', secure: true, maxAge: 600 });
+    // res.status(200).json({
+    //   status: 200,
+    //   payload: {
+    //     userId: foundUser!.userId,
+    //     accessToken: accessToken,
+    //   },
+    // });
+  } catch (err) {
+    res.status(500).json({
+      status: 500,
+      message: `서버 오류: ${err}`,
     });
   }
 };
