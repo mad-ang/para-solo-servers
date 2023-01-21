@@ -94,7 +94,7 @@ const readMessage = (message: { roomId: string; userId: string; friendId: string
         // rooms_chat[roomId].push(chatMessage)
         // console.log(rooms_chat[roomId]);
         // socket.to(roomId).emit('show-messages', chatMessage);
-        socket.emit('show-messages', chatMessage);
+        socket.emit('old-messages', chatMessage);
       })
       .catch((error) => {
         console.log(error);
