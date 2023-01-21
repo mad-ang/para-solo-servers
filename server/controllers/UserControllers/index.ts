@@ -149,65 +149,66 @@ export const login = async (req: Request, res: Response) => {
 
 export const issueAccessToken = async (req: Request, res: Response): Promise<any> => {
   try {
-    let { refreshToken } = req.body;
-    if (!refreshToken) return res.status(401).json(AUTH_ERROR);
+    // let { refreshToken } = req.body;
+    console.log(88888888, req.body);
+    // if (!refreshToken) return res.status(401).json(AUTH_ERROR);
 
-    const decoded = jwt.verify(
-      refreshToken,
-      config.jwt.secretKey,
-      async (error: any, decoded: Token) => {
-        // secretKey로 디코딩 및 검증
-        if (error) return false;
-        return decoded;
-      }
-    );
+    // const decoded = jwt.verify(
+    //   refreshToken,
+    //   config.jwt.secretKey,
+    //   async (error: any, decoded: Token) => {
+    //     // secretKey로 디코딩 및 검증
+    //     if (error) return false;
+    //     return decoded;
+    //   }
+    // );
 
-    if (!decoded) return res.status(401).json(AUTH_ERROR);
+    // if (!decoded) return res.status(401).json(AUTH_ERROR);
+    // console.log(333333, decoded);
+    // const userId = decoded.userId;
+    // const foundUser = await User.findOne({ userId: userId });
+    // if (!foundUser) res.status(401).json(AUTH_ERROR);
 
-    const userId = decoded.userId;
-    const foundUser = await User.findOne({ userId: userId });
-    if (!foundUser) res.status(401).json(AUTH_ERROR);
+    // refreshToken = jwt.sign(
+    //   {
+    //     userId: foundUser!.userId,
+    //     username: foundUser!.username,
+    //     uuid1: uuidv4(),
+    //     uuid2: uuidv4(),
+    //   },
+    //   config.jwt.secretKey
+    // );
 
-    refreshToken = jwt.sign(
-      {
-        userId: foundUser!.userId,
-        username: foundUser!.username,
-        uuid1: uuidv4(),
-        uuid2: uuidv4(),
-      },
-      config.jwt.secretKey
-    );
+    // await User.collection.updateOne(
+    //   { userId: foundUser!.userId },
+    //   {
+    //     $set: {
+    //       refreshToken: refreshToken,
+    //       lastUpdated: new Date(),
+    //     },
+    //   }
+    // );
 
-    await User.collection.updateOne(
-      { userId: foundUser!.userId },
-      {
-        $set: {
-          refreshToken: refreshToken,
-          lastUpdated: new Date(),
-        },
-      }
-    );
+    // const accessToken = jwt.sign(
+    //   {
+    //     userId: foundUser!.userId,
+    //     username: foundUser!.username,
+    //     uuid: uuidv4(),
+    //   },
+    //   config.jwt.secretKey
+    //   // {
+    //   //   expiresIn: config.jwt.expiresInSec,
+    //   // }
+    // );
 
-    const accessToken = jwt.sign(
-      {
-        userId: foundUser!.userId,
-        username: foundUser!.username,
-        uuid: uuidv4(),
-      },
-      config.jwt.secretKey
-      // {
-      //   expiresIn: config.jwt.expiresInSec,
-      // }
-    );
-
-    res.cookie('refreshToken', refreshToken, { path: '/', secure: true, maxAge: 600 });
-    res.status(200).json({
-      status: 200,
-      payload: {
-        userId: foundUser!.userId,
-        accessToken: accessToken,
-      },
-    });
+    // res.cookie('refreshToken', refreshToken, { path: '/', secure: true, maxAge: 600 });
+    // res.status(200).json({
+    //   status: 200,
+    //   payload: {
+    //     userId: foundUser!.userId,
+    //     accessToken: accessToken,
+    //   },
+    // });
   } catch (err) {
     res.status(500).json({
       status: 500,
