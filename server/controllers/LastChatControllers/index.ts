@@ -3,6 +3,7 @@ import { userMap } from '../..';
 import LastChat from '../../models/LastChat';
 import { UserResponseDto, IChatRoomStatus } from './type';
 import { Request, Response } from 'express';
+import User from '../../models/User';
 
 const time_diff = 9 * 60 * 60 * 1000;
 
@@ -55,14 +56,27 @@ export const firstdata = async (req: Request, res: Response) => {
     .then((result) => {
       // 만약 이미 친구였다면 false가 오고, 이제 새로 친구를 요청했다면 true가 온다
       if (result) {
-        res.status(200).json({
+
+        // 친구 요청을 보낸 사람의 코인을 1개 차감한다
+        const userId = user.myInfo.userId;
+
+        User.collection.updateOne(
+          { userId: userId },
+          { $inc: { 
+              userCoin: -1 
+            } 
+          }
+        )
+
+        userMap.get(user.friendInfo.userId)?.emit('request-friend', user.myInfo as any);
+        
+        return res.status(200).json({
           status: 200,
           payload: {
             myInfo: user.myInfo,
             friendInfo: user.friendInfo,
           },
         });
-        userMap.get(user.friendInfo.userId)?.emit('request-friend', user.myInfo as any);
       } else
         res.status(409).json({
           status: 409,
