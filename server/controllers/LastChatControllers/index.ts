@@ -13,9 +13,7 @@ export const loaddata = async (req: Request, res: Response) => {
       status: 404,
       message: 'not found',
     });
-  console.log('check post req');
-  console.log(user);
-  console.log('userId = ', user.userId);
+
   getLastChat(user.userId)
     .then((result) => {
       console.log(result);
