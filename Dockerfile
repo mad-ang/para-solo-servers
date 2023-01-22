@@ -2,9 +2,10 @@
 FROM node:19-alpine
 
 ENV NODE_ENV=production
-WORKDIR .
+WORKDIR /usr/src/app
 COPY ["package.json", "package-lock.json*", "yarn.lock", "./server/tsconfig.server.json", "./"]
 RUN yarn install --production
-RUN yarn heroku-postbuild
-EXPOSE 80 
+COPY . .
+RUN yarn build
+EXPOSE 8080 5002
 CMD ["yarn", "start"]

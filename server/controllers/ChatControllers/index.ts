@@ -3,8 +3,9 @@ import { Socket } from 'socket.io';
 import { io } from '../..';
 import { v4 as uuidV4 } from 'uuid';
 import { Request, Response } from 'express';
-import { updateLastChat, updateRoomId } from '../LastChatControllers';
+import { updateLastChat, updateRoomId, updateUnread } from '../LastChatControllers';
 import { userMap } from '../..';
+import LastChat from '../../models/LastChat';
 const rooms: Record<string, string[]> = {};
 // const rooms_chat: Record<string, Object[]> = {};
 interface IRoomParams {
@@ -31,6 +32,7 @@ export const chatController = (socket: Socket) => {
     if (rooms[roomId]) {
       console.log('user Joined the room', roomId, userId);
       rooms[roomId].push(userId);
+      updateUnread({ myId: userId, friendId: friendId })
       socket.join(roomId);
     } else {
       roomId = createRoom();
@@ -104,7 +106,6 @@ const readMessage = (message: { roomId: string; userId: string; friendId: string
 
   // socket.on("create-room", createRoom);
   socket.on('join-room', joinRoom);
-
   // socket.on('start-chat', startChat);
   // socket.on('stop-chat', stopChat);
   // socket.on('show-messages', readMessage);
@@ -148,5 +149,6 @@ export const getChatMessage = async (sender: string, recipient: string) => {
         result.push(json);
       });
     });
+  LastChat.collection.find()
   return result;
 };

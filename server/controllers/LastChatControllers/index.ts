@@ -155,7 +155,7 @@ const addLastChat = async (obj: {
       status: obj.status,
       message: obj.message,
       roomId: 'start',
-      unread: 0,
+      unreadCount: 0,
       updatedAt: createAt,
     });
     LastChat.collection.insertOne({
@@ -164,7 +164,7 @@ const addLastChat = async (obj: {
       status: obj.status,
       message: obj.message,
       roomId: 'start',
-      unread: 1,
+      unreadCount: 1,
       updatedAt: createAt,
     });
 
@@ -194,8 +194,8 @@ export const updateRoomStatus = async (obj: {
   const { myId, friendId, status, isAccept } = obj;
   console.log('updateRoomStatus', obj);
   if (!isAccept) {
-    LastChat.collection.deleteOne({ $and: [{ 'myInfo.userId': myId }, { unread: 1 }] });
-    LastChat.collection.deleteOne({ $and: [{ 'friendInfo.userId': myId }, { unread: 0 }] });
+    LastChat.collection.deleteOne({ $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }] });
+    LastChat.collection.deleteOne({ $and: [{ 'friendInfo.userId': myId }, { 'myInfo.userId': 0 }] });
     return;
   }
 
@@ -247,13 +247,22 @@ export const updateRoomId = async (obj: { myId: string; friendId: string; roomId
   const { myId, friendId, roomId } = obj;
   console.log(obj);
 
-  await LastChat.collection.findOneAndUpdate(
+  LastChat.collection.findOneAndUpdate(
     { $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }] },
     { $set: { roomId: roomId, unreadCount: 0 } }
   );
-  await LastChat.collection.findOneAndUpdate(
+  LastChat.collection.findOneAndUpdate(
     { $and: [{ 'myInfo.userId': friendId }, { 'friendInfo.userId': myId }] },
     { $set: { roomId: roomId } }
+  );
+};
+
+export const updateUnread = async (obj: { myId: string; friendId: string; }) => {
+  const { myId, friendId } = obj;
+
+  LastChat.collection.findOneAndUpdate(
+    { $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }] },
+    { $set: { unreadCount: 0 } }
   );
 };
 
@@ -262,7 +271,6 @@ export const getLastChat = async (myId: string) => {
   try {
     await LastChat.collection
       .find({ 'myInfo.userId': myId })
-      .limit(20)
       .sort({ _id: -1 })
       .toArray()
       .then((elem) => {
