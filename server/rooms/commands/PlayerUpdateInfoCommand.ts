@@ -19,6 +19,7 @@ export default class PlayerUpdateInfoCommand extends Command<ITownState, Payload
     const keys = Object.keys(userProfile);
     keys.forEach((key: string) => {
       if (
+        //@ts-ignore
         userProfile[key as string] &&
         player?.userProfile[key as string] !== userProfile[key as string]
       ) {
