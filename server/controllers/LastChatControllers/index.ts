@@ -9,6 +9,7 @@ const time_diff = 9 * 60 * 60 * 1000;
 
 export const loaddata = async (req: Request, res: Response) => {
   const user = req.body;
+
   if (!user.userId)
     return res.status(404).json({
       status: 404,
@@ -17,7 +18,6 @@ export const loaddata = async (req: Request, res: Response) => {
 
   getLastChat(user.userId)
     .then((result) => {
-      console.log(result);
       res.status(200).json({
         status: 200,
         payload: result,
@@ -70,6 +70,7 @@ export const firstdata = async (req: Request, res: Response) => {
   }
 
   addLastChat({ //friend DB에 넣어주는 부분
+  addLastChat({
     myInfo: user.myInfo,
     friendInfo: user.friendInfo,
     status: user.status,
@@ -146,6 +147,60 @@ export const chargingCoin = async (req: Request, res: Response) => {
     });
 };
 
+export const chargingCoin = async (req: Request, res: Response) => {
+  // 유효성검사 필요할 듯
+  const user = req.body;
+  const userId = user.myInfo.userId; // DB에서 이 유저의 userCoin을 찾아온다
+
+  const foundUser = await User.findOne({
+    userId: userId,
+  })
+    .then(async () => {
+      //코인충전 3개
+      User.collection.updateOne(
+        { userId: userId },
+        {
+          $inc: {
+            userCoin: 3,
+          },
+        }
+      );
+      res.status(200).json({
+        status: 200,
+        message: '코인이 충전되었습니다',
+        payload: {
+          myInfo: user.myInfo,
+          friendInfo: user.friendInfo,
+        },
+      });
+    })
+    .catch((err) => {
+      //에러
+      console.error(err);
+      res.status(500).json({
+        status: 500,
+        message: `서버 오류: ${err}`,
+      });
+    });
+};
+// if (!user) {
+//   return res.status(404).json({
+//     status: 404,
+//     message: 'not found',
+//   });
+// }
+// if (!(user.myInfo && user.friendInfo && user.message)) {
+//   return res.status(400).json({
+//     status: 400,
+//     message: 'invalid input',
+//   });
+// }
+// if (!foundUser || foundUser?.userCoin === undefined) {
+//   return res.status(400).json({
+//     status: 400,
+//     message: '유효한 사용자가 아닙니다.',
+//   });
+// }
 export const setfriend = async (req: Request, res: Response) => {
   const { myInfo, friendInfo, isAccept } = req.body;
   if (!myInfo || !friendInfo) return res.status(404).send('not found');
@@ -160,14 +215,13 @@ export const setfriend = async (req: Request, res: Response) => {
           friendInfo: friendInfo,
         },
       });
+
       //for alarm
       userMap.get(friendInfo.friendId)?.emit('accept-friend', myInfo.username);
-
       // res.status(200).send(resultStatus)
     }
   );
 };
-
 const addLastChat = async (obj: {
   myInfo: UserResponseDto;
   friendInfo: UserResponseDto;
@@ -192,7 +246,7 @@ const addLastChat = async (obj: {
       status: obj.status,
       message: obj.message,
       roomId: 'start',
-      unread: 0,
+      unreadCount: 0,
       updatedAt: createAt,
     });
     LastChat.collection.insertOne({
@@ -201,7 +255,7 @@ const addLastChat = async (obj: {
       status: obj.status,
       message: obj.message,
       roomId: 'start',
-      unread: 1,
+      unreadCount: 1,
       updatedAt: createAt,
     });
 
@@ -229,18 +283,25 @@ export const updateRoomStatus = async (obj: {
   isAccept: number;
 }) => {
   const { myId, friendId, status, isAccept } = obj;
-  console.log('updateRoomStatus', obj);
+
   if (!isAccept) {
-    LastChat.collection.deleteOne({ $and: [{ 'myInfo.userId': myId }, { unread: 1 }] });
-    LastChat.collection.deleteOne({ $and: [{ 'friendInfo.userId': myId }, { unread: 0 }] });
+    LastChat.collection.deleteOne({
+      $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }],
+    });
+    LastChat.collection.deleteOne({
+      $and: [{ 'myInfo.userId': friendId }, { 'friendInfo.userId': myId }],
+    });
+
     return;
   }
 
-  await LastChat.collection.findOneAndUpdate(
+  updateUnread({ myId: myId, friendId: friendId }, 0);
+
+  LastChat.collection.findOneAndUpdate(
     { $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }] },
     { $set: { status: status } }
   );
-  await LastChat.collection.findOneAndUpdate(
+  LastChat.collection.findOneAndUpdate(
     { $and: [{ 'myInfo.userId': friendId }, { 'friendInfo.userId': myId }] },
     { $set: { status: status } }
   );
@@ -282,15 +343,29 @@ export const updateLastChat = async (obj: { myId: string; friendId: string; mess
 
 export const updateRoomId = async (obj: { myId: string; friendId: string; roomId: string }) => {
   const { myId, friendId, roomId } = obj;
-  console.log(obj);
 
-  await LastChat.collection.findOneAndUpdate(
+  LastChat.collection.findOneAndUpdate(
     { $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }] },
     { $set: { roomId: roomId, unreadCount: 0 } }
   );
-  await LastChat.collection.findOneAndUpdate(
+  LastChat.collection.findOneAndUpdate(
     { $and: [{ 'myInfo.userId': friendId }, { 'friendInfo.userId': myId }] },
     { $set: { roomId: roomId } }
+  );
+};
+
+export const updateUnread = async (
+  obj: {
+    myId: string;
+    friendId: string;
+  },
+  targetCnt: number = 0
+) => {
+  const { myId, friendId } = obj;
+
+  LastChat.collection.findOneAndUpdate(
+    { $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }] },
+    { $set: { unreadCount: targetCnt } }
   );
 };
 
@@ -299,7 +374,6 @@ export const getLastChat = async (myId: string) => {
   try {
     await LastChat.collection
       .find({ 'myInfo.userId': myId })
-      .limit(20)
       .sort({ _id: -1 })
       .toArray()
       .then((elem) => {

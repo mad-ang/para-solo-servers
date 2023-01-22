@@ -164,17 +164,7 @@ export class SkyOffice extends Room<TownState> {
     this.onMessage(
       Message.SEND_PRIVATE_MESSAGE,
       (client, message: { senderId: string; receiverId: string; content: string }) => {
-        console.log(message);
-        // console.log(this.state.players.get(client.sessionId)?.userId)
-        // console.log(this.state.players.get(message.receiver)?.userId)
-        // let senderId = String(this.state.players.get(client.sessionId)?.userId)
-        // let receiverId = String(this.state.players.get(message.receiver)?.userId)
-        // let content = String(message.content)
         const { senderId, receiverId, content } = message;
-        // addChatMessage({ senderId: senderId, receiverId: receiverId, content: content });
-        // let chat = new Chat(senderId, receiverId);
-        // console.log(this.state.players.get(sanitizeFilter(message.receiver)))
-        // message.receiver.send(Message.RECEIVE_DM, { sender : message.sender, content : message.content })
       }
     );
 
@@ -182,18 +172,13 @@ export class SkyOffice extends Room<TownState> {
       Message.CHECK_PRIVATE_MESSAGE,
       (client, message: { requestId: string; targetId: string }) => {
         const { requestId, targetId } = message;
-        // let clientId = String(this.state.players.get(client.sessionId)?.userId)
-        // let otherId = String(this.state.players.get(message.senderId)?.userId)
-        // let chatMessage = await getChatMessage(requestId, targetId);
-        // console.log(chatMessage);
 
         getChatMessage(requestId, targetId)
           .then((chatMessage) => {
-            console.log(chatMessage);
             client.send(Message.CHECK_PRIVATE_MESSAGE, chatMessage);
           })
           .catch((error) => {
-            console.log(error);
+            console.error('CHECK_PRIVATE_MESSAGE', error);
           });
       }
     );
@@ -244,7 +229,6 @@ export class SkyOffice extends Room<TownState> {
 
   onJoin(client: Client, options: any) {
     this.state.players.set(client.sessionId, new Player());
-    console.log('this.roomId', this.roomId);
 
     client.send(Message.SEND_ROOM_DATA, {
       id: this.roomId,
@@ -265,7 +249,6 @@ export class SkyOffice extends Room<TownState> {
   }
 
   onDispose() {
-    console.log('room', this.roomId, 'disposing...');
     this.dispatcher.stop();
   }
 }

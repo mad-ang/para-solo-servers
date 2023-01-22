@@ -91,7 +91,6 @@ app.use((err, res) => {
 
 connectDB()
   .then((db) => {
-    // console.log('init!', db)
     gameServer.listen(port);
 
     console.log(`Listening on ws://localhost:${port}`);
@@ -119,17 +118,11 @@ io.on('connection', (socket: Socket) => {
   socket.on('disconnect', () => {
     console.log('the challenger disconnected');
   });
-});
 
-// io.of(/^\/dynamic-\d+$/).on('connection', (socket) => {
-//   console.log('chat id에 접속');
-//   socket.on(/^\/dynamic-\d+$/, async (senderId) => {
-//     console.log('보내는 사람 아이디', senderId);
-//   });
-//   socket.on('message', (message) => {
-//     console.log('메시지 내용', message);
-//   });
-// });
+  socket.on('connect_error', (err) => {
+    console.log(`connect_error due to ${err.message}`);
+  });
+});
 
 socketServer.listen(socketPort, () => console.log(`socketServer is running on ${socketPort}`));
 S3.init();
