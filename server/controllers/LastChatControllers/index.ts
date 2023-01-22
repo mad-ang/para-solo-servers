@@ -17,7 +17,6 @@ export const loaddata = async (req: Request, res: Response) => {
 
   getLastChat(user.userId)
     .then((result) => {
-      console.log(result);
       res.status(200).json({
         status: 200,
         payload: result,
@@ -243,10 +242,14 @@ export const updateRoomStatus = async (obj: {
   isAccept: number;
 }) => {
   const { myId, friendId, status, isAccept } = obj;
-  console.log('updateRoomStatus', obj);
+
   if (!isAccept) {
-    LastChat.collection.deleteOne({ $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }] });
-    LastChat.collection.deleteOne({ $and: [{ 'friendInfo.userId': myId }, { 'myInfo.userId': 0 }] });
+    LastChat.collection.deleteOne({
+      $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }],
+    });
+    LastChat.collection.deleteOne({
+      $and: [{ 'friendInfo.userId': myId }, { 'myInfo.userId': 0 }],
+    });
     return;
   }
 
@@ -296,7 +299,6 @@ export const updateLastChat = async (obj: { myId: string; friendId: string; mess
 
 export const updateRoomId = async (obj: { myId: string; friendId: string; roomId: string }) => {
   const { myId, friendId, roomId } = obj;
-  console.log(obj);
 
   LastChat.collection.findOneAndUpdate(
     { $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }] },
@@ -308,7 +310,7 @@ export const updateRoomId = async (obj: { myId: string; friendId: string; roomId
   );
 };
 
-export const updateUnread = async (obj: { myId: string; friendId: string; }) => {
+export const updateUnread = async (obj: { myId: string; friendId: string }) => {
   const { myId, friendId } = obj;
 
   LastChat.collection.findOneAndUpdate(

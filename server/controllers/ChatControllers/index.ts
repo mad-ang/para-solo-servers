@@ -32,7 +32,7 @@ export const chatController = (socket: Socket) => {
     if (rooms[roomId]) {
       console.log('user Joined the room', roomId, userId);
       rooms[roomId].push(userId);
-      updateUnread({ myId: userId, friendId: friendId })
+      updateUnread({ myId: userId, friendId: friendId });
       socket.join(roomId);
     } else {
       roomId = createRoom();
@@ -68,40 +68,30 @@ export const chatController = (socket: Socket) => {
   }) => {
     const { roomId, userId, friendId, message } = obj;
     if (message) {
-      // console.log(rooms_chat[roomId]);
-      
       // rooms_chat[roomId].push(message);
       addChatMessage({ senderId: userId, receiverId: friendId, message: message });
-      updateLastChat({myId: userId, friendId: friendId, message: message})
-      console.log(userId, ' to ', friendId,' : ', message);
+      updateLastChat({ myId: userId, friendId: friendId, message: message });
+      console.log(userId, ' to ', friendId, ' : ', message);
       // io.to(roomId).except(socket.id).emit('message', obj)
       userMap.get(friendId)?.emit('message', obj);
     }
   };
 
-// room이 살아 있을 경우.
-// Array를 만들고 거기에 푸쉬. Array를 만들어서 룸 데이터로 가지고 있는다.
-// 메시지를 읽으려 할때 그 array를 리턴.
-// room에 처음 참여하는 경우는 db에서 불러온 값을 그대로 보여줌.
-const readMessage = (message: { roomId: string; userId: string; friendId: string }) => {
-  const { roomId, userId, friendId } = message;
+  // room이 살아 있을 경우.
+  // Array를 만들고 거기에 푸쉬. Array를 만들어서 룸 데이터로 가지고 있는다.
+  // 메시지를 읽으려 할때 그 array를 리턴.
+  // room에 처음 참여하는 경우는 db에서 불러온 값을 그대로 보여줌.
+  const readMessage = (message: { roomId: string; userId: string; friendId: string }) => {
+    const { roomId, userId, friendId } = message;
 
-  // if (rooms_chat[roomId]) {
-  //   socket.to(roomId).emit('show-messages', rooms_chat[roomId]);
-  // } else {
-    console.log('check readMessage');
     getChatMessage(userId, friendId)
       .then((chatMessage) => {
-        console.log('chatroomId after getChatMessage:', roomId);
-        // rooms_chat[roomId].push(chatMessage)
-        // console.log(rooms_chat[roomId]);
-        // socket.to(roomId).emit('show-messages', chatMessage);
         socket.emit('old-messages', chatMessage);
       })
       .catch((error) => {
-        console.log(error);
+        console.error('readMessage', error);
       });
-    }
+  };
   // }
 
   // socket.on("create-room", createRoom);
@@ -149,6 +139,6 @@ export const getChatMessage = async (sender: string, recipient: string) => {
         result.push(json);
       });
     });
-  LastChat.collection.find()
+  LastChat.collection.find();
   return result;
 };

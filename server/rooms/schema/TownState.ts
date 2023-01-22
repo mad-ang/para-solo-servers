@@ -63,7 +63,6 @@ function getRoomId() {
     whiteboardRoomIds.add(result);
     return result;
   } else {
-    console.log('roomId exists, remaking another one.');
     getRoomId();
   }
 }
