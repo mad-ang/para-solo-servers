@@ -118,6 +118,10 @@ io.on('connection', (socket: Socket) => {
   socket.on('disconnect', () => {
     console.log('the challenger disconnected');
   });
+
+  socket.on('connect_error', (err) => {
+    console.log(`connect_error due to ${err.message}`);
+  });
 });
 
 socketServer.listen(socketPort, () => console.log(`socketServer is running on ${socketPort}`));
