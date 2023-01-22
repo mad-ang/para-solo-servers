@@ -344,6 +344,7 @@ export const inquireUser = async (req: Request, res: Response) => {
       payload: {
         userId: foundUser.userId,
         username: foundUser.username,
+        userCoin: foundUser.userCoin,
         userProfile: foundUser.userProfile,
       },
     });
