@@ -10,12 +10,6 @@ export class UserProfile extends Schema implements IUserProfile {
   @type('string') gender = '';
   @type('string') age = '';
 }
-export class UserInfo extends Schema implements IUserInfo {
-  @type('string') userId = '';
-  @type('string') password = '';
-  @type('string') username = '';
-  @type('string') refreshToken = '';
-}
 export class Player extends Schema implements IPlayer {
   @type('string') name = '';
   @type('number') x = 705;
@@ -24,7 +18,6 @@ export class Player extends Schema implements IPlayer {
   @type('boolean') readyToConnect = false;
   @type('boolean') videoConnected = false;
   @type('string') userId = '';
-  @type({ map: 'string' }) userInfo = new MapSchema<string>();
   @type({ map: 'string' || 'number' }) userProfile = new MapSchema<string>();
 }
 
