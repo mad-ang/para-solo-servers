@@ -19,16 +19,13 @@ export default class PlayerUpdateInfoCommand extends Command<ITownState, Payload
     const keys = Object.keys(userProfile);
     keys.forEach((key: string) => {
       if (
-        //@ts-ignore
         userProfile[key as string] &&
-        player?.userProfile[key as string] !== userProfile[key as string]
+        player.userProfile.get(key) !== userProfile[key as string]
       ) {
         changed = true;
-        //@ts-ignore
-        newInfomap.set(key as string, userProfile[key as string]);
+        newInfomap.set(key as string, userProfile[key as string] || '');
       } else {
-        //@ts-ignore
-        newInfomap.set(key as string, player?.userProfile[key as string] || '');
+        newInfomap.set(key as string, player?.userProfile.get(key) || '');
       }
     });
     if (changed) player.userProfile = newInfomap;
