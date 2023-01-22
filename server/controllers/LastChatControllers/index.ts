@@ -71,7 +71,7 @@ export const firstdata = async (req: Request, res: Response) => {
 
         // 만약에 유저코인이 0이면 리턴 404
         if (foundUser!.userCoin <= 0) {
-          return res.status(404).json({
+          return res.status(200).json({
             status: 404,
             message: '코인이 부족합니다.',
           });
