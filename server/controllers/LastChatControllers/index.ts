@@ -46,8 +46,6 @@ export const firstdata = async (req: Request, res: Response) => {
       message: 'invalid input',
     });
   }
-
-
   /*예외처리*/
   // 친구 요청을 보낸 사람의 코인을 1개 차감한다
   const userId = user.myInfo.userId;
@@ -61,6 +59,7 @@ export const firstdata = async (req: Request, res: Response) => {
       message: '유효한 사용자가 아닙니다.',
     });
   }
+  
   // 만약에 유저코인이 0이면 리턴 404
   if (foundUser!.userCoin <= 0) {
     return res.status(200).json({
@@ -69,7 +68,6 @@ export const firstdata = async (req: Request, res: Response) => {
     });
   }
 
-  addLastChat({ //friend DB에 넣어주는 부분
   addLastChat({
     myInfo: user.myInfo,
     friendInfo: user.friendInfo,
@@ -147,60 +145,6 @@ export const chargingCoin = async (req: Request, res: Response) => {
     });
 };
 
-export const chargingCoin = async (req: Request, res: Response) => {
-  // 유효성검사 필요할 듯
-  const user = req.body;
-  const userId = user.myInfo.userId; // DB에서 이 유저의 userCoin을 찾아온다
-
-  const foundUser = await User.findOne({
-    userId: userId,
-  })
-    .then(async () => {
-      //코인충전 3개
-      User.collection.updateOne(
-        { userId: userId },
-        {
-          $inc: {
-            userCoin: 3,
-          },
-        }
-      );
-      res.status(200).json({
-        status: 200,
-        message: '코인이 충전되었습니다',
-        payload: {
-          myInfo: user.myInfo,
-          friendInfo: user.friendInfo,
-        },
-      });
-    })
-    .catch((err) => {
-      //에러
-      console.error(err);
-      res.status(500).json({
-        status: 500,
-        message: `서버 오류: ${err}`,
-      });
-    });
-};
-// if (!user) {
-//   return res.status(404).json({
-//     status: 404,
-//     message: 'not found',
-//   });
-// }
-// if (!(user.myInfo && user.friendInfo && user.message)) {
-//   return res.status(400).json({
-//     status: 400,
-//     message: 'invalid input',
-//   });
-// }
-// if (!foundUser || foundUser?.userCoin === undefined) {
-//   return res.status(400).json({
-//     status: 400,
-//     message: '유효한 사용자가 아닙니다.',
-//   });
-// }
 export const setfriend = async (req: Request, res: Response) => {
   const { myInfo, friendInfo, isAccept } = req.body;
   if (!myInfo || !friendInfo) return res.status(404).send('not found');
