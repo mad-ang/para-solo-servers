@@ -177,8 +177,6 @@ export const setfriend = async (req: Request, res: Response) => {
         },
       });
 
-      updateUnread({ myId: myInfo.userId, friendId: friendInfo.userId }, 0);
-
       //for alarm
       userMap.get(friendInfo.friendId)?.emit('accept-friend', myInfo.username);
       // res.status(200).send(resultStatus)
@@ -252,16 +250,19 @@ export const updateRoomStatus = async (obj: {
       $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }],
     });
     LastChat.collection.deleteOne({
-      $and: [{ 'friendInfo.userId': myId }, { 'myInfo.userId': 0 }],
+      $and: [{ 'myInfo.userId': friendId }, { 'friendInfo.userId': myId }],
     });
+
     return;
   }
 
-  await LastChat.collection.findOneAndUpdate(
+  updateUnread({ myId: myId, friendId: friendId }, 0);
+
+  LastChat.collection.findOneAndUpdate(
     { $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }] },
     { $set: { status: status } }
   );
-  await LastChat.collection.findOneAndUpdate(
+  LastChat.collection.findOneAndUpdate(
     { $and: [{ 'myInfo.userId': friendId }, { 'friendInfo.userId': myId }] },
     { $set: { status: status } }
   );
