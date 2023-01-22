@@ -106,10 +106,10 @@ export const login = async (req: Request, res: Response) => {
         username: foundUser.username,
         uuid: uuidv4(),
       },
-      config.jwt.secretKey
-      // {
-      //   expiresIn: config.jwt.expiresInSec,
-      // }
+      config.jwt.secretKey,
+      {
+        expiresIn: config.jwt.expiresIn,
+      }
     );
 
     const refreshToken = jwt.sign(
@@ -132,7 +132,7 @@ export const login = async (req: Request, res: Response) => {
       }
     );
 
-    res.cookie('refreshToken', refreshToken, { path: '/', secure: true, maxAge: 60 * 60 * 24 }); // 60초 * 60분 * 1시간
+    res.cookie('refreshToken', refreshToken, { path: '/', secure: true }); // 60초 * 60분 * 1시간
     res.status(200).json({
       status: 200,
       payload: {
@@ -185,12 +185,12 @@ export const issueAccessToken = async (req: Request, res: Response): Promise<any
         username: foundUser!.username,
         uuid: uuidv4(),
       },
-      config.jwt.secretKey
-      // {
-      //   expiresIn: config.jwt.expiresInSec,
-      // }
+      config.jwt.secretKey,
+      {
+        expiresIn: config.jwt.expiresIn,
+      }
     );
-    res.cookie('refreshToken', refreshToken, { path: '/', secure: true, maxAge: 60 * 60 * 24 }); // 60초 * 60분 * 1시간
+    res.cookie('refreshToken', refreshToken, { path: '/', secure: true }); // 60초 * 60분 * 1시간
 
     return res.status(200).json({
       status: 200,
@@ -335,6 +335,7 @@ export const updateUserWithAuth = async (req: Request, res: Response) => {
 export const inquireUser = async (req: Request, res: Response) => {
   const decoded = await isAccessTokenValid(req, res);
   if (!decoded) return res.status(401).json(AUTH_ERROR);
+
   const userId = decoded.userId;
   const foundUser = await User.findOne({ userId: userId });
 
