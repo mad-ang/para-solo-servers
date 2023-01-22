@@ -108,7 +108,7 @@ export const login = async (req: Request, res: Response) => {
       },
       config.jwt.secretKey,
       {
-        expiresIn: config.jwt.expiresIn,
+        expiresIn: '1h',
       }
     );
 
@@ -187,7 +187,7 @@ export const issueAccessToken = async (req: Request, res: Response): Promise<any
       },
       config.jwt.secretKey,
       {
-        expiresIn: config.jwt.expiresIn,
+        expiresIn: '1h',
       }
     );
     res.cookie('refreshToken', refreshToken, { path: '/', secure: true }); // 60초 * 60분 * 1시간
