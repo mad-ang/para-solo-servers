@@ -12,7 +12,7 @@ export interface IUserInfo {
 }
 
 export interface IUserProfile {
-  [key: string]: string | undefined;
+  [key: string]: any;
   profileImgUrl?: string;
   height?: string;
   weight?: string;
