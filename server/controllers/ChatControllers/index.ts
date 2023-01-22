@@ -32,7 +32,7 @@ export const chatController = (socket: Socket) => {
     if (rooms[roomId]) {
       console.log('user Joined the room', roomId, userId);
       rooms[roomId].push(userId);
-      updateUnread({ myId: userId, friendId: friendId });
+      updateUnread({ myId: userId, friendId: friendId }, 0);
       socket.join(roomId);
     } else {
       roomId = createRoom();

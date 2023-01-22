@@ -9,6 +9,7 @@ const time_diff = 9 * 60 * 60 * 1000;
 
 export const loaddata = async (req: Request, res: Response) => {
   const user = req.body;
+
   if (!user.userId)
     return res.status(404).json({
       status: 404,
@@ -175,6 +176,9 @@ export const setfriend = async (req: Request, res: Response) => {
           friendInfo: friendInfo,
         },
       });
+
+      updateUnread({ myId: myInfo.userId, friendId: friendInfo.userId }, 0);
+
       //for alarm
       userMap.get(friendInfo.friendId)?.emit('accept-friend', myInfo.username);
       // res.status(200).send(resultStatus)
@@ -310,12 +314,18 @@ export const updateRoomId = async (obj: { myId: string; friendId: string; roomId
   );
 };
 
-export const updateUnread = async (obj: { myId: string; friendId: string }) => {
+export const updateUnread = async (
+  obj: {
+    myId: string;
+    friendId: string;
+  },
+  targetCnt: number = 0
+) => {
   const { myId, friendId } = obj;
 
   LastChat.collection.findOneAndUpdate(
     { $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }] },
-    { $set: { unreadCount: 0 } }
+    { $set: { unreadCount: targetCnt } }
   );
 };
 
