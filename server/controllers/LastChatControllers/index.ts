@@ -110,19 +110,21 @@ export const firstdata = async (req: Request, res: Response) => {
 };
 
 export const setfriend = async (req: Request, res: Response) => {
-  const user = req.body;
-  if (!user) return res.status(404).send('not found');
+  const { myInfo, friendInfo, isAccept } = req.body;
+  if (!myInfo || !friendInfo) return res.status(404).send('not found');
 
-  acceptFriend({ myId: user.myId, friendId: user.friendId, isAccept: user.isAccept }).then(
+  acceptFriend({ myId: myInfo.userId, friendId: friendInfo.userId, isAccept: isAccept }).then(
     (resultStatus) => {
       res.status(200).json({
         status: 200,
         payload: {
           resultStatus: resultStatus,
+          myInfo: myInfo,
+          friendInfo: friendInfo,
         },
       });
       //for alarm
-      userMap.get(user.friendId)?.emit('accept-friend', user.myId);
+      userMap.get(friendInfo.friendId)?.emit('accept-friend', myInfo.username);
 
       // res.status(200).send(resultStatus)
     }
