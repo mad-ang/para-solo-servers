@@ -95,7 +95,7 @@ export const firstdata = async (req: Request, res: Response) => {
           },
         });
       } else
-        res.status(409).json({
+        res.status(200).json({
           status: 409,
           message: 'already exist',
         });
