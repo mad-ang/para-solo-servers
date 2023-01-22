@@ -52,7 +52,7 @@ export const signUp = async (req: Request, res: Response) => {
   const result = await User.collection.insertOne({
     userId: user.userId,
     password: user.password,
-    userCoin : 3,
+    userCoin: 3,
     userProfile: {
       profileImgUrl: '',
       height: '',
@@ -250,8 +250,8 @@ export const authenticateUser = async (req: Request, res: Response): Promise<any
 export const updateUser = async (userId: string, userProfile: IUserProfile) => {
   if (!userProfile) return;
   const keys = Object.keys(userProfile);
-  keys?.forEach((key) => {
-    if (!userProfile[key] || userProfile[key].length === 0) {
+  keys?.forEach((key: string) => {
+    if (!userProfile[key as string] || userProfile[key as string]?.length === 0) {
       delete userProfile[key];
     }
   });

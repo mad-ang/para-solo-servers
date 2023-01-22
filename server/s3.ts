@@ -34,7 +34,7 @@ class _S3 {
     }
   }
 
-  async getPresignedUploadUrl(photoKey) {
+  async getPresignedUploadUrl(photoKey: string) {
     const url = await this.s3.getSignedUrl('putObject', {
       Bucket: this.bucketName,
       Key: `${photoKey}`,

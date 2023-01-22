@@ -17,15 +17,17 @@ export default class PlayerUpdateInfoCommand extends Command<ITownState, Payload
     let changed = false;
     const newInfomap = new MapSchema<string>();
     const keys = Object.keys(userProfile);
-    keys.forEach((key: any) => {
-      //@ts-ignore
-      if (userProfile[key] && player?.userProfile[key] !== userProfile[key]) {
+    keys.forEach((key: string) => {
+      if (
+        userProfile[key as string] &&
+        player?.userProfile[key as string] !== userProfile[key as string]
+      ) {
         changed = true;
         //@ts-ignore
-        newInfomap.set(key, userProfile[key]);
+        newInfomap.set(key as string, userProfile[key as string]);
       } else {
         //@ts-ignore
-        newInfomap.set(key, player?.userProfile[key] || '');
+        newInfomap.set(key as string, player?.userProfile[key as string] || '');
       }
     });
     if (changed) player.userProfile = newInfomap;
