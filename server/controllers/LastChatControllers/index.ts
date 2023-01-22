@@ -59,7 +59,7 @@ export const firstdata = async (req: Request, res: Response) => {
       message: '유효한 사용자가 아닙니다.',
     });
   }
-  
+
   // 만약에 유저코인이 0이면 리턴 404
   if (foundUser!.userCoin <= 0) {
     return res.status(200).json({
@@ -163,7 +163,7 @@ export const setfriend = async (req: Request, res: Response) => {
       console.log('setfriend => accept-friend emit ', myInfo.username);
 
       //for alarm
-      userMap.get(friendInfo.friendId)?.emit('accept-friend', myInfo.username);
+      userMap.get(friendInfo.userId)?.emit('accept-friend', myInfo.username);
       // res.status(200).send(resultStatus)
     }
   );
