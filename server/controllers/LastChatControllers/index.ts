@@ -136,7 +136,7 @@ export const chargingCoin = async (req: Request, res: Response) => {
         { userId: userId },
         {
           $inc: {
-            userCoin: 3,
+            userCoin: 100,
           },
         }
       );
