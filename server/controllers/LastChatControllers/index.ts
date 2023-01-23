@@ -33,81 +33,95 @@ export const loaddata = async (req: Request, res: Response) => {
 };
 
 export const firstdata = async (req: Request, res: Response) => {
-  const user = req.body;
-  if (!user) {
-    return res.status(404).json({
-      status: 404,
-      message: 'not found',
-    });
-  }
-  if (!(user.myInfo && user.friendInfo && user.message)) {
-    return res.status(400).json({
-      status: 400,
-      message: 'invalid input',
-    });
-  }
-  /*예외처리*/
-  // 친구 요청을 보낸 사람의 코인을 1개 차감한다
-  const userId = user.myInfo.userId;
-  // DB에서 이 유저의 userCoin을 찾아온다
-  const foundUser = await User.findOne({
-    userId: userId,
-  });
-  if (!foundUser || foundUser?.userCoin === undefined) {
-    return res.status(400).json({
-      status: 400,
-      message: '유효한 사용자가 아닙니다.',
-    });
-  }
-
-  // 만약에 유저코인이 0이면 리턴 404
-  if (foundUser!.userCoin <= 0) {
-    return res.status(200).json({
-      status: 404,
-      message: '코인이 부족합니다.',
-    });
-  }
-
-  addLastChat({
-    myInfo: user.myInfo,
-    friendInfo: user.friendInfo,
-    status: user.status,
-    message: user.message,
-  })
-    .then(async (result) => {
-      // 만약 이미 친구였다면 false가 오고, 이제 새로 친구를 요청했다면 true가 온다
-      if (result) {
-        User.collection.updateOne(
-          { userId: userId },
-          {
-            $inc: {
-              userCoin: -1,
-            },
-          }
-        );
-        userMap.get(user.friendInfo.userId)?.emit('request-friend', user.myInfo as any);
-
-        return res.status(200).json({
-          status: 200,
-          payload: {
-            myInfo: user.myInfo,
-            friendInfo: user.friendInfo,
-          },
-        });
-      } else
-        res.status(200).json({
-          status: 409,
-          message: 'already exist',
-        });
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).json({
-        status: 500,
-        message: `서버 오류: ${err}`,
+  console.log('???????')
+  try {
+    const user = req.body;
+    if (!user) {
+      return res.status(404).json({
+        status: 404,
+        message: 'not found',
       });
+    }
+    if (!(user.myInfo && user.friendInfo && user.message)) {
+      return res.status(400).json({
+        status: 400,
+        message: 'invalid input',
+      });
+    }
+    /*예외처리*/
+    const userId = user.myInfo.userId;
+    // DB에서 이 유저의 userCoin을 찾아온다
+    const foundUser = await User.findOne({
+      userId: userId,
     });
+    if (!foundUser || foundUser?.userCoin === undefined) {
+      return res.status(400).json({
+        status: 400,
+        message: '유효한 사용자가 아닙니다.',
+      });
+    }
+
+    const alreadyFriend = await checkLast(user.myInfo.userId, user.friendInfo.userId);
+    console.log(alreadyFriend, 'alreadyFriend???????????')
+    if (alreadyFriend) {
+        // 이미 친구였다면
+        return res.status(200).json({
+          status: 409,
+          message: '이미 친구입니다.',
+        });
+    }
+
+    // 새로운 친구요청
+
+    // 만약에 유저코인이 0이면 리턴 404
+    if (foundUser!.userCoin <= 0) {
+      return res.status(200).json({
+        status: 404,
+        message: '코인이 부족합니다.',
+      });
+    }
+
+    const result = await addLastChat({
+      myInfo: user.myInfo,
+      friendInfo: user.friendInfo,
+      status: user.status,
+      message: user.message,
+    });
+
+    if (!result) {
+      // 친구맺기 실패 -> 다양한 이유를 포괄하도록 해야 함
+      return res.status(200).json({
+        status: 404,
+        message: '친구맺기 실패',
+      });
+    }
+
+    User.collection.updateOne(
+      { userId: userId },
+      {
+        $inc: {
+          userCoin: -1,
+        },
+      }
+    );
+    userMap.get(user.friendInfo.userId)?.emit('request-friend', user.myInfo as any);
+
+    return res.status(200).json({
+      status: 200,
+      payload: {
+        myInfo: user.myInfo,
+        friendInfo: user.friendInfo,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: 500,
+      message: `서버 오류: ${error}`,
+    });
+  }
 };
+
 export const chargingCoin = async (req: Request, res: Response) => {
   // 유효성검사 필요할 듯
   const user = req.body;
@@ -185,6 +199,7 @@ const addLastChat = async (obj: {
       return false;
     }
 
+    console.log('오면 안됨!!!!')
     // 이제 처음 친구 요청한 경우
     LastChat.collection.insertOne({
       myInfo: obj.myInfo,
@@ -339,6 +354,9 @@ export const checkLast = async (myId: string, friendId: string) => {
     const res = await LastChat.collection.count({
       $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }],
     });
+
+
+    console.log('이미 친구인가??', res)
     return res;
   } catch (err) {
     console.error(err);
