@@ -7,5 +7,5 @@ COPY ["package.json", "package-lock.json*", "yarn.lock", "./server/tsconfig.serv
 RUN yarn install --production
 COPY . .
 RUN yarn build
-EXPOSE 8080 5002
+EXPOSE 8000 5002
 CMD ["yarn", "start"]
