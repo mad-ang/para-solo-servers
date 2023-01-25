@@ -103,17 +103,10 @@ connectDB()
 const socketServer = http.createServer(app);
 socketServer.listen(socketPort, () => console.log(`socketServer is running on ${socketPort}`));
 export const io = require('socket.io')(socketServer, {
-  cors: true,
-  origin: [
-    'https://www.momstown.site',
-    'http://127.0.0.1:5173',
-    'http://127.0.0.1:5174',
-    'http://localhost:5173',
-    'http://localhost:5174',
-  ],
-  methods: ['GET', 'POST'],
-  allowedHeaders: '*',
-  credentials: true,
+  cors: {
+    origin: 'https://example.com',
+    methods: ['GET', 'POST'],
+  },
 });
 
 export const userMap = new Map<string, Socket>();
