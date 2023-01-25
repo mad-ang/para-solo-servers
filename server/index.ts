@@ -1,5 +1,4 @@
 import http from 'http';
-const https = require('https');
 import express from 'express';
 import cors from 'cors';
 import { Server, LobbyRoom } from 'colyseus';
@@ -104,7 +103,7 @@ const socketServer = http.createServer(app);
 socketServer.listen(socketPort, () => console.log(`socketServer is running on ${socketPort}`));
 export const io = require('socket.io')(socketServer, {
   cors: {
-    origin: 'https://example.com',
+    origin: '*',
     methods: ['GET', 'POST'],
     allowedHeaders: ['my-custom-header'],
     credentials: true,
