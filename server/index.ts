@@ -106,6 +106,8 @@ export const io = require('socket.io')(socketServer, {
   cors: {
     origin: 'https://example.com',
     methods: ['GET', 'POST'],
+    allowedHeaders: ['my-custom-header'],
+    credentials: true,
   },
 });
 
