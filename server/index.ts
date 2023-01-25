@@ -24,7 +24,11 @@ var cookieParser = require('cookie-parser');
 const port = Number(process.env.PORT || 8080);
 const socketPort = Number(process.env.SOCKET_PORT || 5002);
 const app = express();
+app.get('/', (req, res) => {
+  res.json({ message: `Server is running on ${req.secure ? 'HTTPS' : 'HTTP'}` });
+});
 app.use(cookieParser());
+
 const options: cors.CorsOptions = {
   allowedHeaders: [
     'Origin',
@@ -82,14 +86,6 @@ app.use('/auth', authRouter);
 app.use('/chat', chatRouter);
 app.use('/image', imageRouter);
 
-app.use((err, res) => {
-  console.error(err);
-  res.status(500).json({
-    status: 500,
-    message: `서버 오류: ${err}`,
-  });
-});
-
 connectDB()
   .then((db) => {
     gameServer.listen(port);
@@ -98,12 +94,13 @@ connectDB()
   })
   .catch(console.error);
 
-const certOptions = {
-  key: fs.readFileSync('./keys/rootca.key'),
-  cert: fs.readFileSync('./keys/rootca.crt'),
-};
+// const certOptions = {
+//   key: fs.readFileSync('./keys/rootca.key'),
+//   cert: fs.readFileSync('./keys/rootca.crt'),
+// };
 
-const socketServer = https.createServer(certOptions, app);
+const socketServer = http.createServer(app);
+socketServer.listen(socketPort, () => console.log(`socketServer is running on ${socketPort}`));
 export const io = require('socket.io')(socketServer, {
   cors: {
     origin: '*',
@@ -130,5 +127,12 @@ io.on('connection', (socket: Socket) => {
   });
 });
 
-socketServer.listen(socketPort, () => console.log(`socketServer is running on ${socketPort}`));
 S3.init();
+
+app.use((err, res) => {
+  console.error(err);
+  res.status(500).json({
+    status: 500,
+    message: `서버 오류: ${err}`,
+  });
+});
