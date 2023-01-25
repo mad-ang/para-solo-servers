@@ -37,6 +37,7 @@ const options: cors.CorsOptions = {
     'Accept',
     'X-Access-Token',
     'authorization',
+    '*',
   ],
   credentials: true,
   methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
@@ -105,6 +106,8 @@ export const io = require('socket.io')(socketServer, {
   cors: {
     origin: '*',
     methods: ['GET', 'POST'],
+    allowedHeaders: '*',
+    credentials: true,
   },
 });
 
