@@ -103,7 +103,7 @@ const socketServer = http.createServer(app);
 socketServer.listen(socketPort, () => console.log(`socketServer is running on ${socketPort}`));
 export const io = require('socket.io')(socketServer, {
   cors: {
-    origin: '*',
+    origin: 'www.momstown.site',
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
