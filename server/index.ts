@@ -1,4 +1,5 @@
 import http from 'http';
+const https = require('https');
 import express from 'express';
 import cors from 'cors';
 import { Server, LobbyRoom } from 'colyseus';
@@ -7,7 +8,7 @@ import { RoomType } from '../types/Rooms';
 import authRouter from './routes/auth';
 import chatRouter from './routes/chat';
 import imageRouter from './routes/image';
-
+const fs = require('fs');
 // import { sequelize } from './DB/db'
 import { config } from './envconfig';
 // import socialRoutes from "@colyseus/social/express"
@@ -97,7 +98,12 @@ connectDB()
   })
   .catch(console.error);
 
-const socketServer = http.createServer(app);
+const certOptions = {
+  key: fs.readFileSync('./keys/rootca.key'),
+  cert: fs.readFileSync('./keys/rootca.crt'),
+};
+
+const socketServer = https.createServer(certOptions, app);
 export const io = require('socket.io')(socketServer, {
   cors: {
     origin: '*',

@@ -5,3 +5,4 @@ node_modules
 /server/lib
 .vscode
 /server/.env
+/server/keys
