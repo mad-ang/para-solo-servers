@@ -20,7 +20,7 @@ import { Socket } from 'socket.io';
 import S3 from './s3';
 const mongoose = require('mongoose');
 var cookieParser = require('cookie-parser');
-const port = Number(process.env.PORT || 3000);
+const port = 3000;
 
 const app = express();
 app.get('/', (req, res) => {
