@@ -19,6 +19,7 @@ export interface IUserProfile {
   region?: string;
   gender?: string;
   age?: string;
+  statusMessage?: string;
 }
 
 // export enum gender {

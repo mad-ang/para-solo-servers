@@ -9,7 +9,7 @@ const user = new Schema<IUserInfo>({
   userId: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   username: { type: String, required: false },
-  userCoin: { type: Number, required: false},
+  userCoin: { type: Number, required: false },
   userProfile: {
     profileImgUrl: { type: String, required: false },
     height: { type: String, required: false },
@@ -17,6 +17,7 @@ const user = new Schema<IUserInfo>({
     region: { type: String, required: false },
     gender: { type: String, required: false },
     age: { type: String, required: false },
+    statusMessage: { type: String, required: false },
   },
   refreshToken: { type: String, required: false },
   createdAt: { type: Date, default: Date.now, required: false },

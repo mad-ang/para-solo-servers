@@ -60,6 +60,7 @@ export const signUp = async (req: Request, res: Response) => {
       region: '',
       gender: '',
       age: '',
+      statusMessage: '',
     },
     createdAt: new Date(),
   });
