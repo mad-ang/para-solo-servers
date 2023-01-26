@@ -21,8 +21,7 @@ const time_diff = 9 * 60 * 60 * 1000;
 const createRoom = () => {
   const roomId = uuidV4();
   rooms[roomId] = [];
-  // rooms_chat[roomId] = [];
-  console.log('chatroom[', roomId, '] created.');
+
   return roomId;
 };
 
@@ -32,7 +31,6 @@ export const chatController = (socket: Socket) => {
     const { userId, friendId } = host;
 
     if (rooms[roomId]) {
-      console.log('user Joined the room', roomId, userId);
       rooms[roomId].push(userId);
       updateUnread({ myId: userId, friendId: friendId }, 0);
       socket.join(roomId);
@@ -45,7 +43,6 @@ export const chatController = (socket: Socket) => {
     }
     readMessage({ roomId, userId, friendId });
     socket.on('disconnect', () => {
-      console.log('user left the room', host);
       leaveRoom({ roomId, userId: userId, friendId });
     });
   };
@@ -70,11 +67,9 @@ export const chatController = (socket: Socket) => {
   }) => {
     const { roomId, userId, friendId, message } = obj;
     if (message) {
-      // rooms_chat[roomId].push(message);
       addChatMessage({ senderId: userId, receiverId: friendId, message: message });
       updateLastChat({ myId: userId, friendId: friendId, message: message });
-      console.log(userId, ' to ', friendId, ' : ', message);
-      // io.to(roomId).except(socket.id).emit('message', obj)
+
       userMap.get(friendId)?.emit('message', obj);
     }
   };
@@ -86,7 +81,6 @@ export const chatController = (socket: Socket) => {
     message: string;
   }) => {
     const { myInfo, friendInfo, status, message } = body;
-    console.log('requestFriend 요청왔다!!', body);
 
     userMap.get(friendInfo?.userId)?.emit('request-friend-res', myInfo.username);
   };
@@ -98,7 +92,7 @@ export const chatController = (socket: Socket) => {
     message: string;
   }) => {
     const { myInfo, friendInfo, status, message } = body;
-    console.log('acceptFriend', myInfo, friendInfo);
+
     userMap.get(friendInfo?.userId)?.emit('accept-friend-res', myInfo?.username);
   };
   const deleteFriend = async (body: {
@@ -167,7 +161,6 @@ export const addChatMessage = (message: {
     message: message.message,
     createdAt: createAt,
   });
-  console.log('in addChatresult', createAt);
 };
 
 export const getChatMessage = async (sender: string, recipient: string) => {

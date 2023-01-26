@@ -266,7 +266,7 @@ export const updateUser = async (userId: string, userProfile: IUserProfile) => {
       }
     )
     .then(() => {
-      console.log('DB 업데이트', userId, userProfile);
+      console.log('DB 업데이트 userProfile', userId, userProfile);
     })
     .catch(function (error) {
       console.error(error);
@@ -284,7 +284,7 @@ export const updateUserName = async (userId: string, username: string) => {
       }
     )
     .then(() => {
-      console.log('DB 업데이트', userId, username);
+      console.log('DB 업데이트 username', userId, username);
     })
     .catch(function (error) {
       console.error('updateUserName', error);

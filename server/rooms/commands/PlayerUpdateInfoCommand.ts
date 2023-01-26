@@ -15,6 +15,10 @@ export default class PlayerUpdateInfoCommand extends Command<ITownState, Payload
     const player = this.room.state.players.get(client.sessionId);
     if (!player) return;
     let changed = false;
+    if (!userProfile) {
+      player.userProfile = player.userProfile;
+      return;
+    }
     const newInfomap = new MapSchema<string>();
     const keys = Object.keys(userProfile);
     keys.forEach((key: string) => {
