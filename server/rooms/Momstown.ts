@@ -132,12 +132,14 @@ export class SkyOffice extends Room<TownState> {
     this.onMessage(
       Message.UPDATE_PLAYER_INFO,
       (client, message: { userProfile: IUserProfile; userId: string; authFlag: number }) => {
-        if (!message || !message.authFlag || !message.userProfile) return;
+        if (!message || !message.authFlag) return;
         this.dispatcher.dispatch(new PlayerUpdateInfoCommand(), {
           client,
           userProfile: message.userProfile,
         });
-        updateUser(message.userId, message.userProfile);
+        if (message.userProfile) {
+          updateUser(message.userId, message.userProfile);
+        }
       }
     );
 
