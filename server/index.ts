@@ -20,7 +20,7 @@ import { Socket } from 'socket.io';
 import S3 from './s3';
 const mongoose = require('mongoose');
 var cookieParser = require('cookie-parser');
-const port = Number(process.env.PORT || 3000);
+const port = Number(process.env.PORT || 8080);
 
 const app = express();
 app.get('/', (req, res) => {
@@ -98,7 +98,9 @@ connectDB()
   })
   .catch(console.error);
 
+
 export const userMap = new Map<string, Socket>();
+
 
 S3.init();
 
