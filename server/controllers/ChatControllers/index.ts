@@ -101,9 +101,8 @@ export const chatController = (socket: Socket) => {
     // let docs = await LastChat.collection.findOne({
     //   $and: [{ 'userId.userId': userId }, { 'friendInfo.userId': friendId }],
     // });
-
     await LastChat.collection.deleteOne({
-      $and: [{ 'userId.userId': userId }, { 'friendInfo.userId': friendId }],
+      $and: [{ 'myInfo.userId': userId }, { 'friendInfo.userId': friendId }],
     });
 
     await LastChat.collection.findOneAndUpdate(
