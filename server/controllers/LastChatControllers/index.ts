@@ -33,7 +33,7 @@ export const loaddata = async (req: Request, res: Response) => {
 };
 
 export const firstdata = async (req: Request, res: Response) => {
-  console.log('???????')
+  console.log('???????');
   try {
     const user = req.body;
     if (!user) {
@@ -62,13 +62,13 @@ export const firstdata = async (req: Request, res: Response) => {
     }
 
     const alreadyFriend = await checkLast(user.myInfo.userId, user.friendInfo.userId);
-    console.log(alreadyFriend, 'alreadyFriend???????????')
+    console.log(alreadyFriend, 'alreadyFriend???????????');
     if (alreadyFriend) {
-        // 이미 친구였다면
-        return res.status(200).json({
-          status: 409,
-          message: '이미 친구입니다.',
-        });
+      // 이미 친구였다면
+      return res.status(200).json({
+        status: 409,
+        message: '이미 친구입니다.',
+      });
     }
 
     // 새로운 친구요청
@@ -104,8 +104,9 @@ export const firstdata = async (req: Request, res: Response) => {
         },
       }
     );
+    console.log('emit한다!', user.myInfo, user.friendInfo);
     userMap.get(user.friendInfo.userId)?.emit('request-friend', user.myInfo as any);
-
+    console.log('emit 완료')
     return res.status(200).json({
       status: 200,
       payload: {
@@ -199,7 +200,7 @@ const addLastChat = async (obj: {
       return false;
     }
 
-    console.log('오면 안됨!!!!')
+    console.log('오면 안됨!!!!');
     // 이제 처음 친구 요청한 경우
     LastChat.collection.insertOne({
       myInfo: obj.myInfo,
@@ -355,8 +356,7 @@ export const checkLast = async (myId: string, friendId: string) => {
       $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }],
     });
 
-
-    console.log('이미 친구인가??', res)
+    console.log('이미 친구인가??', res);
     return res;
   } catch (err) {
     console.error(err);
