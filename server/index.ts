@@ -28,6 +28,16 @@ app.get('/', (req, res) => {
 });
 app.use(cookieParser());
 
+const allowedOrigins = [
+  'https://parasolo-so.link/',
+  'https://www.parasolo-so.link/',
+  'https://www.momstown.site',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174',
+  'http://localhost:5173',
+  'http://localhost:5174',
+];
+
 const options: cors.CorsOptions = {
   allowedHeaders: [
     'Origin',
@@ -40,13 +50,7 @@ const options: cors.CorsOptions = {
   ],
   credentials: true,
   methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
-  origin: [
-    'https://www.momstown.site',
-    'http://127.0.0.1:5173',
-    'http://127.0.0.1:5174',
-    'http://localhost:5173',
-    'http://localhost:5174',
-  ],
+  origin: allowedOrigins,
   preflightContinue: false,
 };
 
@@ -103,13 +107,7 @@ const socketServer = http.createServer(app);
 socketServer.listen(socketPort, () => console.log(`socketServer is running on ${socketPort}`));
 export const io = require('socket.io')(socketServer, {
   cors: {
-    origin: [
-      'https://www.momstown.site',
-      'http://127.0.0.1:5173',
-      'http://127.0.0.1:5174',
-      'http://localhost:5173',
-      'http://localhost:5174',
-    ],
+    origin: allowedOrigins,
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
