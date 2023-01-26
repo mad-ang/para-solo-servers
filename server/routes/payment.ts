@@ -5,6 +5,7 @@ const router = express.Router();
 
 router.post('/api/orders', async (req, res) => {
   const order = await paypal.createOrder();
+  console.log("들어옴")
   res.json(order);
 });
 
