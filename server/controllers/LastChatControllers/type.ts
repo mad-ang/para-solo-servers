@@ -21,5 +21,6 @@ export enum IChatRoomStatus {
   FRIEND_REQUEST,
   SOCKET_ON,
   SOCKET_OFF,
-  REJECTED
+  REJECTED,
+  TERMINATED
 }
