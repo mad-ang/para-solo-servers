@@ -88,6 +88,17 @@ export const chatController = (socket: Socket) => {
     if (foundUser) userMap.get(friendId)?.emit('request-friend-res', foundUser.username);
   };
 
+  const acceptFriend = async (body: {
+    myInfo: any;
+    friendInfo: any;
+    status: number;
+    message: string;
+  }) => {
+    const { myInfo, friendInfo, status, message } = body;
+    console.log('acceptFriend', myInfo, friendInfo);
+    userMap.get(friendInfo?.userId)?.emit('accept-friend-res', myInfo?.username);
+  };
+
   // room이 살아 있을 경우.
   // Array를 만들고 거기에 푸쉬. Array를 만들어서 룸 데이터로 가지고 있는다.
   // 메시지를 읽으려 할때 그 array를 리턴.
@@ -113,6 +124,8 @@ export const chatController = (socket: Socket) => {
   socket.on('message', sendMessage);
 
   socket.on('request-friend-req', requestFriend);
+
+  socket.on('accept-friend-req', acceptFriend);
 };
 // join-room
 // show-messages

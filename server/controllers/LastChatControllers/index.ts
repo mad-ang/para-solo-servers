@@ -175,10 +175,10 @@ export const setfriend = async (req: Request, res: Response) => {
         },
       });
 
-      console.log('setfriend => accept-friend emit ', myInfo.username);
+      // console.log('setfriend => accept-friend emit ', myInfo.username);
 
       //for alarm
-      userMap.get(friendInfo.userId)?.emit('accept-friend', myInfo.username);
+      // userMap.get(friendInfo.userId)?.emit('accept-friend', myInfo.username);
       // res.status(200).send(resultStatus)
     }
   );
