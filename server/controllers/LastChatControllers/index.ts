@@ -196,8 +196,6 @@ const addLastChat = async (obj: {
     if (alreadyFriend) {
       return false;
     }
-
-    console.log('오면 안됨!!!!');
     // 이제 처음 친구 요청한 경우
     LastChat.collection.insertOne({
       myInfo: obj.myInfo,
