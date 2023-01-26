@@ -21,7 +21,7 @@ import S3 from './s3';
 const mongoose = require('mongoose');
 var cookieParser = require('cookie-parser');
 const port = 3000;
-const socketPort = Number(process.env.SOCKET_PORT || 8080);
+const socketPort = 8080;
 const app = express();
 app.get('/', (req, res) => {
   res.json({ message: `Server is running on ${req.secure ? 'HTTPS' : 'HTTP'}` });
