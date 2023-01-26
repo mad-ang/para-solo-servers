@@ -101,6 +101,23 @@ export const chatController = (socket: Socket) => {
     console.log('acceptFriend', myInfo, friendInfo);
     userMap.get(friendInfo?.userId)?.emit('accept-friend-res', myInfo?.username);
   };
+  const deleteFriend = async (body: {
+    userId: any;
+    friendId: any;
+  }) => {
+    const { userId, friendId} = body;
+
+  // let docs = await LastChat.collection.findOne({
+  //   $and: [{ 'myInfo.userId': userId }, { 'friendInfo.userId': friendId }],
+  // });
+  await LastChat.collection.deleteOne({
+    $and: [{ 'myInfo.userId': userId }, { 'friendInfo.userId': friendId }],
+  });
+  console.log('deleteFriend', userId, friendId);
+  // console.log(`${friendId} 가 목록에서 삭제되었습니다.`);
+    // userMap.get(friendId?.userId)?.emit('delete-friend-res', userId?.username);
+  };
+
 
   // room이 살아 있을 경우.
   // Array를 만들고 거기에 푸쉬. Array를 만들어서 룸 데이터로 가지고 있는다.
@@ -129,6 +146,8 @@ export const chatController = (socket: Socket) => {
   socket.on('request-friend-req', requestFriend);
 
   socket.on('accept-friend-req', acceptFriend);
+
+  socket.on('delete-friend',deleteFriend)
 };
 // join-room
 // show-messages
