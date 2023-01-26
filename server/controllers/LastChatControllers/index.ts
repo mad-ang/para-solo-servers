@@ -279,13 +279,13 @@ export const updateRoomImg = async (userId: string, profileImgUrl: string) => {
   );
 };
 
-// const deleteChatRoom = async (obj: { myId: string; friendId: string }) => {
-//   const { myId, friendId } = obj;
-//   let docs = await LastChat.collection.findOne({
-//     $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }],
-//   });
-//   // 삭제한 상대방에게 상대방이 채팅방에서 나갔음을 알림.
-// };
+const deleteChatRoom = async (obj: { myId: string; friendId: string }) => {
+  const { myId, friendId } = obj;
+  let docs = await LastChat.collection.findOne({
+    $and: [{ 'myInfo.userId': myId }, { 'friendInfo.userId': friendId }],
+  });
+  // 삭제한 상대방에게 상대방이 채팅방에서 나갔음을 알림.
+};
 
 export const updateLastChat = async (obj: { myId: string; friendId: string; message: string }) => {
   const { myId, friendId, message } = obj;
