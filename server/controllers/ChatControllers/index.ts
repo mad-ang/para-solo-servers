@@ -79,13 +79,16 @@ export const chatController = (socket: Socket) => {
     }
   };
 
-  const requestFriend = async (obj: { userId: string; friendId: string }) => {
-    const { userId, friendId } = obj;
-    console.log('requestFriend 요청왔다!!', obj);
-    const foundUser = await User.findOne({
-      userId: userId,
-    });
-    if (foundUser) userMap.get(friendId)?.emit('request-friend-res', foundUser.username);
+  const requestFriend = async (body: {
+    myInfo: any;
+    friendInfo: any;
+    status: number;
+    message: string;
+  }) => {
+    const { myInfo, friendInfo, status, message } = body;
+    console.log('requestFriend 요청왔다!!', body);
+
+    userMap.get(friendInfo?.userId)?.emit('request-friend-res', myInfo.username);
   };
 
   const acceptFriend = async (body: {
