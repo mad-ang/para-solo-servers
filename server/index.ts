@@ -21,7 +21,7 @@ import S3 from './s3';
 const mongoose = require('mongoose');
 var cookieParser = require('cookie-parser');
 const port = Number(process.env.PORT || 8080);
-
+const socketPort = Number(process.env.SOCKET_PORT || 5002);
 const app = express();
 app.get('/', (req, res) => {
   res.json({ message: `Server is running on ${req.secure ? 'HTTPS' : 'HTTP'}` });
@@ -98,9 +98,40 @@ connectDB()
   })
   .catch(console.error);
 
+// const certOptions = {
+//   key: fs.readFileSync('./keys/rootca.key'),
+//   cert: fs.readFileSync('./keys/rootca.crt'),
+// };
+
+const socketServer = http.createServer(app);
+socketServer.listen(socketPort, () => console.log(`socketServer is running on ${socketPort}`));
+export const io = require('socket.io')(socketServer, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  },
+});
 
 export const userMap = new Map<string, Socket>();
 
+io.on('connection', (socket: Socket) => {
+  console.log('here comes new challenger !!', socket.id);
+  socket.on('whoAmI', (userId) => {
+    console.log('whoAmI');
+
+    userMap.set(userId, socket);
+  });
+  chatController(socket);
+  socket.on('disconnect', () => {
+    console.log('the challenger disconnected');
+  });
+
+  socket.on('connect_error', (err) => {
+    console.log(`connect_error due to ${err.message}`);
+  });
+});
 
 S3.init();
 
