@@ -104,9 +104,9 @@ export const firstdata = async (req: Request, res: Response) => {
         },
       }
     );
-    console.log('emit한다!', user.myInfo, user.friendInfo);
-    userMap.get(user.friendInfo.userId)?.emit('request-friend', user.myInfo as any);
-    console.log('emit 완료')
+    // console.log('emit한다!', user.myInfo, user.friendInfo);
+    // userMap.get(user.friendInfo.userId)?.emit('request-friend', user.myInfo as any);
+    // console.log('emit 완료')
     return res.status(200).json({
       status: 200,
       payload: {

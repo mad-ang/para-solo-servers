@@ -6,6 +6,8 @@ import { Request, Response } from 'express';
 import { updateLastChat, updateRoomId, updateUnread } from '../LastChatControllers';
 import { userMap } from '../..';
 import LastChat from '../../models/LastChat';
+import User from '../../models/User';
+
 const rooms: Record<string, string[]> = {};
 // const rooms_chat: Record<string, Object[]> = {};
 interface IRoomParams {
@@ -77,6 +79,15 @@ export const chatController = (socket: Socket) => {
     }
   };
 
+  const requestFriend = async (obj: { userId: string; friendId: string }) => {
+    const { userId, friendId } = obj;
+    console.log('requestFriend 요청왔다!!', obj);
+    const foundUser = await User.findOne({
+      userId: userId,
+    });
+    if (foundUser) userMap.get(friendId)?.emit('request-friend-res', foundUser.username);
+  };
+
   // room이 살아 있을 경우.
   // Array를 만들고 거기에 푸쉬. Array를 만들어서 룸 데이터로 가지고 있는다.
   // 메시지를 읽으려 할때 그 array를 리턴.
@@ -100,6 +111,8 @@ export const chatController = (socket: Socket) => {
   // socket.on('stop-chat', stopChat);
   // socket.on('show-messages', readMessage);
   socket.on('message', sendMessage);
+
+  socket.on('request-friend-req', requestFriend);
 };
 // join-room
 // show-messages
