@@ -106,7 +106,7 @@ export const chatController = (socket: Socket) => {
       $and: [{ 'userId.userId': userId }, { 'friendInfo.userId': friendId }],
     });
 
-    LastChat.collection.findOneAndUpdate(
+    await LastChat.collection.findOneAndUpdate(
       { $and: [{ 'myInfo.userId': friendId }, { 'friendInfo.userId': userId }] },
       { $set: { status: 4 } }
     );
