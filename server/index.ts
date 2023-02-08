@@ -28,16 +28,16 @@ app.get('/', (req, res) => {
 });
 app.use(cookieParser());
 
-// const allowedOrigins = [
-//   'https://parasolo-so.link',
-//   'https://www.parasolo-so.link',
-//   'https://momstown.site',
-//   'https://www.momstown.site',
-//   'http://127.0.0.1:5173',
-//   'http://127.0.0.1:5174',
-//   'http://localhost:5173',
-//   'http://localhost:5174',
-// ];
+const allowedOrigins = [
+  'https://parasolo-so.link',
+  'https://www.parasolo-so.link',
+  'https://momstown.site',
+  'https://www.momstown.site',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174',
+  'http://localhost:5173',
+  'http://localhost:5174',
+];
 
 const options: cors.CorsOptions = {
   allowedHeaders: [
@@ -51,6 +51,7 @@ const options: cors.CorsOptions = {
   ],
   credentials: true,
   methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
+  origin: allowedOrigins,
   preflightContinue: false,
 };
 
