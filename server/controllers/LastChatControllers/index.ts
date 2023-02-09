@@ -104,7 +104,7 @@ export const firstdata = async (req: Request, res: Response) => {
       }
     );
 
-    // userMap.get(user.friendInfo.userId)?.emit('request-friend', user.myInfo as any);
+    userMap.get(user.friendInfo.userId)?.emit('request-friend', user.myInfo as any);
 
     return res.status(200).json({
       status: 200,
@@ -175,7 +175,7 @@ export const setfriend = async (req: Request, res: Response) => {
       });
 
       //for alarm
-      // userMap.get(friendInfo.userId)?.emit('accept-friend', myInfo.username);
+      userMap.get(friendInfo.userId)?.emit('accept-friend', myInfo.username);
       // res.status(200).send(resultStatus)
     }
   );

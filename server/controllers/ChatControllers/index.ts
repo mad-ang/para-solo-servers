@@ -37,7 +37,7 @@ export const chatController = (socket: Socket) => {
     } else {
       roomId = createRoom();
       updateRoomId({ myId: userId, friendId: friendId, roomId: roomId }).then(() => {
-        // userMap.get(friendId)?.emit('updata-room-id');
+        userMap.get(friendId)?.emit('updata-room-id');
         rooms[roomId].push(userId);
       });
     }
@@ -113,7 +113,7 @@ export const chatController = (socket: Socket) => {
     console.log('deleteFriend', userId, friendId);
 
     // console.log(`${friendId} 가 목록에서 삭제되었습니다.`);
-    // userMap.get(friendId?.userId)?.emit('delete-friend-res', userId?.username);
+    userMap.get(friendId?.userId)?.emit('delete-friend-res', userId?.username);
 
     userMap.get(friendId)?.emit('delete-friend-res', userId);
   };
