@@ -33,6 +33,8 @@ const allowedOrigins = [
   'https://www.parasolo-so.link',
   'https://momstown.site',
   'https://www.momstown.site',
+  'https://www.para-solo.site',
+  'https://para-solo.site',
   'http://127.0.0.1:5173',
   'http://127.0.0.1:5174',
   'http://localhost:5173',
@@ -95,7 +97,7 @@ connectDB()
   .then((db) => {
     gameServer.listen(port);
 
-    console.log(`Listening on ws://localhost:${port}`);
+    console.log(`gameServer is listening on port ${port}`);
   })
   .catch(console.error);
 
@@ -105,7 +107,7 @@ connectDB()
 // };
 
 const socketServer = http.createServer(app);
-socketServer.listen(socketPort, () => console.log(`socketServer is running on ${socketPort}`));
+socketServer.listen(socketPort, () => console.log(`socketServer is listening on ${socketPort}`));
 export const io = require('socket.io')(socketServer, {
   cors: {
     origin: allowedOrigins,
@@ -120,7 +122,7 @@ export const userMap = new Map<string, Socket>();
 io.on('connection', (socket: Socket) => {
   console.log('here comes new challenger !!', socket.id);
   socket.on('whoAmI', (userId) => {
-    console.log('whoAmI');
+    console.log('whoAmI', userId);
 
     userMap.set(userId, socket);
   });

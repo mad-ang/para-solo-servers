@@ -6,6 +6,8 @@ import { Request, Response } from 'express';
 import { updateLastChat, updateRoomId, updateUnread } from '../LastChatControllers';
 import { userMap } from '../..';
 import LastChat from '../../models/LastChat';
+import User from '../../models/User';
+
 const rooms: Record<string, string[]> = {};
 // const rooms_chat: Record<string, Object[]> = {};
 interface IRoomParams {
@@ -19,8 +21,7 @@ const time_diff = 9 * 60 * 60 * 1000;
 const createRoom = () => {
   const roomId = uuidV4();
   rooms[roomId] = [];
-  // rooms_chat[roomId] = [];
-  console.log('chatroom[', roomId, '] created.');
+
   return roomId;
 };
 
@@ -30,7 +31,6 @@ export const chatController = (socket: Socket) => {
     const { userId, friendId } = host;
 
     if (rooms[roomId]) {
-      console.log('user Joined the room', roomId, userId);
       rooms[roomId].push(userId);
       updateUnread({ myId: userId, friendId: friendId }, 0);
       socket.join(roomId);
@@ -43,7 +43,6 @@ export const chatController = (socket: Socket) => {
     }
     readMessage({ roomId, userId, friendId });
     socket.on('disconnect', () => {
-      console.log('user left the room', host);
       leaveRoom({ roomId, userId: userId, friendId });
     });
   };
@@ -68,13 +67,55 @@ export const chatController = (socket: Socket) => {
   }) => {
     const { roomId, userId, friendId, message } = obj;
     if (message) {
-      // rooms_chat[roomId].push(message);
       addChatMessage({ senderId: userId, receiverId: friendId, message: message });
       updateLastChat({ myId: userId, friendId: friendId, message: message });
-      console.log(userId, ' to ', friendId, ' : ', message);
-      // io.to(roomId).except(socket.id).emit('message', obj)
+
       userMap.get(friendId)?.emit('message', obj);
     }
+  };
+
+  const requestFriend = async (body: {
+    myInfo: any;
+    friendInfo: any;
+    status: number;
+    message: string;
+  }) => {
+    const { myInfo, friendInfo, status, message } = body;
+
+    userMap.get(friendInfo?.userId)?.emit('request-friend-res', myInfo.username);
+  };
+
+  const acceptFriend = async (body: {
+    myInfo: any;
+    friendInfo: any;
+    status: number;
+    message: string;
+  }) => {
+    const { myInfo, friendInfo, status, message } = body;
+
+    userMap.get(friendInfo?.userId)?.emit('accept-friend-res', myInfo?.username);
+  };
+
+  const deleteFriend = async (body: { userId: any; friendId: any }) => {
+    const { userId, friendId } = body;
+    // let docs = await LastChat.collection.findOne({
+    //   $and: [{ 'userId.userId': userId }, { 'friendInfo.userId': friendId }],
+    // });
+    await LastChat.collection.deleteOne({
+      $and: [{ 'myInfo.userId': userId }, { 'friendInfo.userId': friendId }],
+    });
+
+    await LastChat.collection.findOneAndUpdate(
+      { $and: [{ 'myInfo.userId': friendId }, { 'friendInfo.userId': userId }] },
+      { $set: { status: 4 } }
+    );
+
+    console.log('deleteFriend', userId, friendId);
+
+    // console.log(`${friendId} 가 목록에서 삭제되었습니다.`);
+    // userMap.get(friendId?.userId)?.emit('delete-friend-res', userId?.username);
+
+    userMap.get(friendId)?.emit('delete-friend-res', userId);
   };
 
   // room이 살아 있을 경우.
@@ -100,6 +141,12 @@ export const chatController = (socket: Socket) => {
   // socket.on('stop-chat', stopChat);
   // socket.on('show-messages', readMessage);
   socket.on('message', sendMessage);
+
+  socket.on('request-friend-req', requestFriend);
+
+  socket.on('accept-friend-req', acceptFriend);
+
+  socket.on('delete-friend', deleteFriend);
 };
 // join-room
 // show-messages
@@ -119,7 +166,6 @@ export const addChatMessage = (message: {
     message: message.message,
     createdAt: createAt,
   });
-  console.log('in addChatresult', createAt);
 };
 
 export const getChatMessage = async (sender: string, recipient: string) => {

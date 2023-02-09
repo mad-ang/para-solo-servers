@@ -9,6 +9,7 @@ export class UserProfile extends Schema implements IUserProfile {
   @type('string') region = '';
   @type('string') gender = '';
   @type('string') age = '';
+  @type('string') statusMessage = '';
 }
 export class Player extends Schema implements IPlayer {
   @type('string') name = '';
