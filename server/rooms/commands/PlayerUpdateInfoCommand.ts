@@ -1,33 +1,37 @@
 import { Command } from '@colyseus/command';
 import { Client } from 'colyseus';
-import { IUserInfo } from '../../controllers/UserControllers/types';
+import { IUserInfo, IUserProfile } from '../../controllers/UserControllers/types';
 import { ITownState } from '../../../types/ITownState';
 import { MapSchema } from '@colyseus/schema';
 
 type Payload = {
   client: Client;
-  userInfo: IUserInfo;
+  userProfile: IUserProfile;
 };
 
 export default class PlayerUpdateInfoCommand extends Command<ITownState, Payload> {
   execute(data: Payload) {
-    const { client, userInfo } = data;
+    const { client, userProfile } = data;
     const player = this.room.state.players.get(client.sessionId);
     if (!player) return;
     let changed = false;
+    if (!userProfile) {
+      player.userProfile = player.userProfile;
+      return;
+    }
     const newInfomap = new MapSchema<string>();
-    const keys = Object.keys(userInfo);
-    keys.forEach((key: any) => {
-      //@ts-ignore
-      if (userInfo[key] && player?.userInfo[key] !== userInfo[key]) {
+    const keys = Object.keys(userProfile);
+    keys.forEach((key: string) => {
+      if (
+        userProfile[key as string] &&
+        player.userProfile.get(key) !== userProfile[key as string]
+      ) {
         changed = true;
-        //@ts-ignore
-        newInfomap.set(key, userInfo[key]);
+        newInfomap.set(key as string, userProfile[key as string] || '');
       } else {
-        //@ts-ignore
-        newInfomap.set(key, player?.userInfo[key] || '');
+        newInfomap.set(key as string, player?.userProfile.get(key) || '');
       }
     });
-    if (changed) player.userInfo = newInfomap;
+    if (changed) player.userProfile = newInfomap;
   }
 }

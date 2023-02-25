@@ -9,7 +9,7 @@ export interface IPlayer extends Schema {
   readyToConnect: boolean;
   videoConnected: boolean;
   userId: string;
-  userInfo: MapSchema<string>;
+  userProfile: MapSchema<string>;
 }
 export interface IChair extends Schema {
   occupied: boolean;

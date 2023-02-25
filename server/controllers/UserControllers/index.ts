@@ -3,11 +3,12 @@ const jwt = require('jsonwebtoken');
 import { config } from '../../envconfig';
 const AUTH_ERROR = { message: '사용자 인증 오류' };
 
-import { IUserInfo } from './types';
+import { IUserInfo, IUserProfile } from './types';
 import { Request, Response } from 'express';
 import { Token } from './types';
 import User from '../../models/User';
 import 'express-async-errors';
+import { v4 as uuidv4 } from 'uuid';
 
 async function hashPassword(user: IUserInfo) {
   const password = user.password;
@@ -51,6 +52,16 @@ export const signUp = async (req: Request, res: Response) => {
   const result = await User.collection.insertOne({
     userId: user.userId,
     password: user.password,
+    userCoin: 100,
+    userProfile: {
+      profileImgUrl: '',
+      height: '',
+      weight: '',
+      region: '',
+      gender: '',
+      age: '',
+      statusMessage: '',
+    },
     createdAt: new Date(),
   });
   if (!result) {
@@ -94,25 +105,35 @@ export const login = async (req: Request, res: Response) => {
       {
         userId: foundUser.userId,
         username: foundUser.username,
+        uuid: uuidv4(),
       },
-      config.jwt.secretKey
-      // {
-      //   expiresIn: config.jwt.expiresInSec,
-      // }
+      config.jwt.secretKey,
+      {
+        expiresIn: '1h',
+      }
     );
 
-    const refreshToken = 'refreshToken';
+    const refreshToken = jwt.sign(
+      {
+        userId: foundUser.userId,
+        username: foundUser.username,
+        uuid1: uuidv4(),
+        uuid2: uuidv4(),
+      },
+      config.jwt.secretKey
+    );
+
     await User.collection.updateOne(
       { userId: foundUser.userId },
       {
         $set: {
-          refreshToken: 'refreshToken',
+          refreshToken: refreshToken,
           lastUpdated: new Date(),
         },
       }
     );
 
-    res.cookie('refreshToken', refreshToken, { path: '/', secure: true, maxAge: 600 });
+    res.cookie('refreshToken', refreshToken, { path: '/', secure: true }); // 60초 * 60분 * 1시간
     res.status(200).json({
       status: 200,
       payload: {
@@ -128,7 +149,66 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-const isAuth = async (req: Request, res: Response): Promise<any> => {
+export const issueAccessToken = async (req: Request, res: Response): Promise<any> => {
+  try {
+    let { refreshToken } = req.body;
+
+    if (!refreshToken) return res.status(401).json(AUTH_ERROR);
+
+    const decoded = await isRefreshTokenValid(refreshToken);
+    if (!decoded) return res.status(401).json(AUTH_ERROR);
+
+    const userId = decoded.userId;
+
+    const foundUser = await User.findOne({ userId: userId });
+    if (!foundUser) return res.status(401).json(AUTH_ERROR);
+    refreshToken = jwt.sign(
+      {
+        userId: foundUser!.userId,
+        username: foundUser!.username,
+        uuid1: uuidv4(),
+        uuid2: uuidv4(),
+      },
+      config.jwt.secretKey
+    );
+    await User.collection.updateOne(
+      { userId: foundUser!.userId },
+      {
+        $set: {
+          refreshToken: refreshToken,
+          lastUpdated: new Date(),
+        },
+      }
+    );
+    const accessToken = jwt.sign(
+      {
+        userId: foundUser!.userId,
+        username: foundUser!.username,
+        uuid: uuidv4(),
+      },
+      config.jwt.secretKey,
+      {
+        expiresIn: '1h',
+      }
+    );
+    res.cookie('refreshToken', refreshToken, { path: '/', secure: true }); // 60초 * 60분 * 1시간
+
+    return res.status(200).json({
+      status: 200,
+      payload: {
+        userId: foundUser!.userId,
+        accessToken: accessToken,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 500,
+      message: `서버 오류: ${err}`,
+    });
+  }
+};
+
+const isAccessTokenValid = async (req: Request, res: Response): Promise<any> => {
   const authHeader = req.get('Authorization');
   if (!(authHeader && authHeader?.startsWith('Bearer '))) {
     return null;
@@ -144,8 +224,19 @@ const isAuth = async (req: Request, res: Response): Promise<any> => {
   });
 };
 
+const isRefreshTokenValid = async (refreshToken: string): Promise<any> => {
+  if (!refreshToken) return null;
+  // 사용자가 주장하는 본인의 토큰 -> id, isAdmin값이 진실인지 아직 모름(위조되었을 수도?)
+
+  return jwt.verify(refreshToken, config.jwt.secretKey, async (error: any, decoded: Token) => {
+    // secretKey로 디코딩 및 검증
+    if (error) return false;
+    return decoded;
+  });
+};
+
 export const authenticateUser = async (req: Request, res: Response): Promise<any> => {
-  const decoded = await isAuth(req, res);
+  const decoded = await isAccessTokenValid(req, res);
   const userId = decoded.userId;
   const foundUser = await User.findOne({ userId: userId });
   if (!foundUser) return res.status(401).json(AUTH_ERROR);
@@ -157,26 +248,52 @@ export const authenticateUser = async (req: Request, res: Response): Promise<any
   });
 };
 
-export const updateUser = async (userId: string, userInfo: IUserInfo) => {
-  //  TODO: 한 뎁스 더 들어가서 userProfile 변경시키는 쿼리 확인하기
+export const updateUser = async (userId: string, userProfile: IUserProfile) => {
+  if (!userProfile) return;
+  const keys = Object.keys(userProfile);
+  keys?.forEach((key: string) => {
+    if (!userProfile[key as string] || userProfile[key as string]?.length === 0) {
+      delete userProfile[key];
+    }
+  });
+
   User.collection
     .updateOne(
       { userId: userId },
       {
-        $set: userInfo,
+        $set: {
+          userProfile: userProfile,
+        },
       }
     )
     .then(() => {
-      console.log('DB 업데이트', userId, userInfo);
-      console.log('successfully updated');
+      console.log('DB 업데이트 userProfile', userId, userProfile);
     })
     .catch(function (error) {
-      console.log(error);
+      console.error(error);
+    });
+};
+
+export const updateUserName = async (userId: string, username: string) => {
+  User.collection
+    .updateOne(
+      { userId: userId },
+      {
+        $set: {
+          username: username,
+        },
+      }
+    )
+    .then(() => {
+      console.log('DB 업데이트 username', userId, username);
+    })
+    .catch(function (error) {
+      console.error('updateUserName', error);
     });
 };
 
 export const updateUserWithAuth = async (req: Request, res: Response) => {
-  const decoded = await isAuth(req, res);
+  const decoded = await isAccessTokenValid(req, res);
   if (!decoded) return res.status(401).json(AUTH_ERROR);
 
   const previousUserId = decoded.userId;
@@ -192,7 +309,9 @@ export const updateUserWithAuth = async (req: Request, res: Response) => {
     .updateOne(
       { userId: previousUserId },
       {
-        $set: newUserData,
+        $set: {
+          userProfile: newUserData.userProfile,
+        },
       }
     )
     .then(() => {
@@ -213,8 +332,9 @@ export const updateUserWithAuth = async (req: Request, res: Response) => {
 };
 
 export const inquireUser = async (req: Request, res: Response) => {
-  const decoded = await isAuth(req, res);
+  const decoded = await isAccessTokenValid(req, res);
   if (!decoded) return res.status(401).json(AUTH_ERROR);
+
   const userId = decoded.userId;
   const foundUser = await User.findOne({ userId: userId });
 
@@ -224,6 +344,7 @@ export const inquireUser = async (req: Request, res: Response) => {
       payload: {
         userId: foundUser.userId,
         username: foundUser.username,
+        userCoin: foundUser.userCoin,
         userProfile: foundUser.userProfile,
       },
     });
@@ -235,7 +356,7 @@ export const inquireUser = async (req: Request, res: Response) => {
 };
 
 export const deleteUser = async (req: Request, res: Response) => {
-  const decoded = await isAuth(req, res);
+  const decoded = await isAccessTokenValid(req, res);
   if (!decoded) return res.status(401).json(AUTH_ERROR);
 
   const previousUserId = decoded.userId;

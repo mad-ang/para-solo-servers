@@ -2,20 +2,15 @@ import { Schema, ArraySchema, SetSchema, MapSchema, type } from '@colyseus/schem
 import { IPlayer, ITownState, ITable, IChatMessage, IChair } from '../../../types/ITownState';
 import { IUserInfo, IUserProfile } from '../../controllers/UserControllers/types';
 
-export class UserProfile extends Schema implements IUserProfile{
-  @type('string') progileImgUrl = '';
-  @type('number') heigth = 0;
-  @type('number') weight = 0;
+export class UserProfile extends Schema implements IUserProfile {
+  @type('string') profileImgUrl = '';
+  @type('string') height = '';
+  @type('string') weight = '';
   @type('string') region = '';
-  @type('number') gender = -1;
-  @type('number') age = 0;
+  @type('string') gender = '';
+  @type('string') age = '';
+  @type('string') statusMessage = '';
 }
-// export class User extends Schema implements IUserInfo {
-//   @type('string') gender = '';
-//   @type('string') age = '';
-//   @type('string') height = '';
-//   @type([IUserProfile]) 
-// }
 export class Player extends Schema implements IPlayer {
   @type('string') name = '';
   @type('number') x = 705;
@@ -24,7 +19,7 @@ export class Player extends Schema implements IPlayer {
   @type('boolean') readyToConnect = false;
   @type('boolean') videoConnected = false;
   @type('string') userId = '';
-  @type({ map: 'string' }) userInfo = new MapSchema<string>();
+  @type({ map: 'string' || 'number' }) userProfile = new MapSchema<string>();
 }
 
 export class ChatMessage extends Schema implements IChatMessage {
@@ -69,7 +64,6 @@ function getRoomId() {
     whiteboardRoomIds.add(result);
     return result;
   } else {
-    console.log('roomId exists, remaking another one.');
     getRoomId();
   }
 }

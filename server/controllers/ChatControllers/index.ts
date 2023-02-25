@@ -3,10 +3,13 @@ import { Socket } from 'socket.io';
 import { io } from '../..';
 import { v4 as uuidV4 } from 'uuid';
 import { Request, Response } from 'express';
-import { updateRoomId } from '../LastChatControllers';
+import { updateLastChat, updateRoomId, updateUnread } from '../LastChatControllers';
 import { userMap } from '../..';
+import LastChat from '../../models/LastChat';
+import User from '../../models/User';
+
 const rooms: Record<string, string[]> = {};
-const rooms_chat: Record<string, Array<Object>> = {};
+// const rooms_chat: Record<string, Object[]> = {};
 interface IRoomParams {
   roomId: string;
   userId: string;
@@ -18,61 +21,28 @@ const time_diff = 9 * 60 * 60 * 1000;
 const createRoom = () => {
   const roomId = uuidV4();
   rooms[roomId] = [];
-  rooms_chat[roomId] = [];
-  // socket.emit('room-created', { roomId });
-  console.log('chatroom[', roomId, '] created.');
+
   return roomId;
 };
 
-export const requestRoom = (req: Request, res: Response) => {
-  const user = req.body;
-  let roomId = user.roomId;
-  console.log(roomId);
-  if (rooms[roomId]) {
-    console.log('user Joined the room.', roomId, user.userId);
-    rooms[roomId].push(user.userId);
-  } else {
-    roomId = createRoom();
-    updateRoomId({ myId: user.userId, friendId: user.friendId, roomId: roomId }).then(() => {
-      rooms[roomId].push(user.userId);
-    });
-  }
-  if (rooms[roomId]) res.status(200).send({ roomId: roomId });
-};
-
 export const chatController = (socket: Socket) => {
-  // const createRoom = () => {
-  //   const roomId = uuidV4();
-  //   rooms[roomId] = [];
-  //   rooms_chat[roomId] = [];
-  //   // socket.emit('room-created', { roomId });
-  //   console.log('chatroom[', roomId, '] created.');
-  //   return roomId;
-  // };
   const joinRoom = (host: { roomId: string; userId: string; friendId: string }) => {
     let { roomId } = host;
     const { userId, friendId } = host;
-    console.log("before join Room", roomId);
-    
-    // const roomId = createRoom();
+
     if (rooms[roomId]) {
-      console.log('user Joined the room', roomId, userId);
-      // console.log('user Joined the room.', roomId, host);
-      // rooms[roomId].push(host.userId);
-      // socket.to(roomId).emit('get-roomId', { roomId });
       rooms[roomId].push(userId);
+      updateUnread({ myId: userId, friendId: friendId }, 0);
       socket.join(roomId);
-      // socket.emit('get-users', { roomId, participants: rooms[roomId] });
     } else {
       roomId = createRoom();
       updateRoomId({ myId: userId, friendId: friendId, roomId: roomId }).then(() => {
-        userMap.get(friendId)?.emit('updata-room-id');
+        // userMap.get(friendId)?.emit('updata-room-id');
         rooms[roomId].push(userId);
       });
     }
-    readMessage({roomId, userId, friendId});
+    readMessage({ roomId, userId, friendId });
     socket.on('disconnect', () => {
-      console.log('user left the room', host);
       leaveRoom({ roomId, userId: userId, friendId });
     });
   };
@@ -96,55 +66,87 @@ export const chatController = (socket: Socket) => {
     message: string;
   }) => {
     const { roomId, userId, friendId, message } = obj;
-    if (message)
-      // rooms_chat[roomId].push(message);
-    addChatMessage({ senderId: userId, receiverId: friendId, message: message });
-    // LastChat.
-    console.log(roomId, socket.id);
-    // io.to(roomId).except(socket.id).emit('message', obj)
-    
-    userMap.get(friendId)?.emit('message', obj)
-    // io.to(roomId).emit('message', obj)
-    // socket.emit('message',obj)
-    // socket.to(roomId).except(socket.id).emit('message', obj);
-    // console.log(socket.in(roomId).except(socket.id).emit('message', obj))
-    // console.log( result);
-    
-    // socket.to(roomId).emit('message', obj);
+    if (message) {
+      addChatMessage({ senderId: userId, receiverId: friendId, message: message });
+      updateLastChat({ myId: userId, friendId: friendId, message: message });
+
+      userMap.get(friendId)?.emit('message', obj);
+    }
   };
+
+  const requestFriend = async (body: {
+    myInfo: any;
+    friendInfo: any;
+    status: number;
+    message: string;
+  }) => {
+    const { myInfo, friendInfo, status, message } = body;
+
+    userMap.get(friendInfo?.userId)?.emit('request-friend-res', myInfo.username);
+  };
+
+  const acceptFriend = async (body: {
+    myInfo: any;
+    friendInfo: any;
+    status: number;
+    message: string;
+  }) => {
+    const { myInfo, friendInfo, status, message } = body;
+
+    userMap.get(friendInfo?.userId)?.emit('accept-friend-res', myInfo?.username);
+  };
+
+  const deleteFriend = async (body: { userId: any; friendId: any }) => {
+    const { userId, friendId } = body;
+    // let docs = await LastChat.collection.findOne({
+    //   $and: [{ 'userId.userId': userId }, { 'friendInfo.userId': friendId }],
+    // });
+    await LastChat.collection.deleteOne({
+      $and: [{ 'myInfo.userId': userId }, { 'friendInfo.userId': friendId }],
+    });
+
+    await LastChat.collection.findOneAndUpdate(
+      { $and: [{ 'myInfo.userId': friendId }, { 'friendInfo.userId': userId }] },
+      { $set: { status: 4 } }
+    );
+
+    console.log('deleteFriend', userId, friendId);
+
+    // console.log(`${friendId} 가 목록에서 삭제되었습니다.`);
+    // userMap.get(friendId?.userId)?.emit('delete-friend-res', userId?.username);
+
+    userMap.get(friendId)?.emit('delete-friend-res', userId);
+  };
+
   // room이 살아 있을 경우.
   // Array를 만들고 거기에 푸쉬. Array를 만들어서 룸 데이터로 가지고 있는다.
   // 메시지를 읽으려 할때 그 array를 리턴.
   // room에 처음 참여하는 경우는 db에서 불러온 값을 그대로 보여줌.
   const readMessage = (message: { roomId: string; userId: string; friendId: string }) => {
     const { roomId, userId, friendId } = message;
-    // if (rooms_chat[roomId]) {
-    //   socket.to(roomId).emit('check-private-message', rooms_chat[roomId]);
-    // } else {
-    console.log('check readMessage');
 
     getChatMessage(userId, friendId)
       .then((chatMessage) => {
-        console.log('chatroomId after getChatMessage:', roomId);
-        // console.log(chatMessage);
-        
-        rooms_chat[roomId] = chatMessage;
-        // socket.to(roomId).emit('show-messages', chatMessage);
-        socket.emit('show-messages', chatMessage);
+        socket.emit('old-messages', chatMessage);
       })
       .catch((error) => {
-        console.log(error);
+        console.error('readMessage', error);
       });
-    // }
   };
+  // }
 
   // socket.on("create-room", createRoom);
   socket.on('join-room', joinRoom);
-  
   // socket.on('start-chat', startChat);
   // socket.on('stop-chat', stopChat);
-  socket.on('show-messages', readMessage);
+  // socket.on('show-messages', readMessage);
   socket.on('message', sendMessage);
+
+  socket.on('request-friend-req', requestFriend);
+
+  socket.on('accept-friend-req', acceptFriend);
+
+  socket.on('delete-friend', deleteFriend);
 };
 // join-room
 // show-messages
@@ -158,13 +160,12 @@ export const addChatMessage = (message: {
   let cur_date = new Date();
   let utc = cur_date.getTime() + cur_date.getTimezoneOffset() * 60 * 1000;
   let createAt = utc + time_diff;
-  const result = Chat.collection.insertOne({
+  Chat.collection.insertOne({
     senderId: message.senderId,
     receiverId: message.receiverId,
     message: message.message,
     createdAt: createAt,
   });
-  console.log('in addChatresult', createAt);
 };
 
 export const getChatMessage = async (sender: string, recipient: string) => {
@@ -184,5 +185,6 @@ export const getChatMessage = async (sender: string, recipient: string) => {
         result.push(json);
       });
     });
+  LastChat.collection.find();
   return result;
 };

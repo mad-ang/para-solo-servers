@@ -1,21 +1,22 @@
-import dotenv from 'dotenv'
-dotenv.config()
+import dotenv from 'dotenv';
+dotenv.config();
 
 export const config = {
   jwt: {
     secretKey: process.env.JWT_SECRET,
-    expiresInSec: parseInt(process.env.JWT_EXPIRES_SEC),
+    expiresIn: process.env.JWT_EXPIRES_SEC,
   },
   bcrypt: {
     saltRounds: parseInt(process.env.BCRYPT_SALT_ROUNDS),
   },
-  host: {
-    port: parseInt(process.env.DB_HOST),
-  },
   db: {
     host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    database: process.env.DB_DATABASE,
-    password: process.env.DB_PASSWORD,
   },
-}
+  aws: {
+    bucketName: process.env.AWS_BUCKET_NAME,
+    bucketRegion: process.env.AWS_BUCKET_REGION,
+    identityPoolId: process.env.AWS_IDENTITY_POOL_ID,
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+};

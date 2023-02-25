@@ -6,7 +6,8 @@ import { monitor } from '@colyseus/monitor';
 import { RoomType } from '../types/Rooms';
 import authRouter from './routes/auth';
 import chatRouter from './routes/chat';
-
+import imageRouter from './routes/image';
+const fs = require('fs');
 // import { sequelize } from './DB/db'
 import { config } from './envconfig';
 // import socialRoutes from "@colyseus/social/express"
@@ -16,12 +17,29 @@ import { SkyOffice } from './rooms/Momstown';
 import { connectDB, createCollection } from './DB/db';
 import { chatController } from './controllers/ChatControllers';
 import { Socket } from 'socket.io';
+import S3 from './s3';
 const mongoose = require('mongoose');
 var cookieParser = require('cookie-parser');
 const port = Number(process.env.PORT || 8080);
-const socketPort = Number(process.env.SOCKET_PORT || 4711);
+const socketPort = Number(process.env.SOCKET_PORT || 5002);
 const app = express();
+app.get('/', (req, res) => {
+  res.json({ message: `Server is running on ${req.secure ? 'HTTPS' : 'HTTP'}` });
+});
 app.use(cookieParser());
+
+const allowedOrigins = [
+  'https://parasolo-so.link',
+  'https://www.parasolo-so.link',
+  'https://www.momstown.site',
+  'https://www.para-solo.site',
+  'https://para-solo.site',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174',
+  'http://localhost:5173',
+  'http://localhost:5174',
+];
+
 const options: cors.CorsOptions = {
   allowedHeaders: [
     'Origin',
@@ -30,16 +48,11 @@ const options: cors.CorsOptions = {
     'Accept',
     'X-Access-Token',
     'authorization',
+    '*',
   ],
   credentials: true,
   methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
-  origin: [
-    'https://www.momstown.site',
-    'http://127.0.0.1:5173',
-    'http://127.0.0.1:5174',
-    'http://localhost:5173',
-    'http://localhost:5174',
-  ],
+  origin: allowedOrigins,
   preflightContinue: false,
 };
 
@@ -77,6 +90,52 @@ gameServer.define(RoomType.PUBLIC, SkyOffice, {
 // app.use('/colyseus', monitor())
 app.use('/auth', authRouter);
 app.use('/chat', chatRouter);
+app.use('/image', imageRouter);
+
+connectDB()
+  .then((db) => {
+    gameServer.listen(port);
+
+    console.log(`gameServer is listening on port ${port}`);
+  })
+  .catch(console.error);
+
+// const certOptions = {
+//   key: fs.readFileSync('./keys/rootca.key'),
+//   cert: fs.readFileSync('./keys/rootca.crt'),
+// };
+
+const socketServer = http.createServer(app);
+socketServer.listen(socketPort, () => console.log(`socketServer is listening on ${socketPort}`));
+export const io = require('socket.io')(socketServer, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  },
+});
+
+export const userMap = new Map<string, Socket>();
+
+io.on('connection', (socket: Socket) => {
+  console.log('here comes new challenger !!', socket.id);
+  socket.on('whoAmI', (userId) => {
+    console.log('whoAmI', userId);
+
+    userMap.set(userId, socket);
+  });
+  chatController(socket);
+  socket.on('disconnect', () => {
+    console.log('the challenger disconnected');
+  });
+
+  socket.on('connect_error', (err) => {
+    console.log(`connect_error due to ${err.message}`);
+  });
+});
+
+S3.init();
 
 app.use((err, res) => {
   console.error(err);
@@ -85,45 +144,3 @@ app.use((err, res) => {
     message: `서버 오류: ${err}`,
   });
 });
-
-connectDB()
-  .then((db) => {
-    // console.log('init!', db)
-    gameServer.listen(port);
-
-    console.log(`Listening on ws://localhost:${port}`);
-  })
-  .catch(console.error);
-
-const socketServer = http.createServer(app);
-export const io = require('socket.io')(socketServer, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST'],
-  },
-});
-
-export const userMap = new Map<string, Socket>();
-
-io.on('connection', (socket: Socket) => {
-  console.log('here comes new challenge !!', socket.id);
-  socket.on('whoAmI', (userId) => {
-    userMap.set(userId, socket);
-  });
-  chatController(socket);
-  socket.on('disconnect', () => {
-    console.log('the challenger disconnected');
-  });
-});
-
-// io.of(/^\/dynamic-\d+$/).on('connection', (socket) => {
-//   console.log('chat id에 접속');
-//   socket.on(/^\/dynamic-\d+$/, async (senderId) => {
-//     console.log('보내는 사람 아이디', senderId);
-//   });
-//   socket.on('message', (message) => {
-//     console.log('메시지 내용', message);
-//   });
-// });
-
-socketServer.listen(socketPort, () => console.log(`socketServer is running on ${socketPort}`));

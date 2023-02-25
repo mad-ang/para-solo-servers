@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { Room, Client, ServerError } from 'colyseus';
 import { Dispatcher } from '@colyseus/command';
-import { Player, TownState, Table, Chair } from './schema/TownState';
+import { Player, TownState, Table, Chair, UserProfile } from './schema/TownState';
 import { Message } from '../../types/Messages';
 import { IRoomData } from '../../types/Rooms';
 import { whiteboardRoomIds } from './schema/TownState';
@@ -11,10 +11,10 @@ import { ChairStatusUpdateCommand } from './commands/ChairStatusUpdateCommand';
 import ChatMessageUpdateCommand from './commands/ChatMessageUpdateCommand';
 import { TableAddUserCommand, TableRemoveUserCommand } from './commands/TableUpdateArrayCommand';
 import { addChatMessage, getChatMessage } from '../controllers/ChatControllers';
-import { updateUser } from '../controllers/UserControllers';
+import { updateUser, updateUserName } from '../controllers/UserControllers';
 import PlayerUpdateInfoCommand from './commands/PlayerUpdateInfoCommand';
-import { IUserInfo } from '../controllers/UserControllers/types';
-import { } from '../controllers/UserControllers/types'
+import { IUserInfo, IUserProfile } from '../controllers/UserControllers/types';
+import {} from '../controllers/UserControllers/types';
 
 export class SkyOffice extends Room<TownState> {
   private dispatcher = new Dispatcher(this);
@@ -38,12 +38,30 @@ export class SkyOffice extends Room<TownState> {
 
     this.setState(new TownState());
     // hard coding for talbe.
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 21; i++) {
       this.state.tables.set(String(i), new Table());
     }
 
     // hard coding for chair.
-    for (let i = 0; i < 16; i++) {
+    for (let i = 0; i < 42; i++) {
+      this.state.chairs.set(String(i), new Chair());
+    }
+    for (let i = 21; i < 23; i++) {
+      this.state.tables.set(String(i), new Table());
+    }
+    for (let i = 42; i < 48; i++) {
+      this.state.chairs.set(String(i), new Chair());
+    }
+    for (let i = 23; i < 32; i++) {
+      this.state.tables.set(String(i), new Table());
+    }
+    for (let i = 48; i < 84; i++) {
+      this.state.chairs.set(String(i), new Chair());
+    }
+    for (let i = 32; i < 33; i++) {
+      this.state.tables.set(String(i), new Table());
+    }
+    for (let i = 84; i < 90; i++) {
       this.state.chairs.set(String(i), new Chair());
     }
 
@@ -106,20 +124,22 @@ export class SkyOffice extends Room<TownState> {
           x: message.x,
           y: message.y,
           anim: message.anim,
-        })
         });
+      }
+    );
 
     // 플레이어의 username, anim, x,y 좌표를 제외한 정보들 변경
     this.onMessage(
       Message.UPDATE_PLAYER_INFO,
-      (client, message: { userInfo: IUserInfo; userId: string; authFlag: number }) => {
-        if (!message || !message.authFlag || !message.userInfo) return;
+      (client, message: { userProfile: IUserProfile; userId: string; authFlag: number }) => {
+        if (!message || !message.authFlag) return;
         this.dispatcher.dispatch(new PlayerUpdateInfoCommand(), {
           client,
-          userInfo: message.userInfo,
+          userProfile: message.userProfile,
         });
-        updateUser(message.userId, message.userInfo);
-
+        if (message.userProfile) {
+          updateUser(message.userId, message.userProfile);
+        }
       }
     );
 
@@ -133,8 +153,8 @@ export class SkyOffice extends Room<TownState> {
           name: message.name,
           userId: message.userId,
         });
-        
-        updateUser(message.userId, { username: message.name });
+
+        updateUserName(message.userId, message.name);
       }
     );
 
@@ -146,17 +166,7 @@ export class SkyOffice extends Room<TownState> {
     this.onMessage(
       Message.SEND_PRIVATE_MESSAGE,
       (client, message: { senderId: string; receiverId: string; content: string }) => {
-        console.log(message);
-        // console.log(this.state.players.get(client.sessionId)?.userId)
-        // console.log(this.state.players.get(message.receiver)?.userId)
-        // let senderId = String(this.state.players.get(client.sessionId)?.userId)
-        // let receiverId = String(this.state.players.get(message.receiver)?.userId)
-        // let content = String(message.content)
         const { senderId, receiverId, content } = message;
-        // addChatMessage({ senderId: senderId, receiverId: receiverId, content: content });
-        // let chat = new Chat(senderId, receiverId);
-        // console.log(this.state.players.get(sanitizeFilter(message.receiver)))
-        // message.receiver.send(Message.RECEIVE_DM, { sender : message.sender, content : message.content })
       }
     );
 
@@ -164,18 +174,13 @@ export class SkyOffice extends Room<TownState> {
       Message.CHECK_PRIVATE_MESSAGE,
       (client, message: { requestId: string; targetId: string }) => {
         const { requestId, targetId } = message;
-        // let clientId = String(this.state.players.get(client.sessionId)?.userId)
-        // let otherId = String(this.state.players.get(message.senderId)?.userId)
-        // let chatMessage = await getChatMessage(requestId, targetId);
-        // console.log(chatMessage);
 
         getChatMessage(requestId, targetId)
           .then((chatMessage) => {
-            console.log(chatMessage);
             client.send(Message.CHECK_PRIVATE_MESSAGE, chatMessage);
           })
           .catch((error) => {
-            console.log(error);
+            console.error('CHECK_PRIVATE_MESSAGE', error);
           });
       }
     );
@@ -226,7 +231,6 @@ export class SkyOffice extends Room<TownState> {
 
   onJoin(client: Client, options: any) {
     this.state.players.set(client.sessionId, new Player());
-    console.log('this.roomId', this.roomId);
 
     client.send(Message.SEND_ROOM_DATA, {
       id: this.roomId,
@@ -247,7 +251,6 @@ export class SkyOffice extends Room<TownState> {
   }
 
   onDispose() {
-    console.log('room', this.roomId, 'disposing...');
     this.dispatcher.stop();
   }
 }
